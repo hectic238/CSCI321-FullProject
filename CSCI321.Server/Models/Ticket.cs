@@ -3,13 +3,10 @@ using MongoDB.Bson.Serialization.Attributes;
 
 namespace CSCI321.Server.Models
 {
-    public class User
+    public class Ticket
     {
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
         public string Id { get; set; }
-        public string Email { get; set; }
-        public string Password { get; set; }
-        public List<String> CurrentTickets { get; set; }
     }
 }
