@@ -1,0 +1,67 @@
+/* ExploreEvents.css */
+
+/* Ensure body and html can grow with content */
+html, body {
+    margin: 0;
+    padding: 0;
+    height: auto; /* Ensure auto height */
+}
+
+/* Full-width photo bar */
+.photo-bar {
+    width: 100%;
+    height: 200px;
+    overflow: hidden;
+}
+
+.top-banner {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Styling for the sections */
+.events-section {
+    padding: 20px;
+}
+
+.events-section h2 {
+    margin-top: 40px;
+    font-size: 24px;
+    text-align: left;
+}
+
+/* Grid layout for events */
+.events-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+/* Individual event card */
+.event-card {
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Image in the event card */
+.event-image {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+}
+
+/* Event details styling */
+.event-details {
+    padding: 15px;
+}
+
+.event-details h3 {
+    margin-top: 0;
+}
+
+.event-details p {
+    margin: 5px 0;
+}

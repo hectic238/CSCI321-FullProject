@@ -1,0 +1,42 @@
+.my-events-page {
+    padding: 20px;
+}
+
+.tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+button {
+    padding: 10px 20px;
+    cursor: pointer;
+    border: none;
+    background-color: #ccc;
+    transition: background-color 0.3s;
+}
+
+button.active {
+    background-color: #007bff;
+    color: white;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+.events-list {
+    list-style: none;
+    padding: 0;
+}
+
+.events-list li {
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.events-list h3 {
+    margin: 0;
+}

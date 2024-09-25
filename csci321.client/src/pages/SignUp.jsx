@@ -1,0 +1,114 @@
+import React, { useState } from 'react';
+import {useLocation, useNavigate} from "react-router-dom";
+import { signUpUser } from '../mockBackend'; // Import the mock backend
+
+const SignUp = () => {
+    const location = useLocation();
+    const userType = location.state?.userType; // Get userType from the passed state
+    const [formData, setFormData] = useState({
+        name: '',
+        email: '',
+        password: '',
+        company: '', // Only for organizers
+        preferences: '', // Only for attendees
+        userType: location.state?.userType,
+        userId: crypto.randomUUID(),
+    });
+
+    const navigate = useNavigate();
+
+
+
+    // Handle input changes
+    const handleInputChange = (field, value) => {
+        setFormData(prevData => ({
+            ...prevData,
+            [field]: value
+        }));
+    };
+
+    // Handle form submission
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            await signUpUser(formData); // Use the mock backend to sign up the user
+            navigate('/home')
+            alert("Sign up successful!");
+            // Redirect to sign-in or other actions here
+        } catch (error) {
+            alert("Sign up failed!");
+        }
+    };
+
+    return (
+        <div className="sign-up-container">
+            {/* Toggle between organizer and attendee */}
+            <div>
+                <h1>{userType === 'organiser' ? 'Organizer Sign Up' : 'Attendee Sign Up'}</h1>
+                {/* Add your sign-up form here */}
+                {/* You can use userType for form validation or customization */}
+            </div>
+
+            {/* Form */}
+            <form onSubmit={handleSubmit} className="sign-up-form">
+                <label>
+                    Name:
+                    <input
+                        type="text"
+                        value={formData.name}
+                        onChange={(e) => handleInputChange('name', e.target.value)}
+                        required
+                    />
+                </label>
+
+                <label>
+                    Email:
+                    <input
+                        type="email"
+                        value={formData.email}
+                        onChange={(e) => handleInputChange('email', e.target.value)}
+                        required
+                    />
+                </label>
+
+                <label>
+                    Password:
+                    <input
+                        type="password"
+                        value={formData.password}
+                        onChange={(e) => handleInputChange('password', e.target.value)}
+                        required
+                    />
+                </label>
+
+                {/* Organizer-specific field */}
+                {userType === 'organiser' && (
+                    <label>
+                        Company Name:
+                        <input
+                            type="text"
+                            value={formData.company}
+                            onChange={(e) => handleInputChange('company', e.target.value)}
+                            required
+                        />
+                    </label>
+                )}
+
+                {/* Attendee-specific field */}
+                {userType === 'attendee' && (
+                    <label>
+                        Preferences:
+                        <textarea
+                            value={formData.preferences}
+                            onChange={(e) => handleInputChange('preferences', e.target.value)}
+                        />
+                    </label>
+                )}
+
+                <button type="submit">Sign Up</button>
+            </form>
+        </div>
+    );
+};
+
+export default SignUp;
