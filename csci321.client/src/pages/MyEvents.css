@@ -12,17 +12,17 @@ button {
     padding: 10px 20px;
     cursor: pointer;
     border: none;
-    background-color: #ccc;
+    background-color: red !important;
     transition: background-color 0.3s;
 }
 
 button.active {
-    background-color: #007bff;
+    background-color: red;
     color: white;
 }
 
 button:hover {
-    background-color: #0056b3;
+    background-color: red;
 }
 
 .events-list {
@@ -39,4 +39,16 @@ button:hover {
 
 .events-list h3 {
     margin: 0;
+}
+
+.events-grid {
+    display: flex; /* Use flexbox */
+    flex-direction: column !important; /* Arrange children in a column */
+    justify-content: center; /* Align items at the start (top) */
+    align-items: center; /* Center items horizontally */
+    max-width: 700px !important;
+    min-height: 100vh; /* Full height of the viewport */
+    padding: 20px; /* Optional padding */
+    box-sizing: border-box; /* Include padding in height calculations */
+    margin: auto; /* Center horizontally */
 }

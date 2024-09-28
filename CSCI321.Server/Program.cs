@@ -14,7 +14,39 @@ builder.Services.Configure<UserDatabaseSettings>(
     builder.Configuration.GetSection("Database"));
 
 builder.Services.AddSingleton<UserService>();
+builder.Services.AddSingleton<AuthService>();
 
+<<<<<<< Updated upstream
+=======
+// JWT Authentication setup
+var key = Encoding.ASCII.GetBytes("a very long and secure secret key"); // Use a strong secret key
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+}).AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = new SymmetricSecurityKey(key),
+        ValidateIssuer = false,
+        ValidateAudience = false,
+        ClockSkew = TimeSpan.Zero // No time drift
+    };
+});
+
+// Add CORS policy
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowSpecificOrigin",
+        builder => builder.WithOrigins("https://localhost:5173") // Your React app origin
+                          .AllowAnyMethod()
+                          .AllowAnyHeader());
+});
+
+>>>>>>> Stashed changes
 var app = builder.Build();
 
 app.UseDefaultFiles();

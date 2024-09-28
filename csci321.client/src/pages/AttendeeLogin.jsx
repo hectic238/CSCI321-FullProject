@@ -27,6 +27,7 @@ const AttendeeLogin = () => {
             const user = await signInUser(email, password, "attendee"); // Use the mock backend to sign in
             if(user) {
 
+<<<<<<< Updated upstream
                 localStorage.setItem('user', JSON.stringify(user)); // Store user in localStorage
                 navigate('/home')
             }
@@ -37,6 +38,18 @@ const AttendeeLogin = () => {
             // Redirect to the dashboard or other actions here
         } catch (error) {
             alert(error.message || "Sign in failed!");
+=======
+            const response = await axios.post('/api/User/login', { email, password, userType });
+            console.log(response);
+            // Save token to localStorage
+            localStorage.setItem('accessToken', data.accessToken);
+            localStorage.setItem('refreshToken', data.refreshToken);
+            localStorage.setItem('user', JSON.stringify(response.data.User));
+            navigate('/dashboard'); // Redirect on successful login
+        } catch (err) {
+            console.error("Login error:", err.response.data); // Log the error response for debugging
+            setError('Invalid email or password');
+>>>>>>> Stashed changes
         }
 
         // TODO: STUFF FOR WHEN BACKEND IS IN
