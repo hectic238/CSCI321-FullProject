@@ -1,4 +1,4 @@
-﻿using CSCI321.Server.Helpers;
+using CSCI321.Server.Helpers;
 using CSCI321.Server.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Cryptography;
@@ -43,7 +43,6 @@ public class UserController : ControllerBase
 <<<<<<< Updated upstream
 =======
 
-    // GET: api/User/{userId}
     [Authorize]
     [HttpGet("{userId}")]
     public async Task<IActionResult> GetUserById(string userId)
@@ -107,7 +106,5 @@ public class UserController : ControllerBase
         return Ok(new { AccessToken = accessToken,  RefreshToken = refreshToken, User = userResponse });
     }
 
-    
->>>>>>> Stashed changes
 }
 

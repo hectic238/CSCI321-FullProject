@@ -16,8 +16,6 @@ builder.Services.Configure<UserDatabaseSettings>(
 builder.Services.AddSingleton<UserService>();
 builder.Services.AddSingleton<AuthService>();
 
-<<<<<<< Updated upstream
-=======
 // JWT Authentication setup
 var key = Encoding.ASCII.GetBytes("a very long and secure secret key"); // Use a strong secret key
 
@@ -46,7 +44,6 @@ builder.Services.AddCors(options =>
                           .AllowAnyHeader());
 });
 
->>>>>>> Stashed changes
 var app = builder.Build();
 
 app.UseDefaultFiles();
