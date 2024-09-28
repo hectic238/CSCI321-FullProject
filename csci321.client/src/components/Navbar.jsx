@@ -33,7 +33,8 @@ function Navbar() {
     const handleLogout = () => {
         // Clear user data from localStorage and update state
         localStorage.removeItem('user');
-        localStorage.removeItem('token');
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
         setUser(null);
         navigate('/home'); // Redirect to home after logout
     };

@@ -34,7 +34,7 @@ const Review = ({ eventDetails, onPreviousPage, onSaveDraft, onPublish }) => {
         if (storedUser) {
             const parsedUser = JSON.parse(storedUser);
             setUser(parsedUser);
-            eventDetails.userId = parsedUser.user.userId;
+            eventDetails.userId = parsedUser.userId;
         }
     }, [eventDetails])
 

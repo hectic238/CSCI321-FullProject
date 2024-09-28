@@ -3,7 +3,7 @@ import './MyEvents.css';
 import Navbar from "../components/Navbar.jsx"; // Add necessary styles here
 import mockEvents from "../mockEvents.jsx";
 import draftEvents from "../mockEvents.jsx";
-import EventCard from "./EventCard.jsx";
+import EventCardLarge from "../components/EventCardLarge.jsx";
 
 
 
@@ -21,9 +21,9 @@ const MyEvents = () => {
             const parsedUser = JSON.parse(storedUser);
             setUser(parsedUser);
 
-            console.log('User ID:', parsedUser.user.userId);
+            console.log('User ID:', parsedUser.userId);
 
-            const userEvents = mockEvents.filter(event => event.userId === parsedUser.user.userId);
+            const userEvents = mockEvents.filter(event => event.userId === parsedUser.userId);
 
 
             // Categorize events into active, draft, and past
@@ -43,24 +43,38 @@ const MyEvents = () => {
     return (
         <div>
             <Navbar />
+            
+            <div className='events-grid'>
             <h1>My Events</h1>
-            <div className="tab-buttons">
-                <button onClick={() => setCurrentTab('active')} className={currentTab === 'active' ? 'active-tab' : ''}>Active</button>
-                <button onClick={() => setCurrentTab('draft')} className={currentTab === 'draft' ? 'active-tab' : ''}>Draft</button>
-                <button onClick={() => setCurrentTab('past')} className={currentTab === 'past' ? 'active-tab' : ''}>Past</button>
-            </div>
+                <div className="button">
+                    <button onClick={() => setCurrentTab('active')} className={currentTab === 'active' ? 'active-tab' : ''}>Active</button>
+                    <button onClick={() => setCurrentTab('draft')} className={currentTab === 'draft' ? 'active-tab' : ''}>Draft</button>
+                    <button onClick={() => setCurrentTab('past')} className={currentTab === 'past' ? 'active-tab' : ''}>Past</button>
+                </div>
 
-            {/* Render events based on the selected tab */}
-            <div className="event-list">
+                {/* Render events based on the selected tab */}
+                <div className="event-list">
+                {currentTab === 'active' && activeEvents.length === 0 && (
+                    <p>No Active Events</p>
+                )}
                 {currentTab === 'active' && activeEvents.map(event => (
-                    <EventCard key={event.id} event={event} />
+                    <EventCardLarge key={event.id} event={event} />
                 ))}
+                
+                {currentTab === 'draft' && draftEvents.length === 0 && (
+                    <p>No Draft Events</p>
+                )}
                 {currentTab === 'draft' && draftEvents.map(event => (
-                    <EventCard key={event.id} event={event} />
+                    <EventCardLarge key={event.id} event={event} />
                 ))}
+                
+                {currentTab === 'past' && pastEvents.length === 0 && (
+                    <p>No Past Events</p>
+                )}
                 {currentTab === 'past' && pastEvents.map(event => (
-                    <EventCard key={event.id} event={event} />
+                    <EventCardLarge key={event.id} event={event} />
                 ))}
+            </div>
             </div>
         </div>
     );

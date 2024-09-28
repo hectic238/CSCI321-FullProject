@@ -1,0 +1,56 @@
+/* Styles for the event list container */
+.event-list {
+    display: flex;
+    flex-direction: column; /* Arrange cards in a single column */
+    align-items: center; /* Center the cards horizontally */
+    gap: 16px; /* Space between the cards */
+}
+
+/* Styles for the event card */
+.event-card-large {
+    width: 700px; /* Set a consistent width */
+    height: 200px; /* Set a consistent height */
+    border: 1px solid #ddd; /* Optional: border for visual separation */
+    border-radius: 8px; /* Optional: rounded corners */
+    overflow: hidden; /* Prevent overflow */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Optional: subtle shadow for depth */
+    display: flex; /* Use flex to arrange internal elements */
+    flex-direction: row; /* Stack children vertically */
+    align-items: center; /* Center align items vertically */
+}
+
+/* Styles for the event image */
+.event-image {
+    width: 100%; /* Fixed width for the image */
+    height: 100%; /* Full height of the card */
+    object-fit: cover; /* Ensure the image covers the area without distortion */
+}
+
+/* Styles for event details */
+.event-Card-Column-image {
+    margin-left:40px;
+    padding: 10px; /* Padding inside the card */
+}
+
+.event-Card-Column-details {
+    padding: 10px; /* Padding inside the card */
+    flex-grow: 1; /* Allow details to grow and fill space */
+}
+
+.event-Card-Column-buttons {
+    flex-direction: row;
+    max-width: 200px;
+}
+
+.event-card {
+    width: 250px; /* Set a consistent width */
+    height: 250px; /* Set a consistent height */
+    border: 1px solid #ddd; /* Optional: border for visual separation */
+    border-radius: 8px; /* Optional: rounded corners */
+    overflow: hidden; /* Prevent overflow */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Optional: subtle shadow for depth */
+    flex-direction: row; /* Stack children vertically */
+    align-items: center; /* Center align items vertically */
+    flex:none;
+}
+

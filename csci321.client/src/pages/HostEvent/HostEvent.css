@@ -27,7 +27,7 @@
 
 .events-grid {
     display: flex; /* Use flexbox */
-    flex-direction: column; /* Arrange children in a column */
+    flex-direction: column !important; /* Arrange children in a column */
     justify-content: flex-start; /* Align items at the start (top) */
     align-items: center; /* Center items horizontally */
 
