@@ -28,16 +28,6 @@ const OrganiserLogin = () => {
 
 
         try {
-            const user = await signInUser(email, password, "organiser"); // Use the mock backend to sign in
-            if(user) {
-
-<<<<<<< Updated upstream
-                localStorage.setItem('user', JSON.stringify(user)); // Store user in localStorage
-                navigate('/home')
-=======
-            console.log(email);
-            console.log(password);
-            console.log("organiser");
 
             const loginModel = {
                 Email: email,
@@ -45,7 +35,6 @@ const OrganiserLogin = () => {
                 UserType: "organiser",
             };
             
-            console.log(loginModel);
 
             const response = await fetch('http://localhost:5144/api/User/login', {
                 method: 'POST',
@@ -54,9 +43,9 @@ const OrganiserLogin = () => {
                 },
                 body: JSON.stringify(loginModel), // Ensure userType is needed
             });
+
             if (response.ok) {
                 const data = await response.json();
-                console.log("Response Data:", data); // Log the data to inspect its structure
 
                 // Save token to localStorage
                 localStorage.setItem('accessToken', data.accessToken);
@@ -67,10 +56,6 @@ const OrganiserLogin = () => {
             } else {
                 const errorData = await response.json();
                 setError(errorData.message || 'Invalid email or password');
->>>>>>> Stashed changes
-            }
-            else {
-                alert('Invalid credentials'); // Show error message
             }
 
             // Redirect to the dashboard or other actions here

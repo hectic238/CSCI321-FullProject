@@ -4,6 +4,7 @@ using System.Security.Claims;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
 
+
 public class AuthService {
 
     public AuthService () {
@@ -14,7 +15,7 @@ public class AuthService {
     public ClaimsPrincipal GetPrincipalFromExpiredToken(string token)
     {
         var tokenHandler = new JwtSecurityTokenHandler();
-        var key = Encoding.UTF8.GetBytes("a very long and secure secret key");
+        var key = Encoding.ASCII.GetBytes("a very long and secure secret key");
 
         try
         {
@@ -42,12 +43,12 @@ public class AuthService {
         }
         catch (Exception ex)
         {
-            Console.WriteLine("Error extracting claims from token: " + ex.Message);
+
             return null;
         }
     }
 
-    public string GenerateJwtToken(string userId, string email, string userType, int tokenExpirationMinutes)  
+    public string GenerateJwtToken(string userId, int tokenExpirationMinutes)  
     {
         var tokenHandler = new JwtSecurityTokenHandler();
         var key = Encoding.ASCII.GetBytes("a very long and secure secret key");
@@ -56,8 +57,6 @@ public class AuthService {
         {
             Subject = new ClaimsIdentity(new[] {
                 new Claim(ClaimTypes.NameIdentifier, userId),
-                new Claim(ClaimTypes.Email, email),
-                new Claim(ClaimTypes.Role, userType) // Attendee or Organizer
             }),
 
             Expires = DateTime.UtcNow.AddMinutes(tokenExpirationMinutes),

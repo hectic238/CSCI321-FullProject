@@ -7,9 +7,12 @@ namespace CSCI321.Server.Models
     {
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
-        public string Id { get; set; }
-        public string Email { get; set; }
-        public string Password { get; set; }
-        public List<String> CurrentTickets { get; set; }
+        public string userId { get; set; }
+    public string name { get; set; }
+    public string email { get; set; }
+    public string password { get; set; }
+    public string userType { get; set; }
+    public string company { get; set; }
+    public string preferences { get; set; }
     }
 }

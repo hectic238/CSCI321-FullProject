@@ -23,10 +23,8 @@ function Navbar() {
         const storedUser = localStorage.getItem('user');
         if (storedUser) {
             setUser(JSON.parse(storedUser)); // Store user details in state
-            console.log("User logged in:", JSON.parse(storedUser));
         }
         else if(storedUser === null) {
-            console.log("No user found, showing login options."); // Log if no user found
         }
     }, []);
 
@@ -87,7 +85,7 @@ function Navbar() {
                 {user ? (
                     <>
                         {/* Conditionally render based on user type */}
-                        {user.user.userType === 'attendee' && (
+                        {user.userType === 'attendee' && (
 
 
                             <div className="attendee-actions">
@@ -118,7 +116,7 @@ function Navbar() {
                             </div>
 
                         )}
-                        {user.user.userType === 'organiser' && (
+                        {user.userType === 'organiser' && (
                             <div className="attendee-actions">
                                 <Link to="/explore">Explore Events</Link>
                                 <Link to="/host">Host Events</Link>
