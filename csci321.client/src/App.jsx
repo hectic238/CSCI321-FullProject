@@ -17,9 +17,7 @@ import ProfileDetails from "./pages/ProfileDetails.jsx"; // Create these compone
 import PrivateRoute from './components/PrivateRoute';
 import MyEvents from "./pages/MyEvents.jsx";
 import MyTickets from "./pages/MyTickets.jsx";
-
-
-
+import NewNavBar from "./components/NewNavbar.jsx";
 
 
 const App = () => {
@@ -182,7 +180,7 @@ const App = () => {
                     <Route path="/attendeeLogin" element={<AttendeeLogin />} />
                     <Route path="/organiserLogin" element={<OrganiserLogin />} />
                     <Route path="/signUp" element={<SignUp />} />
-                    <Route path="/host" element={
+                    <Route path="/HostEvent" element={
                         <PrivateRoute allowedUserType="organiser">
                             <HostEvent />
                         </PrivateRoute>}

@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import './HostEvent.css';
-import Navbar from "../../components/Navbar.jsx"; // Import your CSS file
+import Navbar from "../../components/NewNavbar.jsx"; // Import your CSS file
 import banner from '../../assets/exploreEvent.png';
 
 import {Link, useNavigate} from "react-router-dom"; // Assuming your image is in src/assets

@@ -1,5 +1,5 @@
 import './Home.css';
-import Navbar from '../components/Navbar';
+import Navbar from '../components/NewNavbar';
 import {Link} from "react-router-dom";
 import logoSmall from '../assets/logo_small.png'; // Assuming your image is in src/assets
 
@@ -8,7 +8,6 @@ import logoSmall from '../assets/logo_small.png'; // Assuming your image is in s
 function Home() {
     return (
         <>
-
             <Navbar/>
             <div className="landing-page">
                 <div className="circle-container">
