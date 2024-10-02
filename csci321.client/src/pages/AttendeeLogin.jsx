@@ -24,32 +24,36 @@ const AttendeeLogin = () => {
         e.preventDefault();
 
         try {
-            const user = await signInUser(email, password, "attendee"); // Use the mock backend to sign in
-            if(user) {
 
-<<<<<<< Updated upstream
-                localStorage.setItem('user', JSON.stringify(user)); // Store user in localStorage
-                navigate('/home')
-            }
-            else {
-                alert('Invalid credentials'); // Show error message
-            }
+            const loginModel = {
+                Email: email,
+                Password: password,
+                UserType: "attendee",
+            };
+            const response = await fetch('http://localhost:5144/api/User/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(loginModel), // Ensure userType is needed
+            });
 
-            // Redirect to the dashboard or other actions here
-        } catch (error) {
-            alert(error.message || "Sign in failed!");
-=======
-            const response = await axios.post('/api/User/login', { email, password, userType });
-            console.log(response);
-            // Save token to localStorage
-            localStorage.setItem('accessToken', data.accessToken);
-            localStorage.setItem('refreshToken', data.refreshToken);
-            localStorage.setItem('user', JSON.stringify(response.data.User));
-            navigate('/dashboard'); // Redirect on successful login
+            if (response.ok) {
+                const data = await response.json();
+
+                // Save token to localStorage
+                localStorage.setItem('accessToken', data.accessToken);
+                localStorage.setItem('refreshToken', data.refreshToken);
+                localStorage.setItem('user', JSON.stringify(data.user)); // Store user data
+        
+                navigate('/home'); // Redirect on successful login
+            } else {
+                const errorData = await response.json();
+                setError(errorData.message || 'Invalid email or password');
+            }
         } catch (err) {
             console.error("Login error:", err.response.data); // Log the error response for debugging
             setError('Invalid email or password');
->>>>>>> Stashed changes
         }
 
         // TODO: STUFF FOR WHEN BACKEND IS IN

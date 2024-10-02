@@ -1,6 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
+public class RefreshTokenRequest
+{
+    public string accessToken { get; set; }
+}
+
 public class AuthController : ControllerBase {
 
     private readonly AuthService _authService;
@@ -11,8 +16,9 @@ public class AuthController : ControllerBase {
 
 
     [HttpPost("refreshToken")]
-    public IActionResult RefreshToken()
+    public async Task<IActionResult> RefreshToken()
     {
+
 
     var authHeader = Request.Headers["Authorization"].FirstOrDefault();
     
@@ -23,39 +29,39 @@ public class AuthController : ControllerBase {
 
     var refreshToken = authHeader.Substring("Bearer ".Length).Trim();
 
+    Console.WriteLine($"Refresh Token: {refreshToken}");
+
+    var accessHeader = Request.Headers["Access-Token"].FirstOrDefault();
+
+    var accessToken = accessHeader;
+
+    if (string.IsNullOrEmpty(accessToken))
+        {
+            Console.WriteLine("AccessToken " , accessToken);
+            return Unauthorized("Access token is missing.");
+        }
+
+    Console.WriteLine($"Access Token: {accessToken}");
+
     // Validate the refresh token
-    var principal = _authService.GetPrincipalFromExpiredToken(refreshToken); // Validate and get the claims
+    var principal = _authService.GetPrincipalFromExpiredToken(accessToken); // Validate and get the claims
 
     if (principal == null)
     {
-        return Unauthorized("Invalid refresh token.");
+        return Unauthorized("Invalid access token.");
     }
 
+// Extract user claims from the principal
+    var userId = principal.FindFirst(ClaimTypes.NameIdentifier).Value;
+    
+    Console.WriteLine($"User Id: {userId}");
+
+
     // Generate a new access token
-    var newAccessToken = _authService.GenerateJwtToken(
-                principal.FindFirst(ClaimTypes.NameIdentifier).Value,
-                            principal.FindFirst(ClaimTypes.Email).Value,
-                            principal.FindFirst(ClaimTypes.Role).Value, 
-                            1);
+    var newAccessToken = _authService.GenerateJwtToken(userId, 2);
+
     
     return Ok(new { accessToken = newAccessToken });
-
-        // // Validate the refresh token...
-        // var principal = _authService.GetPrincipalFromExpiredToken(expiredToken);
-        
-        // if (principal != null)
-        // {
-        //     // Generate a new access token
-        //     var newAccessToken = _authService.GenerateJwtToken(
-        //         Guid.Parse(principal.FindFirst(ClaimTypes.NameIdentifier).Value),
-        //                     principal.FindFirst(ClaimTypes.Email).Value,
-        //                     principal.FindFirst(ClaimTypes.Role).Value, 
-        //                     1);
-            
-        //     return Ok(new { accessToken = newAccessToken });
-        // }
-
-        // return Unauthorized();
     }
 
 }

@@ -7,7 +7,21 @@ import starIcon from '../assets/staricon.png'; // Add your star image here
 import profileIcon from '../assets/profileicon.png'; // Add your profile image here
 import {useEffect, useRef, useState} from "react";
 import ProfileDropdown from "./ProfileDropdown.jsx"; // Assuming your image is in src/assets
+import { AudioOutlined } from '@ant-design/icons';
+import { Input, Space } from 'antd';
+const { Search } = Input;
 
+
+const suffix = (
+    <AudioOutlined
+        style={{
+            fontSize: 16,
+            color: '#1677ff',
+        }}
+    />
+);
+
+const onSearch = (value, _e, info) => console.log(info?.source, value);
 
 
 function Navbar() {
@@ -23,10 +37,8 @@ function Navbar() {
         const storedUser = localStorage.getItem('user');
         if (storedUser) {
             setUser(JSON.parse(storedUser)); // Store user details in state
-            console.log("User logged in:", JSON.parse(storedUser));
         }
         else if(storedUser === null) {
-            console.log("No user found, showing login options."); // Log if no user found
         }
     }, []);
 
@@ -72,11 +84,19 @@ function Navbar() {
                 </Link>
 
                 {/* Search Bar */}
-                <input
-                    type="text"
-                    placeholder="Start Searching for Events"
-                    className="search-bar"
-                />
+                    <Search
+                        placeholder="Search for events here"
+                        onSearch={onSearch}
+                        style={{
+                            flex: 1, /* Makes the search bar expand to fill available space */
+                            margin: 0,
+                            padding: 8,
+                            borderradius: 30,
+                            border: 1, /* Black border for the search bar */
+                            width: 100, /* Makes the search bar take full width */
+                            maxWidth: 300, /* Set your desired max width here */
+                        }}
+                    />
             </div>
             {/* Buttons */}
             <div className="nav-links">
@@ -87,7 +107,7 @@ function Navbar() {
                 {user ? (
                     <>
                         {/* Conditionally render based on user type */}
-                        {user.user.userType === 'attendee' && (
+                        {user.userType === 'attendee' && (
 
 
                             <div className="attendee-actions">
@@ -118,7 +138,7 @@ function Navbar() {
                             </div>
 
                         )}
-                        {user.user.userType === 'organiser' && (
+                        {user.userType === 'organiser' && (
                             <div className="attendee-actions">
                                 <Link to="/explore">Explore Events</Link>
                                 <Link to="/host">Host Events</Link>

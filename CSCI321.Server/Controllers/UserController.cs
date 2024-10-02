@@ -1,5 +1,6 @@
 ﻿using CSCI321.Server.Helpers;
 using CSCI321.Server.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Cryptography;
 using System.Text;
@@ -26,11 +27,11 @@ public class UserController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Post(User newUser)
     {
-        newUser.Password = HashPassword(newUser.Password);
+        newUser.password = HashPassword(newUser.password);
 
         await _userService.CreateAsync(newUser);
 
-        return CreatedAtAction(nameof(Get), new { id = newUser.Id }, newUser);
+        return CreatedAtAction(nameof(Get), new { id = newUser.userId }, newUser);
     }
     private string HashPassword(string password)
     {
@@ -40,10 +41,8 @@ public class UserController : ControllerBase
             return BitConverter.ToString(hashedBytes).Replace("-", "").ToLower();
         }
     }
-<<<<<<< Updated upstream
-=======
 
-    // GET: api/User/{userId}
+
     [Authorize]
     [HttpGet("{userId}")]
     public async Task<IActionResult> GetUserById(string userId)
@@ -63,7 +62,6 @@ public class UserController : ControllerBase
     public async Task<IActionResult> Login([FromBody] LoginModel loginData)
     {
 
-        
         // Find the user by email
         var user = await _userService.GetByEmailAsync(loginData.Email);
         
@@ -90,10 +88,15 @@ public class UserController : ControllerBase
             return Unauthorized("Invalid credentials.");
         }
 
-        // Generate JWT token
-        var accessToken = _authService.GenerateJwtToken(user.userId, user.email, user.userType, 2); // minute accessToken
+        // if user is of different type
+        if(user.userType != loginData.UserType) {
+            return Unauthorized("Invalid Credentials");
+        }
 
-        var refreshToken = _authService.GenerateJwtToken(user.userId, user.email, user.userType, 60); // 1 hour refresh token
+        // Generate JWT token
+        var accessToken = _authService.GenerateJwtToken(user.userId, 2); // minute accessToken
+
+        var refreshToken = _authService.GenerateJwtToken(user.userId, 60); // 1 hour refresh token
 
         var userResponse = new
         {
@@ -107,7 +110,5 @@ public class UserController : ControllerBase
         return Ok(new { AccessToken = accessToken,  RefreshToken = refreshToken, User = userResponse });
     }
 
-    
->>>>>>> Stashed changes
 }
 

@@ -1,5 +1,8 @@
+using System.Text;
 using CSCI321.Server.DBSettings;
 using CSCI321.Server.Helpers;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,8 +19,6 @@ builder.Services.Configure<UserDatabaseSettings>(
 builder.Services.AddSingleton<UserService>();
 builder.Services.AddSingleton<AuthService>();
 
-<<<<<<< Updated upstream
-=======
 // JWT Authentication setup
 var key = Encoding.ASCII.GetBytes("a very long and secure secret key"); // Use a strong secret key
 
@@ -41,13 +42,22 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowSpecificOrigin",
-        builder => builder.WithOrigins("https://localhost:5173") // Your React app origin
-                          .AllowAnyMethod()
-                          .AllowAnyHeader());
+        builder =>
+        {
+            builder.WithOrigins("https://localhost:5173") // Replace with your frontend URL
+                   .AllowAnyHeader()
+                   .AllowAnyMethod();
+        });
 });
 
->>>>>>> Stashed changes
+// Add other services
+builder.Services.AddControllers(); 
+
+
 var app = builder.Build();
+
+// Enable CORS globally or on specific endpoints
+app.UseCors("AllowSpecificOrigin");
 
 app.UseDefaultFiles();
 app.UseStaticFiles();

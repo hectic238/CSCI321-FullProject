@@ -1,10 +1,8 @@
-import Navbar from "../../components/Navbar.jsx";
-import banner from "../../assets/exploreEvent.png";
 import React, {useEffect, useState} from "react";
 import ticketedEvent from "../../assets/ticketedEvent.png"
 import freeEvent from "../../assets/freeEvent.png"
 
-function Ticketing ({ onPreviousPage, onNextPage, eventDetails, handleTicketFormChange, setEventDetails}) {
+function Ticketing ({eventDetails, handleTicketFormChange, setEventDetails}) {
     const [tickets, setTickets] = useState(eventDetails.tickets || []);
     const [eventTicketType, setEventTicketType] = useState(eventDetails.eventTicketType || '');
     const [showPopup, setShowPopup] = useState(false);
@@ -44,37 +42,18 @@ function Ticketing ({ onPreviousPage, onNextPage, eventDetails, handleTicketForm
 
     };
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        console.log('Submitting...'); // Log submission attempt
-
-        if (eventTicketType === 'ticketed' && (tickets.length === 0 || tickets.some(ticket => !ticket.name || !ticket.price || !ticket.count))) {
-            setShowPopup(true); // Show pop-up when trying to submit with empty fields
-            console.log('Validation failed, showing popup');
-            return;
-        }
-        console.log('Tickets:', tickets);
-        console.log('Event Details:', eventDetails); // Check if event details are correct
-        onNextPage(); // Move to ticketing page
-        // Proceed with saving the event details
-    };
-
 
 return (
     <div className="host-event-banner">
-        <Navbar/>
-        <img src={banner} alt="Banner" className="banner-image"/>
         <div className="host-event-headings">
             <h1 className="event-title">{eventDetails.title || "Event Title"}</h1>
             <h2 className="event-location">{eventDetails.location || "Location"}</h2>
             <h3 className="event-time">{eventDetails.startDate} {eventDetails.startTime} - {eventDetails.endTime}</h3>
         </div>
-        <div className="progress-bar">
-            <div className="progress" style={{width: '75%'}}></div>
-        </div>
+
 
         <div className="events-grid">
-            <form onSubmit={handleSubmit}>
+            <form>
                 <h2>What type of event are you running?</h2>
                 <div className="event-type">
                     <label className={`image-radio ${eventTicketType === 'ticketed' ? 'selected' : ''}`}>
@@ -147,13 +126,7 @@ return (
                     <button type="button" onClick={handleAddTicket}>Add Ticket</button>
                 </div>
                     )}
-
-                <div className="button-container">
-                    <button type="button" onClick={onPreviousPage}>Go Back</button>
-                    <button type="submit"
-                            >
-                        Save and Continue</button>
-                </div>
+                
             </form>
         </div>
         {/* Pop-up for disabled button warning */}
@@ -166,7 +139,4 @@ return (
     </div>
 );
 
-}
-
-
-        export default Ticketing;
+}export default Ticketing;

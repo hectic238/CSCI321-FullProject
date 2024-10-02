@@ -41,7 +41,7 @@ button:hover {
     margin: 0;
 }
 
-.events-grid {
+.My-events-page .events-grid {
     display: flex; /* Use flexbox */
     flex-direction: column !important; /* Arrange children in a column */
     justify-content: center; /* Align items at the start (top) */

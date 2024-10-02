@@ -12,7 +12,7 @@ const SignUp = () => {
         company: '', // Only for organizers
         preferences: '', // Only for attendees
         userType: location.state?.userType,
-        userId: crypto.randomUUID(),
+        userId: "3b8ec461c8d8753c60a166ff",
     });
 
     const navigate = useNavigate();
@@ -30,15 +30,37 @@ const SignUp = () => {
     // Handle form submission
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        const loginModel = {
+            Email: formData.email,
+            Password: formData.password,
+            UserType: userType,
+        };
+
+
         try {
-            await signUpUser(formData); // Use the mock backend to sign up the user
-            navigate('/home')
-            alert("Sign up successful!");
-            // Redirect to sign-in or other actions here
-        } catch (error) {
-            alert("Sign up failed!");
+            const response = await fetch('http://localhost:5144/api/User', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData),
+            });
+            // Check if the response is successful
+        if (!response.ok) {
+            // Handle errors based on the status code
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Sign up failed!');
         }
-    };
+
+        // If successful, navigate to home and alert success
+        await response.json(); // Optionally handle the response data if needed
+        navigate('/home');
+        alert("Sign up successful!");
+    } catch (error) {
+        alert("Sign up failed! " + error.message);
+    }};
+
 
     return (
         <div className="sign-up-container">

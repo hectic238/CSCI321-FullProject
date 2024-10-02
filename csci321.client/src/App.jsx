@@ -86,13 +86,13 @@ const App = () => {
         headers: {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${refreshToken}`, // Add the refresh token to Authorization header
+          "Access-Token": accessToken,
         },
       });
 
       if (response.ok) {
         const data = await response.json();
         setAccessToken(data.accessToken);
-        console.log(response);
         localStorage.setItem("accessToken", data.accessToken); // Update token in localStorage
       } else {
         console.log("Failed to refresh token");
@@ -119,17 +119,17 @@ const App = () => {
     setRefreshToken(storedRefreshToken);
 
     const tokenExpirationTime = getTokenExpirationTime(accessToken);
-    console.log(tokenExpirationTime);
 
+    // On any page refresh, refresh the accessToken
     if(accessToken) {
       refreshAccessToken();
     }
     
 
-      if(isLoggedOut) {
-        console.log("handling Logout");
-        handleLogout();
-      } 
+      // if(isLoggedOut) {
+      //   console.log("handling Logout");
+      //   handleLogout();
+      // } 
       
       const interval = setInterval(() => {
         
