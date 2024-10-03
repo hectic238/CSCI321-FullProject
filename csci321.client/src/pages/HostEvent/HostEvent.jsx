@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import {useNavigate} from "react-router-dom";
+import React, { useState, useEffect } from 'react';
+import {useNavigate, useLocation} from "react-router-dom";
 import Details from './Details.jsx';
 import Banner from './Banner';
 import Ticketing from './Ticketing';
@@ -8,18 +8,41 @@ import { Button, message, Steps, theme } from 'antd';
 import banner from '../../assets/exploreEvent.png';
 import Navbar from "../../components/Navbar.jsx";
 import Home from "@/pages/Home.jsx"; // Import your CSS file
-
+import mockEvents , { addEvent, addDraftEvent } from "../../mockEvents.jsx";
 const HostEvent = () => {
+    
+    const location = useLocation();
+    const passedEvent = location.state || {};
+    
+    console.log(passedEvent);
 
     const navigate = useNavigate();
-
+    const { token } = theme.useToken();
+    const [current, setCurrent] = useState(0);
     const [formErrors, setFormErrors] = useState({});  // Track form errors
     const [eventDetails, setEventDetails] = useState({
         eventTicketType: '',
-        tickets: [],
-        id: '',
-        userId: ''
+        tickets:  [],
+        id:  '',
+        userId:  '',
+        title:  passedEvent.title || '',
+        category:  'Music',
+        eventType:  'single',
+        startDate:  '2024-09-09',
+        startTime:  '16:10',
+        endTime:  '18:10',
+        location:  'Sydney',
+        additionalInfo:  'Hi',
+        recurrenceFrequency:  '', 
+        recurrenceEndDate:  '',
+        editing: passedEvent.editing || false,
     });
+
+    useEffect(() => {
+        if (passedEvent && Object.keys(passedEvent).length > 0) {
+            setEventDetails(passedEvent);
+        }
+    }, [passedEvent]);
 
     const handleFormChange = (newDetails) => {
         setEventDetails((prevDetails) => ({
@@ -43,15 +66,35 @@ const HostEvent = () => {
     };
 
     // Logic to handle publishing or saving the event
-    const handlePublishEvent = () => {
-        
+    const handlePublishEvent = async () => {
+
         console.log('Event Published', eventDetails);
-        navigate("/home");
+        try {
+            const response = await addEvent(eventDetails);
+
+            if (response.success) {
+                console.log('Event successfully added!', response);
+                navigate("/home"); // Navigate to home on success
+            }
+        } catch (error) {
+            console.error('Error adding event:', error);
+        }
     };
 
-    const handleSaveDraft = () => {
+    const handleSaveDraft =  async () => {
         // Add save draft logic here
         console.log('Event Saved as Draft', eventDetails);
+        try {
+            const response = await addDraftEvent(eventDetails);
+
+            if (response.success) {
+                console.log('Event draft successfully added!', response);
+                navigate("/home"); // Navigate to home on success
+            }
+        } catch (error) {
+            console.error('Error adding event:', error);
+        }
+        
     };
     
     const steps = [
@@ -86,8 +129,7 @@ const HostEvent = () => {
     ];
 
 
-    const { token } = theme.useToken();
-    const [current, setCurrent] = useState(0);
+
     const next = () => {
         const isValid = validateCurrentPage();
 

@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './MyEvents.css';
 import Navbar from "../components/Navbar.jsx"; // Add necessary styles here
-import mockEvents from "../mockEvents.jsx";
-import draftEvents from "../mockEvents.jsx";
+import mockEvents, {mockDraftEvents} from "../mockEvents.jsx";
 import EventCardLarge from "../components/EventCardLarge.jsx";
 
 
@@ -10,27 +9,30 @@ import EventCardLarge from "../components/EventCardLarge.jsx";
 const MyEvents = () => {
     const [activeEvents, setActiveEvents] = useState([]);
     const [pastEvents, setPastEvents] = useState([]);
+    const [draftEvents, setDraftEvents] = useState([]);
     const [currentTab, setCurrentTab] = useState('active'); // To handle tab switching
-
-
-    const [user, setUser] = useState(null);
 
     useEffect(() => {
         const storedUser = localStorage.getItem('user');
         if (storedUser) {
             const parsedUser = JSON.parse(storedUser);
-            setUser(parsedUser);
 
             console.log('User ID:', parsedUser.userId);
 
             const userEvents = mockEvents.filter(event => event.userId === parsedUser.userId);
+            const drafts = mockDraftEvents.filter(event => event.userId === parsedUser.userId);
 
 
-            // Categorize events into active, draft, and past
+
             const now = new Date();
-            const past = userEvents.filter(event => new Date(event.endDate) < now);
 
-            // Update state
+            // Split user events into active and past based on their date
+            const past = userEvents.filter(event => new Date(event.date) < now);
+            const active = userEvents.filter(event => new Date(event.date) >= now);
+
+            
+            setDraftEvents(drafts);
+            setActiveEvents(active);
             setPastEvents(past);
         }
 

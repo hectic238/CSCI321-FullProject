@@ -5,16 +5,16 @@ const Details = ({ eventDetails, onFormChange}) => {
 
 
     const [details, setDetails] = useState({
-        title: eventDetails.title || 'Sydney',
-        category: eventDetails.category || 'Music',
-        eventType: eventDetails.eventType || 'single',
-        startDate: eventDetails.startDate || '2024-09-09',
-        startTime: eventDetails.startTime || '16:10',
-        endTime: eventDetails.endTime || '18:10',
-        location: eventDetails.location || 'Sydney',
-        additionalInfo: eventDetails.additionalInfo || 'Hi',
-        recurrenceFrequency: eventDetails.recurrenceFrequency || '', // Add this line
-        recurrenceEndDate: eventDetails.recurrenceEndDate || ''
+        title: eventDetails.title,
+        category: eventDetails.category,
+        eventType: eventDetails.eventType,
+        startDate: eventDetails.startDate,
+        startTime: eventDetails.startTime,
+        endTime: eventDetails.endTime,
+        location: eventDetails.location,
+        additionalInfo: eventDetails.additionalInfo,
+        recurrenceFrequency: eventDetails.recurrenceFrequency, // Add this line
+        recurrenceEndDate: eventDetails.recurrenceEndDate
     });
 
     const [isRecurring, setIsRecurring] = useState(false);
