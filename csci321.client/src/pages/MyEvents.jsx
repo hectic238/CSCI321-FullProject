@@ -1,6 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import './MyEvents.css';
-import Navbar from "../components/Navbar.jsx"; // Add necessary styles here
 import mockEvents from "../mockEvents.jsx";
 import draftEvents from "../mockEvents.jsx";
 import EventCardLarge from "../components/EventCardLarge.jsx";
@@ -42,8 +40,6 @@ const MyEvents = () => {
 
     return (
         <div>
-            <Navbar />
-            
             <div className='events-grid'>
             <h1>My Events</h1>
                 <div className="button">

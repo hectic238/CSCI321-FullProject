@@ -1,12 +1,16 @@
 import { Disclosure, DisclosureButton, DisclosurePanel, Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react'
 import { Bars3Icon, BellIcon, XMarkIcon } from '@heroicons/react/24/outline'
+import { useState, useEffect } from 'react';
+import logo from '../assets/logo_small.png'
+import TextInput from '../components/TextInput.jsx'
 
 const navigation = [
-    { name: 'Explore Events', href: '', current: true },
+    { name: 'Explore Events', href: '/', current: false },
     { name: 'Host Events', href: '/Host-Events', current: false },
-    { name: 'Contact Us', href: '#', current: false },
-    { name: 'Attendee Login', href: '#', current: false },
-    { name: 'Organizer Login', href: '#', current: false }
+    { name: 'Contact Us', href: '/contactUs', current: false },
+    { name: 'Attendee Login', href: '/attendeeLogin', current: false },
+    { name: 'Organizer Login', href: '/organiserLogin', current: false },
+    { name: 'Sign Up', href: '/signUp', current: false }
 ]
 
 function classNames(...classes) {
@@ -14,8 +18,23 @@ function classNames(...classes) {
 }
 
 export default function Example() {
+    const [current, setCurrent] = useState('')
+    useEffect(() => {
+        setCurrent(window.location.pathname);
+        
+        const handleLocationChange = () => {
+            setCurrent(window.location.pathname);
+        };
+
+        window.addEventListener('popstate', handleLocationChange);
+
+        return () => {
+            window.removeEventListener('popstate', handleLocationChange);
+        };
+    }, []);
+
     return (
-        <Disclosure as="nav" className="bg-gray-800">
+        <Disclosure as="nav" className="bg-gray-800 fixed top-0 left-0 w-full z-10">
             <div className="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
                 <div className="relative flex h-16 items-center justify-between">
                     <div className="absolute inset-y-0 left-0 flex items-center sm:hidden">
@@ -27,13 +46,16 @@ export default function Example() {
                             <XMarkIcon aria-hidden="true" className="hidden h-6 w-6 group-data-[open]:block" />
                         </DisclosureButton>
                     </div>
-                    <div className="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start">
-                        <div className="flex flex-shrink-0 items-center">
+                    <div className="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start mr-4">
+                        <div className="flex flex-shrink-0 items-center bg-white rounded">
                             <img
                                 alt="Your Company"
-                                src="https://tailwindui.com/img/logos/mark.svg?color=indigo&shade=500"
+                                src={logo}
                                 className="h-8 w-auto"
                             />
+                        </div>
+                        <div className="flex items-center ml-4">
+                            <TextInput className='flex space-x-4 px-3 py-2 pl-10' placeholder='Search for an events!' />
                         </div>
                         <div className="hidden sm:ml-6 sm:block">
                             <div className="flex space-x-4">
@@ -41,11 +63,12 @@ export default function Example() {
                                     <a
                                         key={item.name}
                                         href={item.href}
-                                        aria-current={item.current ? 'page' : undefined}
+                                        aria-current={item.href === current ? 'page' : undefined}
                                         className={classNames(
-                                            item.current ? 'bg-red-default text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white',
+                                            item.href === current ? 'bg-red-default text-white hover:text-white hover:bg-red-500' : 'text-gray-300 hover:bg-gray-700 hover:text-white',
                                             'rounded-md px-3 py-2 text-sm font-medium',
                                         )}
+                                        style={{ transition: 'all 0.3s ease-in-out' }}
                                     >
                                         {item.name}
                                     </a>
@@ -56,7 +79,7 @@ export default function Example() {
                     <div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
                         <button
                             type="button"
-                            className="relative rounded-full bg-gray-800 p-1 text-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800"
+                            className="relative rounded-full bg-gray-800 p-1 text-gray-400 hover:text-white"
                         >
                             <span className="absolute -inset-1.5" />
                             <span className="sr-only">View notifications</span>
@@ -66,7 +89,7 @@ export default function Example() {
                         {/* Profile dropdown */}
                         <Menu as="div" className="relative ml-3">
                             <div>
-                                <MenuButton className="relative flex rounded-full bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800">
+                                <MenuButton className="relative flex rounded-full bg-gray-800 text-sm" syle={{ backgroundColor: 'transparent' }}>
                                     <span className="absolute -inset-1.5" />
                                     <span className="sr-only">Open user menu</span>
                                     <img
@@ -111,7 +134,7 @@ export default function Example() {
                             aria-current={item.current ? 'page' : undefined}
                             className={classNames(
                                 item.current ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white',
-                                'block rounded-md px-3 py-2 text-base font-medium',
+                                'block rounded-md px-3 py-2 font-medium',
                             )}
                         >
                             {item.name}

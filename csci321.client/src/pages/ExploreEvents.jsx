@@ -1,6 +1,4 @@
-import Navbar from '../components/Navbar';
 import mockEvents from "../mockEvents.jsx";
-import './ExploreEvents.css';
 
 import EventCard from "../components/EventCard.jsx";
 
@@ -31,8 +29,6 @@ const formatTime = (timeString) => {
 function ExploreEvents() {
     return (
         <>
-
-            <Navbar/>
             <div className="explore-events">
                 {/* Photo Bar across the top */}
                 <div className="photo-bar">

@@ -160,6 +160,7 @@ module.exports = {
                     'accent-700': '#00b8d4',
                 },
                 gray: {
+                    'default': '#585858',
                     50: '#fafafa',
                     100: '#f5f5f5',
                     200: '#eeeeee',
@@ -323,6 +324,9 @@ module.exports = {
             },
             boxShadow: {
                 outline: '0 0 0 3px rgba(101, 31, 255, 0.4)',
+            },
+            margin: {
+                '25vw': '30vw',
             },
         },
     },

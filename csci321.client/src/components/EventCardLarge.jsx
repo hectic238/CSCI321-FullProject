@@ -1,6 +1,4 @@
 import React from "react";
-import './EventCardLarge.css';
-
 
 const formatDate = (dateString) => {
     const date = new Date(dateString);

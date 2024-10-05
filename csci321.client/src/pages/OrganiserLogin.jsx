@@ -1,9 +1,8 @@
-// src/pages/Login.jsx
 import React, { useState } from "react";
 import {Link, useNavigate} from 'react-router-dom';
-import Navbar from '../components/Navbar'; // Import Navbar
 import logo from '../assets/logo_slogan.png'; // Assuming your image is in src/assets
 import { signInUser } from '../mockBackend'; // Import the mock backend
+import Login from '../components/login.jsx'
 
 
 
@@ -68,47 +67,7 @@ const OrganiserLogin = () => {
 
 
     return (
-        <div className="login-page">
-            <Navbar />
-            <div className="login-container">
-                {/* Logo and slogan */}
-                <img src={logo} alt="Logo" className="logo" tabIndex="-1"/>
-
-                <h2>Organiser Login</h2>
-
-                {/* Input fields for username and password */}
-                <form onSubmit={handleLogin} className="input-section">
-                    <input
-                        type="email"
-                        placeholder="Username"
-                        value={email}
-                        className="input-field"
-                        onChange={(e) => setEmail(e.target.value)}
-                        required
-                    />
-                    <input
-                        type="password"
-                        placeholder="Password"
-                        value={password}
-                        className="input-field"
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                    />
-
-                    {/* Error message */}
-                    {error && <p className="error">{error}</p>}
-
-                    {/* Login button */}
-                    <button type="submit" className="login-button">Login</button>
-                </form>
-
-                {/* Forgot password and sign up links */}
-                <div className="options">
-                    <button className="option-button">Forgot Password?</button>
-                    <button className="option-button" onClick={() => signUpButton('organiser')}>Sign Up</button>
-                </div>
-            </div>
-        </div>
+        <Login />
     );
 
 

@@ -1,11 +1,10 @@
-import './App.css'
 import { BrowserRouter, Routes, Route, useLocation, useNavigate } from "react-router-dom";
+import { useEffect, useState } from 'react';
 import Home from './pages/Home';
 import About from './pages/About';
 import ExploreEvents from "./pages/ExploreEvents.jsx";
 import Layout from "./components/Layout.jsx";
 import AttendeeLogin from "./pages/AttendeeLogin.jsx";
-import { useEffect, useState } from 'react';
 import OrganiserLogin from "./pages/OrganiserLogin.jsx";
 import HostEventDetails from './pages/HostEvent/Details';
 import HostEventBanner from './pages/HostEvent/Banner'; // Create these components similarly
@@ -17,7 +16,8 @@ import ProfileDetails from "./pages/ProfileDetails.jsx"; // Create these compone
 import PrivateRoute from './components/PrivateRoute';
 import MyEvents from "./pages/MyEvents.jsx";
 import MyTickets from "./pages/MyTickets.jsx";
-import NewNavBar from "./components/NewNavbar.jsx";
+import ContactUs from "./pages/ContactUs.jsx";
+import Navbar from "./components/NewNavbar.jsx";
 
 
 const App = () => {
@@ -167,11 +167,10 @@ const App = () => {
     }, [location.pathname, accessToken, refreshToken, isLoggedOut]);
 
 
-
-
     return (
         <div>
-            <main className="main-content">
+            <Navbar />
+            <div style={{ backgroundColor: '#585858', height: '100vh', width: '100vw'}}>
                 <Routes>
                     <Route index element={<Home />} />
                     <Route path="/home" element={<Home />} />
@@ -179,6 +178,7 @@ const App = () => {
                     <Route path="/explore" element={<ExploreEvents />} />
                     <Route path="/attendeeLogin" element={<AttendeeLogin />} />
                     <Route path="/organiserLogin" element={<OrganiserLogin />} />
+                    <Route path="/contactUs" element={<ContactUs />} />
                     <Route path="/signUp" element={<SignUp />} />
                     <Route path="/HostEvent" element={
                         <PrivateRoute allowedUserType="organiser">
@@ -206,7 +206,7 @@ const App = () => {
                     }
                     />
                 </Routes>
-            </main>
+            </div>
         </div>
     )
 }

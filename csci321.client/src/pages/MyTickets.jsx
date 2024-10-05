@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import Navbar from "../components/Navbar.jsx"; // Add necessary styles here
 import banner from '../assets/exploreEvent.png'; // Assuming your image is in src/assets
-import './MyTickets.css';
 import mockEvents from "../mockEvents.jsx"; // Create a CSS file for styles
 
 const MyTickets = () => {
@@ -21,7 +19,6 @@ const MyTickets = () => {
 
     return (
         <div>
-            <Navbar />
             <img src={banner} alt="Banner" className="banner-image" />
 
             <h1 className="tickets-title">Your Tickets</h1>

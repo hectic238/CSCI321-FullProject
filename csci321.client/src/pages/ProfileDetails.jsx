@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import Navbar from "../components/Navbar.jsx";
 
 const ProfileDetails = () => {
     const [user, setUser] = useState(null);
@@ -50,7 +49,6 @@ const ProfileDetails = () => {
 
     return (
         <div className="profile-details">
-            <Navbar />
             <h1>Profile Details</h1>
             <h2>Name: {user.name}</h2>
             <h2>Email: {user.email}</h2>

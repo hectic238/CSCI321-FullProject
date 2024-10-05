@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import {useLocation, useNavigate} from "react-router-dom";
 import { signUpUser } from '../mockBackend'; // Import the mock backend
+import Register from '../components/register.jsx'
 
 const SignUp = () => {
     const location = useLocation();
@@ -63,73 +64,7 @@ const SignUp = () => {
 
 
     return (
-        <div className="sign-up-container">
-            {/* Toggle between organizer and attendee */}
-            <div>
-                <h1>{userType === 'organiser' ? 'Organizer Sign Up' : 'Attendee Sign Up'}</h1>
-                {/* Add your sign-up form here */}
-                {/* You can use userType for form validation or customization */}
-            </div>
-
-            {/* Form */}
-            <form onSubmit={handleSubmit} className="sign-up-form">
-                <label>
-                    Name:
-                    <input
-                        type="text"
-                        value={formData.name}
-                        onChange={(e) => handleInputChange('name', e.target.value)}
-                        required
-                    />
-                </label>
-
-                <label>
-                    Email:
-                    <input
-                        type="email"
-                        value={formData.email}
-                        onChange={(e) => handleInputChange('email', e.target.value)}
-                        required
-                    />
-                </label>
-
-                <label>
-                    Password:
-                    <input
-                        type="password"
-                        value={formData.password}
-                        onChange={(e) => handleInputChange('password', e.target.value)}
-                        required
-                    />
-                </label>
-
-                {/* Organizer-specific field */}
-                {userType === 'organiser' && (
-                    <label>
-                        Company Name:
-                        <input
-                            type="text"
-                            value={formData.company}
-                            onChange={(e) => handleInputChange('company', e.target.value)}
-                            required
-                        />
-                    </label>
-                )}
-
-                {/* Attendee-specific field */}
-                {userType === 'attendee' && (
-                    <label>
-                        Preferences:
-                        <textarea
-                            value={formData.preferences}
-                            onChange={(e) => handleInputChange('preferences', e.target.value)}
-                        />
-                    </label>
-                )}
-
-                <button type="submit">Sign Up</button>
-            </form>
-        </div>
+        <Register />
     );
 };
 

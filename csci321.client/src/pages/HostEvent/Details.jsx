@@ -1,5 +1,4 @@
 import React, {useEffect, useState} from 'react';
-import './HostEvent.css';
 import Navbar from "../../components/NewNavbar.jsx"; // Import your CSS file
 import banner from '../../assets/exploreEvent.png';
 

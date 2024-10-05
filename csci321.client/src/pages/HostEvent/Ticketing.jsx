@@ -1,4 +1,3 @@
-import Navbar from "../../components/Navbar.jsx";
 import banner from "../../assets/exploreEvent.png";
 import React, {useEffect, useState} from "react";
 import ticketedEvent from "../../assets/ticketedEvent.png"
@@ -62,7 +61,6 @@ function Ticketing ({ onPreviousPage, onNextPage, eventDetails, handleTicketForm
 
 return (
     <div className="host-event-banner">
-        <Navbar/>
         <img src={banner} alt="Banner" className="banner-image"/>
         <div className="host-event-headings">
             <h1 className="event-title">{eventDetails.title || "Event Title"}</h1>

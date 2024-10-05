@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import Navbar from "../../components/Navbar.jsx";
 import banner from '../../assets/exploreEvent.png';
 
 
@@ -34,7 +33,6 @@ const Banner = ({ eventDetails, onImageChange,onPreviousPage, onNextPage }) => {
 
     return (
         <div className="host-event-banner">
-            <Navbar/>
             <img src={banner} alt="Banner" className="banner-image"/>
             <div className="host-event-headings">
                 <h1 className="event-title">{eventDetails.title || "Event Title"}</h1>

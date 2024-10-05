@@ -1,6 +1,4 @@
 import React, {useEffect, useState} from 'react';
-import Navbar from "../../components/Navbar.jsx"; // Navbar component
-import './Review.css'; // CSS for the Review Page
 import banner from '../../assets/exploreEvent.png';
 
 import {addDraftEvent, addEvent} from "../../mockEvents.jsx";
@@ -40,7 +38,6 @@ const Review = ({ eventDetails, onPreviousPage, onSaveDraft, onPublish }) => {
 
     return (
         <div className="review-page">
-            <Navbar/>
             {/* Event Banner */}
             {image && (
                 <img src={banner} alt="Event Banner" className="banner-image"/>
