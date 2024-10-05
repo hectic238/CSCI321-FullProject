@@ -60,11 +60,20 @@ export const addDraftEvent = (formData) => {
 }
 
 export const addEvent = (formData) => {
-    if(formData.id === "") {
-        formData.id = crypto.randomUUID();
+    
+    const exisitingEventIndex = mockEvents.findIndex(event => event.id === formData.id);
+    
+    if (exisitingEventIndex !== -1) {
+        return editEvent(formData);
+    } 
+    else {
+        if(formData.id === "") {
+            formData.id = crypto.randomUUID();
+        }
     }
+    
     mockEvents.push(formData);
-    console.log(mockEvents);
+    console.log("New Event Added: ", mockEvents);
     return Promise.resolve({ success: true });
 }
 

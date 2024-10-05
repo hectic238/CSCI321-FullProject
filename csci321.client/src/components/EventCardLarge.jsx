@@ -2,6 +2,7 @@ import React from "react";
 import './EventCardLarge.css';
 import {useNavigate} from "react-router-dom";
 import mockEvents, {getEventById} from "@/mockEvents.jsx";
+import editIcon from '../assets/editIcon.png';
 
 function EventCardLarge({ event }) {
     const navigate = useNavigate();
@@ -27,15 +28,13 @@ function EventCardLarge({ event }) {
 
     const editEvent = () => {
         
-        console.log(event);
         navigate('/host', { state: event });
-
-
-
     };
+    
+    
     return (
         <div key={event.id} className="event-card-large">
-            <div className="event-Card-Column-image">
+            <div className="event-card-large-column-image">
                 <img src={event.image} alt={event.title} className="event-image"/>
             </div>
 
@@ -47,8 +46,8 @@ function EventCardLarge({ event }) {
             </div>
 
             <div className="event-Card-Column-buttons">
-                <img src={event.image} alt={event.title} className="event-image"/>
-                <button onClick={editEvent}>Edit Event Details</button>
+                <img src={editIcon} alt={event.title} className="edit-image"/>
+                <button onClick={editEvent} className="edit-button">Edit Event Details</button>
             </div>
         </div>
     );

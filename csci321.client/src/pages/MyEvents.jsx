@@ -20,6 +20,8 @@ const MyEvents = () => {
             console.log('User ID:', parsedUser.userId);
 
             const userEvents = mockEvents.filter(event => event.userId === parsedUser.userId);
+            
+            console.log(userEvents);
             const drafts = mockDraftEvents.filter(event => event.userId === parsedUser.userId);
 
 
@@ -27,10 +29,10 @@ const MyEvents = () => {
             const now = new Date();
 
             // Split user events into active and past based on their date
-            const past = userEvents.filter(event => new Date(event.date) < now);
-            const active = userEvents.filter(event => new Date(event.date) >= now);
+            const past = userEvents.filter(event => new Date(event.startDate) < now);
+            const active = userEvents.filter(event => new Date(event.startDate) >= now);
 
-            
+            console.log(past);
             setDraftEvents(drafts);
             setActiveEvents(active);
             setPastEvents(past);
@@ -47,16 +49,26 @@ const MyEvents = () => {
             <Navbar />
             
             <div className='events-grid'>
-            <h1>My Events</h1>
-                <div className="button">
-                    <button onClick={() => setCurrentTab('active')} className={currentTab === 'active' ? 'active-tab' : ''}>Active</button>
-                    <button onClick={() => setCurrentTab('draft')} className={currentTab === 'draft' ? 'active-tab' : ''}>Draft</button>
-                    <button onClick={() => setCurrentTab('past')} className={currentTab === 'past' ? 'active-tab' : ''}>Past</button>
+
+                <div className="buttons">
+                    <h1>My Events</h1>
+                    <div className="button-grid">
+                        <button onClick={() => setCurrentTab('active')}
+                                className={currentTab === 'active' ? 'active-tab' : ''}>Active
+                        </button>
+                        <button onClick={() => setCurrentTab('past')}
+                                className={currentTab === 'past' ? 'active-tab' : ''}>Past
+                        </button>
+                        <button onClick={() => setCurrentTab('draft')}
+                                className={currentTab === 'draft' ? 'active-tab' : ''}>Draft
+                        </button>
+
+                    </div>
                 </div>
 
                 {/* Render events based on the selected tab */}
                 <div className="event-list">
-                {currentTab === 'active' && activeEvents.length === 0 && (
+                    {currentTab === 'active' && activeEvents.length === 0 && (
                     <p>No Active Events</p>
                 )}
                 {currentTab === 'active' && activeEvents.map(event => (

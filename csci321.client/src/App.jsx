@@ -17,6 +17,7 @@ import ProfileDetails from "./pages/ProfileDetails.jsx"; // Create these compone
 import PrivateRoute from './components/PrivateRoute';
 import MyEvents from "./pages/MyEvents.jsx";
 import MyTickets from "./pages/MyTickets.jsx";
+import EventDetails from "@/pages/EventDetails.jsx";
 
 
 
@@ -207,6 +208,8 @@ const App = () => {
                     </PrivateRoute>
                     }
                     />
+
+                    <Route path="/:eventName/:eventId" element={<EventDetails />} />
                 </Routes>
             </main>
         </div>

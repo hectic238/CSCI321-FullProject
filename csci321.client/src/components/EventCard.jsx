@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from 'react-router-dom';
 
 const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -25,7 +26,7 @@ function EventCard({ event }) {
 
             <div className="event-Card-Column-details">
             <img src={event.image} alt={event.title} className="event-image"/>
-                <h3>{event.title}</h3>
+                <Link to={`/${event.title.replace(/\s+/g, '-')}/${event.id}`}><h3>{event.title}</h3></Link>
                 <p><strong>Date:</strong> {formatDate(event.startDate)}</p>
                 <p><strong>Time:</strong> {formatTime(event.startTime) + " - " + formatTime(event.endTime)}</p>
                 <p><strong>Location:</strong> {event.location}</p>
