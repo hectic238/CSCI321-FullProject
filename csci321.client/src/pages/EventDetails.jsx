@@ -97,7 +97,6 @@ const EventDetails = () => {
 
     return (
         <div className="event-details-container">
-            {/* Header Section */}
             <Navbar />
             <div className="event-header">
                 <img src={eventDetails.image} alt={eventDetails.title} className="event-image" />
@@ -109,8 +108,7 @@ const EventDetails = () => {
                 <Button onClick={() => setIsDrawerVisible(true)}>More Info</Button>
 
             </div>
-
-            {/* Ant Design Sidebar */}
+            
             <Drawer
                 title={eventDetails.title}
                 placement="right"
@@ -126,7 +124,6 @@ const EventDetails = () => {
 
             {/* Main Body Section */}
             <div className="event-body">
-                {/* 75% Section for Venue Map or General Admission */}
                 <div className="venue-info">
                     {eventDetails.eventTicketType === 'free' ? (
                         <div className="general-admission">Free Event</div>
@@ -134,8 +131,7 @@ const EventDetails = () => {
                         <div className="venue-map">Venue Map Placeholder</div>
                     )}
                 </div>
-
-                {/* 25% Section for Ticketing Info */}
+                
                 <div className="ticket-info">
                     {eventDetails.eventTicketType === 'free' ? (
                         <div className="general-admission">Free Event</div>
