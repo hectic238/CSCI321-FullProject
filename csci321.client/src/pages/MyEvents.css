@@ -8,12 +8,29 @@
     margin-bottom: 20px;
 }
 
-button {
-    padding: 10px 20px;
+.buttons button {
+    padding: 10px 20px; /* Adjust the padding to make buttons smaller */
+    margin-left: 10px;
+    font-size: 16px; /* Set a reasonable font size */
+    border: none; /* Remove borders (optional) */
+    border-radius: 5px; /* Rounded corners */
+    background-color: red;
+    color: white; /* Button text color */
     cursor: pointer;
-    border: none;
-    background-color: red !important;
-    transition: background-color 0.3s;
+    transition: background-color 0.3s ease; /* Smooth hover transition */
+}
+
+.button-grid {
+    margin-left: 50px;
+    margin-top: 10px;
+}
+
+.buttons {
+    display: flex; /* Align the buttons in a row */
+    justify-content: center; /* Center the buttons horizontally */
+    align-items: center; /* Align the buttons vertically */
+    gap: 10px; /* Add some space between the buttons */
+    margin: 20px 0; /* Optional: add margin above and below the button group */
 }
 
 button.active {
@@ -41,7 +58,7 @@ button:hover {
     margin: 0;
 }
 
-.events-grid {
+.My-events-page .events-grid {
     display: flex; /* Use flexbox */
     flex-direction: column !important; /* Arrange children in a column */
     justify-content: center; /* Align items at the start (top) */

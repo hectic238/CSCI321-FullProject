@@ -4,7 +4,8 @@ import {Link, useNavigate} from 'react-router-dom';
 import Navbar from '../components/Navbar'; // Import Navbar
 import logo from '../assets/logo_slogan.png'; // Assuming your image is in src/assets
 import { signInUser } from '../mockBackend'; // Import the mock backend
-
+import { EyeInvisibleOutlined, EyeTwoTone } from '@ant-design/icons';
+import { Button, Input, Space } from 'antd';
 
 
 const OrganiserLogin = () => {
@@ -94,7 +95,6 @@ const OrganiserLogin = () => {
                         onChange={(e) => setPassword(e.target.value)}
                         required
                     />
-
                     {/* Error message */}
                     {error && <p className="error">{error}</p>}
 

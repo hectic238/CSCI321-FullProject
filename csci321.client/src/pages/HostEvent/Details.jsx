@@ -1,25 +1,20 @@
 import React, {useEffect, useState} from 'react';
 import './HostEvent.css';
-import Navbar from "../../components/Navbar.jsx"; // Import your CSS file
-import banner from '../../assets/exploreEvent.png';
 
-import {Link, useNavigate} from "react-router-dom"; // Assuming your image is in src/assets
-
-
-const Details = ({ eventDetails, onFormChange, onNextPage }) => {
+const Details = ({ eventDetails, onFormChange}) => {
 
 
     const [details, setDetails] = useState({
-        title: eventDetails.title || 'Sydney',
-        category: eventDetails.category || 'Music',
-        eventType: eventDetails.eventType || 'single',
-        startDate: eventDetails.startDate || '2024-09-09',
-        startTime: eventDetails.startTime || '16:10',
-        endTime: eventDetails.endTime || '18:10',
-        location: eventDetails.location || 'Sydney',
-        additionalInfo: eventDetails.additionalInfo || 'Hi',
-        recurrenceFrequency: eventDetails.recurrenceFrequency || '', // Add this line
-        recurrenceEndDate: eventDetails.recurrenceEndDate || ''
+        title: eventDetails.title,
+        category: eventDetails.category,
+        eventType: eventDetails.eventType,
+        startDate: eventDetails.startDate,
+        startTime: eventDetails.startTime,
+        endTime: eventDetails.endTime,
+        location: eventDetails.location,
+        additionalInfo: eventDetails.additionalInfo,
+        recurrenceFrequency: eventDetails.recurrenceFrequency, // Add this line
+        recurrenceEndDate: eventDetails.recurrenceEndDate
     });
 
     const [isRecurring, setIsRecurring] = useState(false);
@@ -37,35 +32,11 @@ const Details = ({ eventDetails, onFormChange, onNextPage }) => {
 
         setDetails({ ...details, [name]: value });
     };
-
-    const handleSubmit = (e) => {
-        e.preventDefault(); // Prevent default form submission
-        if (details.eventType === 'recurring') {
-            if (!details.recurrenceFrequency || !details.recurrenceEndDate) {
-                alert('Please select a recurrence frequency and end date for recurring events.');
-                return;
-            }
-        }
-
-        if (details.title && details.category && details.startDate && details.location) {
-            onFormChange(details); // Update parent state with form data
-            onNextPage(); // Move to the next page
-        } else {
-            alert('Please fill in all required fields');
-        }
-    };
-
-
-
+    
 
     return (
         <div className="host-event-details">
-            <Navbar/>
-            <img src={banner} alt="Banner" className="banner-image" />
             <h1>Create a New Event</h1>
-            <div className="progress-bar">
-                <div className="progress" style={{ width: '25%' }}></div>
-            </div>
 
             <div className="events-grid">
 
@@ -237,13 +208,6 @@ const Details = ({ eventDetails, onFormChange, onNextPage }) => {
                             />
                         </div>
                     </div>
-
-                    <button
-                        onClick={handleSubmit}
-
-                    >
-                        Save and Continue
-                    </button>
                 </form>
             </div>
         </div>

@@ -1,5 +1,5 @@
 // src/mockEvents.js
-const mockEvents = [
+export const mockEvents = [
     {
         id: 1,
         userId: 'c20dee40-7ae1-4aca-bb08-13bf2739f49c',
@@ -45,28 +45,61 @@ const mockEvents = [
 
 ];
 
-const draftEvents = [];
+export const mockDraftEvents = [];
 
 
 export const addDraftEvent = (formData) => {
     if(formData.id === "") {
         formData.id = crypto.randomUUID();
     }
-    draftEvents.push(formData);
+    mockDraftEvents.push(formData);
 
-    console.log(draftEvents);
+    console.log(mockDraftEvents);
     return Promise.resolve({ success: true });
 
 }
 
 export const addEvent = (formData) => {
-    if(formData.id === "") {
-        formData.id = crypto.randomUUID();
+    
+    const exisitingEventIndex = mockEvents.findIndex(event => event.id === formData.id);
+    
+    if (exisitingEventIndex !== -1) {
+        return editEvent(formData);
+    } 
+    else {
+        if(formData.id === "") {
+            formData.id = crypto.randomUUID();
+        }
     }
+    
     mockEvents.push(formData);
-    console.log(mockEvents);
+    console.log("New Event Added: ", mockEvents);
     return Promise.resolve({ success: true });
 }
+
+export const editEvent = (formData) => {
+    const eventIndex = mockEvents.findIndex(event => event.id === formData.id);
+
+    if (eventIndex !== -1) {
+        // Update the event
+        mockEvents[eventIndex] = { ...mockEvents[eventIndex], ...formData };
+        console.log("Event updated:", mockEvents[eventIndex]);
+        return Promise.resolve({ success: true, event: mockEvents[eventIndex] });
+    } else {
+        return Promise.reject({ success: false, message: "Event not found" });
+    }
+}
+
+export const getEventById = (id) => {
+    const event = mockEvents.find(event => event.id === id);
+
+    if (event) {
+        return Promise.resolve({ success: true, event });
+    } else {
+        return Promise.reject({ success: false, message: "Event not found" });
+    }
+};
+
 
 export default mockEvents;
 

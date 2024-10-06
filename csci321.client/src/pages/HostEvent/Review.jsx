@@ -1,12 +1,8 @@
 import React, {useEffect, useState} from 'react';
-import Navbar from "../../components/Navbar.jsx"; // Navbar component
 import './Review.css'; // CSS for the Review Page
-import banner from '../../assets/exploreEvent.png';
-
-import {addDraftEvent, addEvent} from "../../mockEvents.jsx";
 
 
-const Review = ({ eventDetails, onPreviousPage, onSaveDraft, onPublish }) => {
+const Review = ({ eventDetails}) => {
 
     const {
         title,
@@ -40,24 +36,15 @@ const Review = ({ eventDetails, onPreviousPage, onSaveDraft, onPublish }) => {
 
     return (
         <div className="review-page">
-            <Navbar/>
-            {/* Event Banner */}
-            {image && (
-                <img src={banner} alt="Event Banner" className="banner-image"/>
-            )}
 
             {/* Event Title */}
-            <h1>{title}</h1>
 
-            {/* Progress Bar */}
-            <div className="progress-bar">
-                <div className="progress" style={{width: '100%'}}></div>
-            </div>
+            <h1>Review Event</h1>
+
 
             {/* Event Details Summary */}
             <div className="review-details-box">
                 <img src={image}/>
-
                 <h1>{title}</h1>
 
                 <h2>Date & Time</h2>
@@ -107,12 +94,6 @@ const Review = ({ eventDetails, onPreviousPage, onSaveDraft, onPublish }) => {
                 <p>{additionalInfo}</p>
             </div>
 
-            {/* Buttons */}
-            <div className="review-buttons">
-                <button onClick={onPreviousPage}>Go Back</button>
-                <button onClick={() => addDraftEvent(eventDetails)}>Save for Later / Draft</button>
-                <button onClick={() => addEvent(eventDetails)}>Publish Event</button>
-            </div>
         </div>
     );
 };

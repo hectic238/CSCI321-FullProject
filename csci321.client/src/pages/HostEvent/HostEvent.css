@@ -30,8 +30,7 @@
     flex-direction: column !important; /* Arrange children in a column */
     justify-content: flex-start; /* Align items at the start (top) */
     align-items: center; /* Center items horizontally */
-
-    min-height: 100vh; /* Full height of the viewport */
+    
     padding: 20px; /* Optional padding */
     box-sizing: border-box; /* Include padding in height calculations */
 }
