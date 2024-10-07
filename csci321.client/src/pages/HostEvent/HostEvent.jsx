@@ -36,6 +36,7 @@ const HostEvent = () => {
         recurrenceFrequency:  '', 
         recurrenceEndDate:  '',
         editing: passedEvent.editing || false,
+        numberAttendees: 0,
     });
 
     useEffect(() => {

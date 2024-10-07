@@ -72,3 +72,23 @@
     color: white;
 }
 
+.sold-out-tag {
+    background-color: red;
+    color: white;
+    padding: 5px;
+    text-align: center;
+    font-weight: bold;
+    margin-top: 10px;
+}
+
+.limited-space-tag {
+    background-color: yellow;
+    color: black;
+    padding: 5px;
+    text-align: center;
+    font-weight: bold;
+    margin-top: 10px;
+}
+
+
+
