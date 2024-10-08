@@ -39,6 +39,58 @@ export const mockEvents = [
         description: "A festival celebrating cuisine from all around the world.",
         imageUrl: "/images/food-festival.jpg",
         category: "other"
+    },
+    {
+        id: "842bd01c-10e5-4b81-bf75-efe168906ddb",
+        userId: "3b8ec461c8d8753c60a166fd",
+        title: "Sydney Music Festival",
+        category: "Music",
+        eventType: "single",
+        eventTicketType: "ticketed",
+        startDate: "2024-09-09",
+        startTime: "16:10",
+        endTime: "18:10",
+        location: "Sydney",
+        additionalInfo: "Hi",
+        recurrenceFrequency: "",
+        recurrenceEndDate: "",
+        image: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC0A", // Placeholder image base64 string
+        tickets: [
+            {
+                name: "General Admission",
+                price: "100",
+                count: "15",
+                soldOut: false,
+            },
+            {
+                name: "VIP",
+                price: "100",
+                count: "1",
+                soldOut: false,
+            }
+        ],
+        editing: false,
+        numberAttendees: 0,
+    },
+    {
+        id: "842bd01c-10e5-4b81-bf75-efe168906ddc",
+        userId: "3b8ec461c8d8753c60a166fd",
+        title: "Sydney Concert",
+        category: "Music",
+        eventType: "single",
+        eventTicketType: "free",
+        startDate: "2024-09-09",
+        startTime: "16:10",
+        endTime: "18:10",
+        location: "Sydney",
+        additionalInfo: "Hi",
+        recurrenceFrequency: "",
+        recurrenceEndDate: "",
+        image: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC0A", // Placeholder image base64 string
+        tickets: [
+        ],
+        editing: false,
+        numberAttendees: 0,
     }
 
 

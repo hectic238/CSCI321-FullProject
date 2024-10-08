@@ -21,6 +21,18 @@ const formatTime = (timeString) => {
     return `${formattedHours}:${minutes} ${ampm}`; // Return formatted time
 };
 function EventCard({ event }) {
+
+    const isSoldOut = event.eventTicketType === 'ticketed' && event.tickets.every(ticket => parseInt(ticket.count) === 0);
+
+    // Calculate total tickets left
+    const totalTicketsLeft = event.tickets?.length
+        ? event.tickets.reduce((total, ticket) => total + parseInt(ticket.count, 10), 0)
+        : 0;
+    // Check if total tickets left is less than 100
+    const isLimitedSpace = event.eventTicketType === 'ticketed' && totalTicketsLeft > 0 && totalTicketsLeft < 100;
+    const isFreeEvent = event.eventTicketType === 'free'; // Check if it's a free event
+
+
     return (
         <div key={event.id} className="event-card">
 
@@ -30,6 +42,27 @@ function EventCard({ event }) {
                 <p><strong>Date:</strong> {formatDate(event.startDate)}</p>
                 <p><strong>Time:</strong> {formatTime(event.startTime) + " - " + formatTime(event.endTime)}</p>
                 <p><strong>Location:</strong> {event.location}</p>
+
+
+                {isFreeEvent && (
+                    <div className="free-event-tag">
+                        <p><strong>Free Event</strong></p>
+                    </div>
+                )}
+                
+                
+                {isSoldOut && (
+                    <div className="sold-out-tag">
+                        <p><strong>SOLD OUT</strong></p>
+                    </div>
+                )}
+
+                {/* Conditionally render "Limited Spaces Left" tag if total tickets left is less than 100 */}
+                {isLimitedSpace && (
+                    <div className="limited-space-tag">
+                        <p><strong>Limited Spaces Left!</strong></p>
+                    </div>
+                )}
             </div>
         </div>
     );

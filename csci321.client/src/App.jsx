@@ -18,6 +18,7 @@ import PrivateRoute from './components/PrivateRoute';
 import MyEvents from "./pages/MyEvents.jsx";
 import MyTickets from "./pages/MyTickets.jsx";
 import EventDetails from "@/pages/EventDetails.jsx";
+import Checkout from './pages/Checkout.jsx';
 
 
 
@@ -210,6 +211,7 @@ const App = () => {
                     />
 
                     <Route path="/:eventName/:eventId" element={<EventDetails />} />
+                    <Route path="/checkout/:eventId" element={<Checkout />} />
                 </Routes>
             </main>
         </div>
