@@ -21,6 +21,33 @@ namespace CSCI321.Server.Helpers
             _UserCollection = mongoDatabase.GetCollection<User>(
                 UserDatabaseSettings.Value.UserCollectionName);
         }
+        
+        // Method to get a refresh token from the database
+        public async Task<(string refreshToken, DateTime expiry)?> GetRefreshTokenFromDB(string userId)
+        {
+            // Find the user by userId
+            var user = await _UserCollection.Find(x => x.userId == userId).FirstOrDefaultAsync();
+    
+            // Check if user exists and return the refresh token and expiry date
+            if (user != null)
+            {
+                return (user.refreshToken, user.refreshTokenExpiry);
+            }
+    
+            return null; // Return null if user is not found
+        }
+
+        // Method to store a refresh token and its expiry date in the database
+        public async Task StoreRefreshToken(string userId, string refreshToken, DateTime expiry)
+        {
+            var user = await _UserCollection.Find(x => x.userId == userId).FirstOrDefaultAsync();
+            if (user != null)
+            {
+                user.refreshToken = refreshToken; // Store the new refresh token
+                user.refreshTokenExpiry = expiry; // Store the expiration date
+                await _UserCollection.ReplaceOneAsync(x => x.userId == userId, user);
+            }
+        }
 
         public async Task<List<User>> GetAsync() =>
             await _UserCollection.Find(_ => true).ToListAsync();

@@ -40,18 +40,24 @@ const OrganiserLogin = () => {
             const response = await fetch('http://localhost:5144/api/User/login', {
                 method: 'POST',
                 headers: {
+                    
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify(loginModel), // Ensure userType is needed
             });
+            
+            
 
             if (response.ok) {
                 const data = await response.json();
 
+                console.log(data);
                 // Save token to localStorage
                 localStorage.setItem('accessToken', data.accessToken);
                 localStorage.setItem('refreshToken', data.refreshToken);
-                localStorage.setItem('user', JSON.stringify(data.user)); // Store user data
+                
+                const userType = "organiser";
+                localStorage.setItem('userType', userType);
         
                 navigate('/home'); // Redirect on successful login
             } else {

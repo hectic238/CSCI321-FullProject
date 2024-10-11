@@ -14,5 +14,9 @@ namespace CSCI321.Server.Models
     public string userType { get; set; }
     public string company { get; set; }
     public string preferences { get; set; }
+
+    public string refreshToken { get; set; }
+    public DateTime refreshTokenExpiry { get; set; } // Expiration date for the refresh token
+
     }
 }

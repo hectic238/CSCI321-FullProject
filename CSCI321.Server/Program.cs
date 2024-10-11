@@ -71,6 +71,8 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication(); // This ensures JWT authentication is enabled before authorization
+
 app.UseAuthorization();
 
 app.MapControllers();

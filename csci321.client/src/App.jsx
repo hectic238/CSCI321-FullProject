@@ -34,13 +34,15 @@ const App = () => {
     const handleLogout = () => {
       // Clear user data from localStorage and update state
       
-      localStorage.removeItem('user');
+      localStorage.removeItem('userType');
       localStorage.removeItem('accessToken');
       localStorage.removeItem('refreshToken');
       navigate("/home");
       navigate(0); // Redirect to home after logout
       
     };
+    
+    
     // Function to decode the JWT token and extract the expiration time (exp)
     const getTokenExpirationTime = (token) => {
         if (!token) return null;
@@ -81,30 +83,22 @@ const App = () => {
       };
 
     // Handle token refresh
-  const refreshAccessToken = async () => {
-    try {
-      const response = await fetch("http://localhost:5144/refreshToken", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${refreshToken}`, // Add the refresh token to Authorization header
-          "Access-Token": accessToken,
-        },
-      });
+    async function refreshAccessToken(refreshToken) {
+        const response = await fetch('http://localhost:5144/api/User/refreshToken', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${refreshToken}`,
+                'Content-Type': 'application/json',
+            },
+        });
 
-      if (response.ok) {
+        if (!response.ok) {
+            throw new Error("Unable to refresh token");
+        }
+
         const data = await response.json();
-        setAccessToken(data.accessToken);
-        localStorage.setItem("accessToken", data.accessToken); // Update token in localStorage
-      } else {
-        console.log("Failed to refresh token");
-        setIsLoggedOut(true); // Log out user if the refresh fails
-      }
-    } catch (error) {
-      console.error("Error refreshing token:", error);
-      setIsLoggedOut(true);
+        return data.accessToken; // Get the new access token from the response
     }
-  };
 
   // Detect user inactivity (5 minutes = 300000ms)
   useIdleTimer(300000, () => {
@@ -113,38 +107,38 @@ const App = () => {
   });
 
     useEffect(() => {
-      const storedAccessToken = localStorage.getItem("accessToken");
-    const storedRefreshToken = localStorage.getItem("refreshToken");
-
-    // Use the state setter functions
-    setAccessToken(storedAccessToken);
-    setRefreshToken(storedRefreshToken);
-
-    const tokenExpirationTime = getTokenExpirationTime(accessToken);
-
-    // On any page refresh, refresh the accessToken
-    if(accessToken) {
-      refreshAccessToken();
-    }
-    
-
-      // if(isLoggedOut) {
-      //   console.log("handling Logout");
-      //   handleLogout();
-      // } 
-      
-      const interval = setInterval(() => {
-        
-        if (accessToken) {
-          if (tokenExpirationTime < Date.now()) {
-            refreshAccessToken();
-          }
-        }
-      }, 90000); // Check every minute
-      
-
-        
-
+    //   const storedAccessToken = localStorage.getItem("accessToken");
+    // const storedRefreshToken = localStorage.getItem("refreshToken");
+    //
+    // // Use the state setter functions
+    // setAccessToken(storedAccessToken);
+    // setRefreshToken(storedRefreshToken);
+    //
+    // const tokenExpirationTime = getTokenExpirationTime(accessToken);
+    //
+    // // On any page refresh, refresh the accessToken
+    // if(accessToken) {
+    //   refreshAccessToken();
+    // }
+    //
+    //
+    //   if(isLoggedOut) {
+    //     console.log("handling Logout");
+    //     handleLogout();
+    //   } 
+    //  
+    //   const interval = setInterval(() => {
+    //     if (accessToken) {
+    //        
+    //       if (tokenExpirationTime < Date.now()) {
+    //         refreshAccessToken();
+    //       }
+    //     }
+    //   }, 30000); // Check every minute
+    //  
+    //
+    //    
+    //
 
         // Check if the current route requires scrolling or not
         if (location.pathname === '/explore') {
@@ -166,7 +160,7 @@ const App = () => {
         return () => {
             document.body.classList.remove('scrollable');
             document.body.classList.remove('no-scroll');
-            clearInterval(interval);
+            //clearInterval(interval);
         };
     }, [location.pathname, accessToken, refreshToken, isLoggedOut]);
 
