@@ -8,7 +8,7 @@
         return null;
     }
 
-    const expiryResponse = await fetch('http://localhost:5144/api/User/getRefreshExpiry', {
+    const expiryResponse = await fetch('https://localhost:5144/api/User/getRefreshExpiry', {
         method: 'GET',
         headers: {
             'Authorization': `Bearer ${accessToken}`,
@@ -25,7 +25,7 @@
     const expiryDate = new Date(expiryDateJSON.refreshExpiry);
     console.log(expiryDate);
 
-    // Test expired Token
+     //Test expired Token
     //expiryDate.setDate(expiryDate.getDate() - 7);
     //console.log(expiryDate);
     
@@ -34,7 +34,7 @@
     // If the refreshTokenExpiry is earlier than now, log the user out
     if (expiryDate < new Date()) {
         console.log("Refresh token has expired. Logging the user out.");
-        //logoutUser();
+        logoutUser();
         return;
     }
     
@@ -47,7 +47,7 @@
 
         try {
 
-            const response = await fetch('http://localhost:5144/api/User/refreshToken', {
+            const response = await fetch('https://localhost:5144/api/User/refreshToken', {
                     method: 'POST',
                     headers: {
                         'Authorization': `Bearer ${accessToken}`,
@@ -63,30 +63,21 @@
             return newAccessToken;
         } catch (error) {
             console.log("Failed to refresh access token:", error);
-            //logoutUser(); // Log out if refreshing the access token fails
+            logoutUser(); // Log out if refreshing the access token fails
         }
     }
     
-    
-    
-
-    // const response = await fetch('http://localhost:5144/api/User/refreshToken', {
-    //     method: 'POST',
-    //     headers: {
-    //         'Authorization': `Bearer ${accessToken}`,
-    //         'Content-Type': 'application/json',
-    //     },
-    // });
-    //
-    // if (!response.ok) {
-    //     throw new Error("Unable to refresh token");
-    // }
-    //
-    // const data = await response.json();
-    // return data.accessToken; // Get the new access token from the response
-
-
 };
+
+export const logoutUser = () => {
+    
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+    localStorage.removeItem('userType');
+    console.log("User has been logged out. Redirecting to login.");
+    // You can also add a redirect here to the login page
+    window.location.href = '/home'; // For example
+}
 
 
 function accessTokenIsExpired(accessToken) {

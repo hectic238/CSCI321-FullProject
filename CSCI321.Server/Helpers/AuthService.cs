@@ -2,16 +2,17 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using CSCI321.Server.Models;
 using Microsoft.IdentityModel.Tokens;
-
 namespace CSCI321.Server.Helpers
 {
     public class AuthService
     {
 
-        public AuthService()
+        private readonly IConfiguration configuration;
+        public AuthService(IConfiguration configuration)
         {
-
+            this.configuration = configuration;
         }
 
 
@@ -53,10 +54,6 @@ namespace CSCI321.Server.Helpers
             }
         }
         
-        public async Task storeRefreshToken(string userId, string refreshToken, DateTime expiry)
-        {
-            // Save the refresh token, userId, and expiry date to the database
-        }
         
         public string GenerateRefreshToken()
         {
@@ -64,25 +61,46 @@ namespace CSCI321.Server.Helpers
         }
 
 
-        public string GenerateAccessToken(string userId, int tokenExpirationMinutes)
+        public string GenerateAccessToken( User user)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.ASCII.GetBytes("a very long and secure secret key");
+            //var key = Encoding.ASCII.GetBytes("a very long and secure secret key");
 
-            var tokenDescriptor = new SecurityTokenDescriptor
+            var claims = new[]
             {
-                Subject = new ClaimsIdentity(new[]
-                {
-                    new Claim(ClaimTypes.NameIdentifier, userId),
-                }),
-
-                Expires = DateTime.UtcNow.AddMinutes(tokenExpirationMinutes),
-                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key),
-                    SecurityAlgorithms.HmacSha256Signature)
+                new Claim(JwtRegisteredClaimNames.Sub, user.userId.ToString()),  // This should work for sub
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                new Claim(JwtRegisteredClaimNames.Email, user.email.ToString()),
+                new Claim("userType", user.userType.ToString()),
             };
+            
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Key"]));
+            var signIn = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+            
+            var token = new JwtSecurityToken(
+                configuration["Jwt:Issuer"],
+                configuration["Jwt:Audience"],
+                claims,
+                expires: DateTime.Now.AddMinutes(15),
+                signingCredentials: signIn
+                );
+            
+            string tokenValue = new JwtSecurityTokenHandler().WriteToken(token);
 
-            var token = tokenHandler.CreateToken(tokenDescriptor);
-            return tokenHandler.WriteToken(token);
+            // var tokenDescriptor = new SecurityTokenDescriptor
+            // {
+            //     Subject = new ClaimsIdentity(new[]
+            //     {
+            //         new Claim(ClaimTypes.NameIdentifier, userId),
+            //     }),
+            //
+            //     Expires = DateTime.UtcNow.AddMinutes(tokenExpirationMinutes),
+            //     SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key),
+            //         SecurityAlgorithms.HmacSha256Signature)
+            // };
+            //
+            // var token = tokenHandler.CreateToken(tokenDescriptor);
+            return tokenValue;
         }
         
         

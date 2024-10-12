@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Navbar from "../components/Navbar.jsx";
+import {RefreshToken} from "@/components/RefreshToken.jsx";
 
 const ProfileDetails = () => {
     const [userDetails, setUserDetails] = useState(null);
@@ -11,35 +12,35 @@ const ProfileDetails = () => {
     }, []);
 
     const fetchUserDetails = async () => {
-        const token = localStorage.getItem('accessToken');
+        const accessToken = localStorage.getItem('accessToken');
 
-        if (!token) {
+        if (!accessToken) {
             console.error('No access token found. Please log in.');
             return;
         }
         
         try {
-            const response = await fetch(`http://localhost:5144/api/User/get`, {
+            
+            await RefreshToken();
+            const response = await fetch(`https://localhost:5144/api/User/get`, {
                 method: 'GET',
                 headers: {
-                    'Authorization': `Bearer ${token}`, // Include the token
+                    'Authorization': `Bearer ${accessToken}`, // Include the token
                     'Content-Type': 'application/json',
                 },
             });
 
-            if (response.ok) {
-                const data = await response.json();
-                setUserDetails(data); // Store user details in state
-            } else if (response.status === 401) {
-                console.error('Unauthorized: Invalid or expired token.');
-                setError('Session expired. Please log in again.');
-                // Handle token expiration: Redirect to login or clear local storage
-            } else {
+            if (!response.ok) {
                 console.error('Failed to fetch user details:', response.status);
                 setError('Failed to fetch user details.');
+                return;
             }
+
+            const data = await response.json(); // Only call this once
+            console.log(data);
+            setUserDetails(data); // Store user details in state
         } catch (err) {
-            console.error('Error fetching user details:', err);
+            console.error('An error occurred while fetching user details:', err);
             setError('An error occurred while fetching user details.');
         }
     };

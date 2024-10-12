@@ -20,7 +20,6 @@ builder.Services.AddSingleton<UserService>();
 builder.Services.AddSingleton<AuthService>();
 
 // JWT Authentication setup
-var key = Encoding.ASCII.GetBytes("a very long and secure secret key"); // Use a strong secret key
 
 builder.Services.AddAuthentication(options =>
 {
@@ -28,15 +27,21 @@ builder.Services.AddAuthentication(options =>
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
 }).AddJwtBearer(options =>
 {
+    
     options.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuerSigningKey = true,
-        IssuerSigningKey = new SymmetricSecurityKey(key),
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(builder.Configuration["Jwt:Key"])),
+        ValidIssuer = builder.Configuration["Jwt:Issuer"],
         ValidateIssuer = false,
+        ValidAudience = builder.Configuration["Jwt:Audience"],
         ValidateAudience = false,
-        ClockSkew = TimeSpan.Zero // No time drift
+        ClockSkew = TimeSpan.Zero
     };
+    
 });
+
+builder.Services.AddAuthorization();
 
 // Add CORS policy
 builder.Services.AddCors(options =>

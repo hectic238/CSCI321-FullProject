@@ -20,6 +20,8 @@ import MyTickets from "./pages/MyTickets.jsx";
 import EventDetails from "@/pages/EventDetails.jsx";
 import Checkout from './pages/Checkout.jsx';
 
+import { RefreshToken, logoutUser } from './components/refreshToken';
+
 
 
 
@@ -29,35 +31,6 @@ const App = () => {
     const [refreshToken, setRefreshToken] = useState(localStorage.getItem("refreshToken"));
     const [isLoggedOut, setIsLoggedOut] = useState(false);
     const location = useLocation();
-    const navigate = useNavigate();
-
-    const handleLogout = () => {
-      // Clear user data from localStorage and update state
-      
-      localStorage.removeItem('userType');
-      localStorage.removeItem('accessToken');
-      localStorage.removeItem('refreshToken');
-      navigate("/home");
-      navigate(0); // Redirect to home after logout
-      
-    };
-    
-    
-    // Function to decode the JWT token and extract the expiration time (exp)
-    const getTokenExpirationTime = (token) => {
-        if (!token) return null;
-      
-        const base64Url = token.split('.')[1]; // Extract the payload part of the JWT
-        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/'); // Replace URL-safe characters
-        const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
-          return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-        }).join(''));
-      
-        const payload = JSON.parse(jsonPayload);
-      
-        // Return the expiration time (exp), which is in seconds since the Unix epoch
-        return payload.exp ? payload.exp * 1000 : null; // Convert to milliseconds
-      };
     
     // Track user activity (idle timeout)
     const useIdleTimer = (timeout, onIdle) => {
@@ -82,63 +55,16 @@ const App = () => {
         }, [timeout, onIdle]);
       };
 
-    // Handle token refresh
-    async function refreshAccessToken(refreshToken) {
-        const response = await fetch('http://localhost:5144/api/User/refreshToken', {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${refreshToken}`,
-                'Content-Type': 'application/json',
-            },
-        });
-
-        if (!response.ok) {
-            throw new Error("Unable to refresh token");
-        }
-
-        const data = await response.json();
-        return data.accessToken; // Get the new access token from the response
-    }
-
   // Detect user inactivity (5 minutes = 300000ms)
   useIdleTimer(300000, () => {
     console.log("User is idle for more than 5 minutes, logging out.");
-    setIsLoggedOut(true);
+    logoutUser();
   });
 
     useEffect(() => {
-    //   const storedAccessToken = localStorage.getItem("accessToken");
-    // const storedRefreshToken = localStorage.getItem("refreshToken");
-    //
-    // // Use the state setter functions
-    // setAccessToken(storedAccessToken);
-    // setRefreshToken(storedRefreshToken);
-    //
-    // const tokenExpirationTime = getTokenExpirationTime(accessToken);
-    //
-    // // On any page refresh, refresh the accessToken
-    // if(accessToken) {
-    //   refreshAccessToken();
-    // }
-    //
-    //
-    //   if(isLoggedOut) {
-    //     console.log("handling Logout");
-    //     handleLogout();
-    //   } 
-    //  
-    //   const interval = setInterval(() => {
-    //     if (accessToken) {
-    //        
-    //       if (tokenExpirationTime < Date.now()) {
-    //         refreshAccessToken();
-    //       }
-    //     }
-    //   }, 30000); // Check every minute
-    //  
-    //
-    //    
-    //
+    if(accessToken) {
+       RefreshToken();
+     }
 
         // Check if the current route requires scrolling or not
         if (location.pathname === '/explore') {

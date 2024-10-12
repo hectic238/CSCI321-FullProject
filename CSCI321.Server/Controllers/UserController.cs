@@ -58,7 +58,7 @@ public class UserController : ControllerBase
 
         var accessToken = authHeader.Substring("Bearer ".Length).Trim();
 
-        Console.WriteLine($"Access Token: {accessToken}");
+       // Console.WriteLine($"Access Token: {accessToken}");
 
         var principal = _authService.GetPrincipalFromExpiredToken(accessToken); // Validate and get the claims
 
@@ -70,7 +70,7 @@ public class UserController : ControllerBase
         
         var userId = principal.FindFirst(ClaimTypes.NameIdentifier).Value;
     
-        Console.WriteLine($"User Id: {userId}");
+        //Console.WriteLine($"User Id: {userId}");
 
         // Validate the refresh token
         var refreshTokenData = await _userService.GetRefreshTokenFromDB(userId); // Make sure userId is defined
@@ -107,10 +107,18 @@ public class UserController : ControllerBase
             return Unauthorized("Invalid access token.");
         }
         
+        Console.WriteLine(principal);
         
         var userId = principal.FindFirst(ClaimTypes.NameIdentifier).Value;
     
-        Console.WriteLine($"User Id: {userId}");
+        Console.WriteLine($"User Id in refreshToken: {userId}");
+        
+        var user = await _userService.GetByIdAsync(userId);
+
+        if (user == null)
+        {
+            return NotFound("User not found.");
+        }
 
         // Validate the refresh token
         var refreshTokenData = await _userService.GetRefreshTokenFromDB(userId); // Make sure userId is defined
@@ -131,7 +139,7 @@ public class UserController : ControllerBase
 
 
         // Generate a new access token
-        var newAccessToken = _authService.GenerateAccessToken(userId, 2);
+        var newAccessToken = _authService.GenerateAccessToken(user);
 
         
         return Ok(new { accessToken = newAccessToken });
@@ -141,36 +149,11 @@ public class UserController : ControllerBase
     [HttpGet("getUserType")]
     public async Task<IActionResult> GetUserTypeByToken()
     {
-        var authHeader = Request.Headers["Authorization"].FirstOrDefault();
-    
-        if (authHeader == null || !authHeader.StartsWith("Bearer "))
-        {
-            return Unauthorized("Refresh token is missing or invalid.");
-        }
-
-        var accessToken = authHeader.Substring("Bearer ".Length).Trim();
-        
-        Console.WriteLine($"Access Token: {accessToken}");
-        
-        var principal = _authService.GetPrincipalFromExpiredToken(accessToken); // Validate and get the claims
-
-        if (principal == null)
-        {
-            return Unauthorized("Invalid access token.");
-        }
-        
-        
-        var userId = principal.FindFirst(ClaimTypes.NameIdentifier).Value;
-    
-        Console.WriteLine($"User Id: {userId}");
-        
-        
-        
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
         if (userId == null)
         {
             return Unauthorized("Invalid token.");
         }
-        
         
         // Find the user by userId
         var user = await _userService.GetByIdAsync(userId);
@@ -187,38 +170,9 @@ public class UserController : ControllerBase
     [HttpGet("get")]
     public async Task<IActionResult> GetUserByToken()
     {
-        var authHeader = Request.Headers["Authorization"].FirstOrDefault();
-    
-        if (authHeader == null || !authHeader.StartsWith("Bearer "))
-        {
-            return Unauthorized("Refresh token is missing or invalid.");
-        }
 
-        var accessToken = authHeader.Substring("Bearer ".Length).Trim();
+        var userId =  User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         
-        Console.WriteLine($"Access Token: {accessToken}");
-        
-        var principal = _authService.GetPrincipalFromExpiredToken(accessToken); // Validate and get the claims
-
-        if (principal == null)
-        {
-            return Unauthorized("Invalid access token.");
-        }
-        
-        
-        var userId = principal.FindFirst(ClaimTypes.NameIdentifier).Value;
-    
-        Console.WriteLine($"User Id: {userId}");
-        
-        
-        
-        if (userId == null)
-        {
-            return Unauthorized("Invalid token.");
-        }
-        
-        
-        // Find the user by userId
         var user = await _userService.GetByIdAsync(userId);
 
         if (user == null)
@@ -226,7 +180,7 @@ public class UserController : ControllerBase
             return NotFound("User not found.");
         }
 
-        return Ok(userId); // Return the user details
+        return Ok(user);
     }
     
     // public async Task<bool> ValidateRefreshToken(string userId, string token)
@@ -272,7 +226,7 @@ public class UserController : ControllerBase
 
         var userId = user.userId;
         // Generate JWT token
-        var accessToken = _authService.GenerateAccessToken(user.userId, 2); // minute accessToken
+        var accessToken = _authService.GenerateAccessToken(user); // minute accessToken
 
         var refreshToken = _authService.GenerateRefreshToken();
         
