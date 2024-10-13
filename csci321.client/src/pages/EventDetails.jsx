@@ -3,7 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import Navbar from "../components/Navbar.jsx"; // Add necessary styles here
 import mockEvents, {editEvent, getEventById} from '../mockEvents';
 import { Drawer, Button } from 'antd'; // Ant Design imports
-import './EventDetails.css'; // Assuming you will style with this CSS file
+import './EventDetails.css';
+import {getUserIdFromToken} from "@/components/Functions.jsx"; // Assuming you will style with this CSS file
 
 const EventDetails = () => {
     const { eventName, eventId } = useParams(); // Extract eventName and eventId from the URL
@@ -101,13 +102,7 @@ const EventDetails = () => {
 
     useEffect(() => {
 
-        const storedUser = localStorage.getItem('user');
-        if (storedUser) {
-            const parsedUser = JSON.parse(storedUser);
-
-            setUserId(parsedUser.userId);
-            console.log('User ID:', parsedUser.userId);
-        }
+        setUserId(getUserIdFromToken());
         const fetchEvent = async () => {
             try {
                 const response = await getEventById(eventId);  // Wait for the promise to resolve

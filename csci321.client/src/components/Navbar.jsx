@@ -10,8 +10,7 @@ import ProfileDropdown from "./ProfileDropdown.jsx"; // Assuming your image is i
 import { AudioOutlined } from '@ant-design/icons';
 import { Input, Space } from 'antd';
 const { Search } = Input;
-import { RefreshToken } from '../components/refreshToken';
-import {jwtDecode} from 'jwt-decode'; // Import the jwt-decode library
+import {getUserTypeFromToken} from "@/components/Functions.jsx"; // Import the jwt-decode library
 
 
 
@@ -38,10 +37,10 @@ function Navbar() {
     useEffect(() => {
         const token = localStorage.getItem('accessToken');
         if (token) {
-            const decodedToken = jwtDecode(token);
-            setUserType(decodedToken['userType']); // Set userType from decoded token
+            setUserType(getUserTypeFromToken(token)); // Set userType from decoded token
         }
     }, []);
+    
 
     const handleLogout = () => {
         // Clear user data from localStorage and update state
