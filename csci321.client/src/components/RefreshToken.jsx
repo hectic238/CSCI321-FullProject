@@ -1,9 +1,9 @@
 ﻿export const RefreshToken = async () => {
 
     const accessToken = localStorage.getItem('accessToken');
-    const refreshToken = localStorage.getItem('refreshToken');
-
-    if (!refreshToken) {
+    // const refreshToken = localStorage.getItem('refreshToken');
+    //
+    if (!accessToken) {
         console.log("No refresh token found. User is likely logged out.");
         return null;
     }
@@ -21,9 +21,7 @@
     }
 
     const expiryDateJSON = await expiryResponse.json();
-    
     const expiryDate = new Date(expiryDateJSON.refreshExpiry);
-    console.log(expiryDate);
 
      //Test expired Token
     //expiryDate.setDate(expiryDate.getDate() - 7);
@@ -37,9 +35,6 @@
         logoutUser();
         return;
     }
-    
-    
-
 
     // Check if access token is expired
     if (accessTokenIsExpired(accessToken)) {
@@ -72,7 +67,6 @@
 export const logoutUser = () => {
     
     localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
     localStorage.removeItem('userType');
     console.log("User has been logged out. Redirecting to login.");
     // You can also add a redirect here to the login page

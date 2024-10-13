@@ -233,7 +233,7 @@ public class UserController : ControllerBase
         await _userService.StoreRefreshToken(userId, refreshToken, DateTime.UtcNow.AddDays(7)); // 7 days expiration
         
         // Return the token and user data
-        return Ok(new { accessToken, refreshToken });
+        return Ok(new { accessToken});
     }
 
 }

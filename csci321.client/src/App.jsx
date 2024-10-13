@@ -28,7 +28,6 @@ import { RefreshToken, logoutUser } from './components/refreshToken';
 
 const App = () => {
     const [accessToken, setAccessToken] = useState(localStorage.getItem("accessToken"));
-    const [refreshToken, setRefreshToken] = useState(localStorage.getItem("refreshToken"));
     const [isLoggedOut, setIsLoggedOut] = useState(false);
     const location = useLocation();
     
@@ -88,7 +87,7 @@ const App = () => {
             document.body.classList.remove('no-scroll');
             //clearInterval(interval);
         };
-    }, [location.pathname, accessToken, refreshToken, isLoggedOut]);
+    }, [location.pathname, accessToken, isLoggedOut]);
 
 
 

@@ -11,6 +11,8 @@ import { AudioOutlined } from '@ant-design/icons';
 import { Input, Space } from 'antd';
 const { Search } = Input;
 import { RefreshToken } from '../components/refreshToken';
+import {jwtDecode} from 'jwt-decode'; // Import the jwt-decode library
+
 
 
 const suffix = (
@@ -34,14 +36,11 @@ function Navbar() {
     const navigate = useNavigate();
 
     useEffect(() => {
-        // Check if a user is logged in by checking localStorage
-        const userType = localStorage.getItem('userType');
-        if (userType) {
-            setUserType(userType); // Store user details in state
+        const token = localStorage.getItem('accessToken');
+        if (token) {
+            const decodedToken = jwtDecode(token);
+            setUserType(decodedToken['userType']); // Set userType from decoded token
         }
-        else if(userType === null) {
-        }
-        
     }, []);
 
     const handleLogout = () => {
@@ -54,7 +53,6 @@ function Navbar() {
     };
 
     const toggleDropdown = () => {
-        console.log("Toggle Dropdown Called");
         setDropdownOpen(prev => !prev);
     };
 

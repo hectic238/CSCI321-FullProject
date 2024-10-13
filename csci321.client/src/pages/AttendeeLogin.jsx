@@ -46,14 +46,8 @@ const AttendeeLogin = () => {
 
             if (response.ok) {
                 const data = await response.json();
-
-                console.log(data);
                 // Save token to localStorage
                 localStorage.setItem('accessToken', data.accessToken);
-                localStorage.setItem('refreshToken', data.refreshToken);
-
-                const userType = "attendee";
-                localStorage.setItem('userType', userType);
 
                 navigate('/home'); // Redirect on successful login
             } else {
