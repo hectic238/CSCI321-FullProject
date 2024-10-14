@@ -10,7 +10,7 @@ import { env } from 'process';
 const baseFolder =
     env.APPDATA !== undefined && env.APPDATA !== ''
         ? `${env.APPDATA}/ASP.NET/https`
-        : `${env.HOME}/.aspnet/https`;
+        : `${env.HOME}/.aspnet/dev-certs/https`;
 
 const certificateName = "csci321.client";
 const certFilePath = path.join(baseFolder, `${certificateName}.pem`);

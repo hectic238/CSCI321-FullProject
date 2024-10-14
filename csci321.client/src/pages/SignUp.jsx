@@ -12,7 +12,7 @@ const SignUp = () => {
         company: '', // Only for organizers
         preferences: '', // Only for attendees
         userType: location.state?.userType,
-        userId: "3b8ec461c8d8753c60a166ff",
+        userId: "3b8ec461c8d8753c60a166da",
     });
 
     const navigate = useNavigate();
