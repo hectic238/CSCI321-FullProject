@@ -61,12 +61,14 @@ export const mockEvents = [
                 price: "100",
                 count: "15",
                 soldOut: false,
+                bought: "0",
             },
             {
                 name: "VIP",
                 price: "100",
                 count: "1",
                 soldOut: false,
+                bought: "0",
             }
         ],
         editing: false,
@@ -98,7 +100,7 @@ export const mockEvents = [
         title: "Sydney Concert",
         category: "Music",
         eventType: "single",
-        eventTicketType: "free",
+        eventTicketType: "ticketed",
         startDate: "2024-11-11",
         startTime: "16:10",
         endTime: "18:10",
@@ -108,6 +110,20 @@ export const mockEvents = [
         recurrenceEndDate: "",
         image: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC0A", // Placeholder image base64 string
         tickets: [
+            {
+                name: "General Admission",
+                price: "100",
+                count: "15",
+                soldOut: false,
+                bought: "0",
+            },
+            {
+                name: "VIP",
+                price: "100",
+                count: "1",
+                soldOut: false,
+                bought: "0",
+            }
         ],
         editing: false,
         numberAttendees: 0,

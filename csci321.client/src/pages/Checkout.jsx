@@ -29,6 +29,7 @@ const Checkout = () => {
                     // Reduce the available ticket count
                     event.numberAttendees += selectedTicket.quantity;
                     updatedTickets[ticketIndex].count = (availableCount - selectedTicket.quantity).toString();
+                    updatedTickets[ticketIndex].bought = selectedTicket.quantity.toString();
                 } else {
                     newSoldOutTickets.push(selectedTicket.name); // Mark this ticket as sold out
 

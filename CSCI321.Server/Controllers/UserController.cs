@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Cryptography;
 using System.Text;
-using Amazon.Runtime.Internal;
 
 namespace CSCI321.Server.Controllers;
 
@@ -26,14 +25,30 @@ public class UserController : ControllerBase
     public async Task<List<User>> Get() =>
     await _userService.GetAsync();
 
-    [HttpPost]
+    [HttpPost("signUp")]
     public async Task<IActionResult> Post(User newUser)
     {
-        newUser.password = HashPassword(newUser.password);
+        
+        try
+        {
+            Console.WriteLine("Before password hashing: " + newUser.password);
 
-        await _userService.CreateAsync(newUser);
+            newUser.password = HashPassword(newUser.password);
 
-        return CreatedAtAction(nameof(Get), new { id = newUser.userId }, newUser);
+            Console.WriteLine("After password hashing: " + newUser.password);
+
+            newUser.refreshTokenExpiry = DateTime.UtcNow.AddDays(30);
+
+            await _userService.CreateAsync(newUser);
+
+            Console.WriteLine($"User created with Id: {newUser.userId}");
+            return CreatedAtAction(nameof(Get), new { id = newUser.userId }, newUser);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error occurred: {ex.Message}");
+            return StatusCode(500, "Internal server error.");
+        }
     }
     private string HashPassword(string password)
     {
@@ -182,26 +197,6 @@ public class UserController : ControllerBase
 
         return Ok(user);
     }
-    
-    // public async Task<bool> ValidateRefreshToken(string userId, string token)
-    // {
-    //     var refreshTokenData = await _userService.GetRefreshTokenFromDB(userId);
-    //
-    //     if (refreshTokenData.HasValue)
-    //     {
-    //         var (refreshToken, expiry) = refreshTokenData.Value;
-    //
-    //         
-    //         if (refreshToken == token && DateTime.UtcNow < expiry)
-    //         {
-    //             return true; // Token is valid
-    //         }
-    //         return false; // Token is invalid or expired
-    //         
-    //     }
-    //
-    //     return false;
-    // }
 
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginModel loginData)

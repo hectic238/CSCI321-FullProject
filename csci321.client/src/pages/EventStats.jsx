@@ -32,6 +32,27 @@ function EventStats() {
         return <p>Loading event details...</p>;
     }
 
+    const getTotalAttendees = () => {
+        return eventDetails.numberAttendees;
+    };
+
+    const renderTicketStats = () => {
+        if (eventDetails.eventTicketType === 'ticketed' && eventDetails.tickets) {
+            return eventDetails.tickets.map((ticket, index) => (
+                <div key={index} className="ticket-info">
+                    <p><strong>Ticket Type:</strong> {ticket.name}</p>
+                    <p><strong>Price:</strong> ${ticket.price}</p>
+                    <p><strong>Sold:</strong> {ticket.bought}</p>
+                    <p><strong>Available:</strong> {ticket.count}</p>
+                </div>
+            ));
+        } else {
+            return <p>This event is free to attend.</p>;
+        }
+    };
+    
+    
+
     return (
         <div className="event-details-container">
             <Navbar />
@@ -48,7 +69,15 @@ function EventStats() {
 
             {/* Main Body Section */}
             <div className="event-body">
-                
+                <h2>Event Statistics</h2>
+                <div className="attendee-count">
+                    <p><strong>Total Attendees:</strong> {getTotalAttendees()}</p>
+                </div>
+
+                <div className="ticket-stats">
+                    <h3>Ticket Sales</h3>
+                    {renderTicketStats()}
+                </div>
             </div>
         </div>
     );

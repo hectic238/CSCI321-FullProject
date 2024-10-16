@@ -8,13 +8,12 @@ import { Button, message, Steps, theme } from 'antd';
 import banner from '../../assets/exploreEvent.png';
 import Navbar from "../../components/Navbar.jsx";
 import Home from "@/pages/Home.jsx"; // Import your CSS file
-import mockEvents , { addEvent, addDraftEvent } from "../../mockEvents.jsx";
+import mockEvents , { addDraftEvent } from "../../mockEvents.jsx";
+import {generateObjectId} from "@/components/Functions.jsx";
 const HostEvent = () => {
     
     const location = useLocation();
     const passedEvent = location.state || {};
-    
-    console.log(passedEvent);
 
     const navigate = useNavigate();
     const { token } = theme.useToken();
@@ -23,7 +22,7 @@ const HostEvent = () => {
     const [eventDetails, setEventDetails] = useState({
         eventTicketType: '',
         tickets:  [],
-        id:  '',
+        id:  generateObjectId(),
         userId:  '',
         title:  passedEvent.title || '',
         category:  'Music',
@@ -35,8 +34,8 @@ const HostEvent = () => {
         additionalInfo:  'Hi',
         recurrenceFrequency:  '', 
         recurrenceEndDate:  '',
-        editing: passedEvent.editing || false,
         numberAttendees: 0,
+        isDraft: false,
     });
 
     useEffect(() => {
@@ -68,17 +67,46 @@ const HostEvent = () => {
 
     // Logic to handle publishing or saving the event
     const handlePublishEvent = async () => {
+        const accessToken = localStorage.getItem('accessToken');
 
-        console.log('Event Published', eventDetails);
+        if (!accessToken) {
+            console.error('No access token found. Please log in.');
+            return;
+        }
+        
         try {
-            const response = await addEvent(eventDetails);
-
-            if (response.success) {
-                console.log('Event successfully added!', response);
-                navigate("/home"); // Navigate to home on success
+            const response = await fetch('https://localhost:5144/api/Event/createEvent', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(eventDetails),
+            })
+            if(!response.ok) {
+                let errorData;
+                try {
+                    errorData = await response.json();
+                } catch (error) {
+                    throw new Error("Failed to parse error response");
+                }
+                throw new Error(errorData.message || "Publish Event Failed!");
             }
+            
+            await response.json();
+            navigate('/home');
+            alert("Sign up successful!");
+            // const response = await addEvent(eventDetails);
+            //
+            // if (response.success) {
+            //     console.log('Event successfully added!', response);
+            //     navigate("/home"); // Navigate to home on success
+            // }
         } catch (error) {
             console.error('Error adding event:', error);
+
+            // Display an error message to the user
+            alert(`Error: ${error.message}`);
         }
     };
 

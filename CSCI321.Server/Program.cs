@@ -16,8 +16,12 @@ builder.Services.AddSwaggerGen();
 builder.Services.Configure<UserDatabaseSettings>(
     builder.Configuration.GetSection("Database"));
 
+builder.Services.Configure<EventDatabaseSettings>(
+    builder.Configuration.GetSection("Database"));
+
 builder.Services.AddSingleton<UserService>();
 builder.Services.AddSingleton<AuthService>();
+builder.Services.AddSingleton<EventService>();
 
 // JWT Authentication setup
 
