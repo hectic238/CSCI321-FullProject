@@ -10,6 +10,8 @@ import ProfileDropdown from "./ProfileDropdown.jsx"; // Assuming your image is i
 import { AudioOutlined } from '@ant-design/icons';
 import { Input, Space } from 'antd';
 const { Search } = Input;
+import {getUserTypeFromToken} from "@/components/Functions.jsx"; // Import the jwt-decode library
+
 
 
 const suffix = (
@@ -26,33 +28,30 @@ const onSearch = (value, _e, info) => console.log(info?.source, value);
 
 function Navbar() {
 
-    const [user, setUser] = useState(null);
+    const [userType, setUserType] = useState(null);
     const [dropdownOpen, setDropdownOpen] = useState(false); // State to manage dropdown visibility
     const dropdownRef = useRef(null); // Ref for the dropdown
 
     const navigate = useNavigate();
 
     useEffect(() => {
-        // Check if a user is logged in by checking localStorage
-        const storedUser = localStorage.getItem('user');
-        if (storedUser) {
-            setUser(JSON.parse(storedUser)); // Store user details in state
-        }
-        else if(storedUser === null) {
+        const token = localStorage.getItem('accessToken');
+        if (token) {
+            setUserType(getUserTypeFromToken(token)); // Set userType from decoded token
         }
     }, []);
+    
 
     const handleLogout = () => {
         // Clear user data from localStorage and update state
-        localStorage.removeItem('user');
+        localStorage.removeItem('userType');
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
-        setUser(null);
+        setUserType(null);
         navigate('/home'); // Redirect to home after logout
     };
 
     const toggleDropdown = () => {
-        console.log("Toggle Dropdown Called");
         setDropdownOpen(prev => !prev);
     };
 
@@ -104,10 +103,10 @@ function Navbar() {
 
 
 
-                {user ? (
+                {userType ? (
                     <>
                         {/* Conditionally render based on user type */}
-                        {user.userType === 'attendee' && (
+                        {userType === 'attendee' && (
 
 
                             <div className="attendee-actions">
@@ -138,7 +137,7 @@ function Navbar() {
                             </div>
 
                         )}
-                        {user.userType === 'organiser' && (
+                        {userType === 'organiser' && (
                             <div className="attendee-actions">
                                 <Link to="/explore">Explore Events</Link>
                                 <Link to="/host">Host Events</Link>

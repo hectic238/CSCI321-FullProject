@@ -1,50 +1,51 @@
 import React, { useEffect, useState } from 'react';
 import Navbar from "../components/Navbar.jsx";
+import {RefreshToken} from "@/components/RefreshToken.jsx";
 
 const ProfileDetails = () => {
-    const [user, setUser] = useState(null);
-
     const [userDetails, setUserDetails] = useState(null);
     const [error, setError] = useState(null);
-    const [isEditing, setIsEditing] = useState(false); // State for editing mode
-    const [validationErrors, setValidationErrors] = useState({}); // For error messages
 
+
+    useEffect(() => {
+        fetchUserDetails();  // Pass userId to fetch function
+    }, []);
 
     const fetchUserDetails = async () => {
-        const token = localStorage.getItem('accessToken'); // Retrieve the JWT token
-        
+        const accessToken = localStorage.getItem('accessToken');
 
+        if (!accessToken) {
+            console.error('No access token found. Please log in.');
+            return;
+        }
+        
         try {
-            const response = await fetch(`http://localhost:5144/api/User/${userId}`, {
+            
+            await RefreshToken();
+            const response = await fetch(`https://localhost:5144/api/User/get`, {
                 method: 'GET',
                 headers: {
-                    'Authorization': `Bearer ${token}`, // Include the token
+                    'Authorization': `Bearer ${accessToken}`, // Include the token
                     'Content-Type': 'application/json',
                 },
             });
 
-            if (response.ok) {
-                const data = await response.json();
-                setUserDetails(data); // Store user details in state
-            } else {
+            if (!response.ok) {
                 console.error('Failed to fetch user details:', response.status);
                 setError('Failed to fetch user details.');
+                return;
             }
+
+            const data = await response.json(); // Only call this once
+            console.log(data);
+            setUserDetails(data); // Store user details in state
         } catch (err) {
-            console.error('Error fetching user details:', err);
+            console.error('An error occurred while fetching user details:', err);
             setError('An error occurred while fetching user details.');
         }
-    }
+    };
 
-    useEffect(() => {
-        // Get user data from local storage
-        const storedUser = localStorage.getItem('user');
-        if (storedUser) {
-            setUser(JSON.parse(storedUser));
-        }
-    }, []);
-
-    if (!user) {
+    if (!userDetails) {
         return <div>Loading...</div>; // Or redirect to login if user is not found
     }
 
@@ -52,10 +53,10 @@ const ProfileDetails = () => {
         <div className="profile-details">
             <Navbar />
             <h1>Profile Details</h1>
-            <h2>Name: {user.name}</h2>
-            <h2>Email: {user.email}</h2>
-            {user.userType === 'organiser' && <h2>Company: {user.company}</h2>}
-            {user.userType === 'attendee' && <h2>Preferences: {user.preferences}</h2>}
+            <h2>Name: {userDetails.name}</h2>
+            <h2>Email: {userDetails.email}</h2>
+            {userDetails.userType === 'organiser' && <h2>Company: {userDetails.company}</h2>}
+            {userDetails.userType === 'attendee' && <h2>Preferences: {userDetails.preferences}</h2>}
 
             <button>Edit Profile</button>
         </div>

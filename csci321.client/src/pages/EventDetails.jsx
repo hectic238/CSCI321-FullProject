@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Navbar from "../components/Navbar.jsx"; // Add necessary styles here
-import mockEvents, {editEvent, getEventById} from '../mockEvents';
 import { Drawer, Button } from 'antd'; // Ant Design imports
-import './EventDetails.css'; // Assuming you will style with this CSS file
+import './EventDetails.css';
+import {fetchEvent, getUserIdFromToken, editEvent} from "@/components/Functions.jsx"; // Assuming you will style with this CSS file
 
 const EventDetails = () => {
     const { eventName, eventId } = useParams(); // Extract eventName and eventId from the URL
@@ -74,55 +74,16 @@ const EventDetails = () => {
         console.log(`Added ${attendeeCount} attendees to the event.`); // This is where you might want to save the updated event
         
     };
-    
-    // Toggle sidebar visibility
-    const showSidebar = () => setSidebarVisible(true);
-    const closeSidebar = () => setSidebarVisible(false);
-
-    const formatDate = (dateString) => {
-        const date = new Date(dateString);
-
-        // Options for formatting
-        const options = { day: 'numeric', month: 'long', year: 'numeric' };
-
-        // Get formatted date
-        return date.toLocaleDateString('en-GB', options);
-    };
-
-    const formatTime = (timeString) => {
-        if(timeString === undefined){
-            return '';
-        }
-        const [hours, minutes] = timeString.split(':');
-        const formattedHours = hours % 12 || 12; // Convert to 12-hour format
-        const ampm = hours >= 12 ? 'PM' : 'AM'; // Determine AM/PM
-        return `${formattedHours}:${minutes} ${ampm}`; // Return formatted time
-    };
 
     useEffect(() => {
 
-        const storedUser = localStorage.getItem('user');
-        if (storedUser) {
-            const parsedUser = JSON.parse(storedUser);
-
-            setUserId(parsedUser.userId);
-            console.log('User ID:', parsedUser.userId);
-        }
-        const fetchEvent = async () => {
-            try {
-                const response = await getEventById(eventId);  // Wait for the promise to resolve
-                if (response.success) {
-                    console.log(response.event);
-                    setEventDetails(response.event);  // Set event details once the event is retrieved
-                } else {
-                    console.log('Event not found');
-                }
-            } catch (error) {
-                console.error("Error fetching event:", error);
+        setUserId(getUserIdFromToken());
+        
+        fetchEvent(eventId).then(event => {
+            if (event) {
+                setEventDetails(event);
             }
-        };
-
-        fetchEvent();  // Call the async function inside useEffect
+        });
     }, [eventId]);
 
     if (!eventDetails) {
