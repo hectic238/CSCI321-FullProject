@@ -2,7 +2,8 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import React, { useEffect, useState } from 'react';
 import mockEvents, {getEventById} from '../mockEvents';
-import { Drawer, Button } from 'antd'; // Ant Design imports
+import { Drawer, Button } from 'antd';
+import {fetchEvent} from "@/components/Functions.jsx"; // Ant Design imports
 
 
 function EventStats() {
@@ -11,21 +12,11 @@ function EventStats() {
     const [eventDetails, setEventDetails] = useState(null);
 
     useEffect(() => {
-        const fetchEvent = async () => {
-            try {
-                const response = await getEventById(eventId);  // Wait for the promise to resolve
-                if (response.success) {
-                    console.log(response.event);
-                    setEventDetails(response.event);  // Set event details once the event is retrieved
-                } else {
-                    console.log('Event not found');
-                }
-            } catch (error) {
-                console.error("Error fetching event:", error);
+        fetchEvent(eventId).then(event => {
+            if (event) {
+                setEventDetails(event);
             }
-        };
-    
-        fetchEvent();  // Call the async function inside useEffect
+        });
     }, [eventId]);
 
     if (!eventDetails) {

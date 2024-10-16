@@ -70,6 +70,33 @@ public class EventService
 
         return events;
     }
+    
+    public async Task<Event> GetEventByIdAsync(string id)
+    {
+        // Build a filter to search by event ID
+        var filter = Builders<Event>.Filter.Eq(e => e.id, id);
+
+        // Find the event that matches the provided ID
+        var eventDocument = await _EventCollection.Find(filter).FirstOrDefaultAsync();
+
+        // Return the event or null if not found
+        return eventDocument;
+    }
+
+    public async Task UpdateAsync(string id, Event updatedEvent)
+    {
+        await _EventCollection.ReplaceOneAsync(e => e.id == id, updatedEvent);
+    }
+
+    public async Task<List<Event>> GetEventsByUserIdAsync(string userId)
+    {
+        return await _EventCollection.Find(e => e.userId == userId).ToListAsync();
+    }
+
+    public async Task<List<Event>> GetDraftEventsByUserIdAsync(string userId)
+    {
+        return await _EventCollection.Find(e => e.userId == userId && e.isDraft == true).ToListAsync();
+    }
 
 
 

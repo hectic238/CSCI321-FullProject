@@ -176,7 +176,7 @@ export const addEvent = (formData) => {
     const exisitingEventIndex = mockEvents.findIndex(event => event.id === formData.id);
     
     if (exisitingEventIndex !== -1) {
-        return editEvent(formData);
+        //return editEvent(formData);
     } 
     else {
         if(formData.id === "") {

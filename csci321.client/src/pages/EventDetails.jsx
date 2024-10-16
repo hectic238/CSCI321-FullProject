@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Navbar from "../components/Navbar.jsx"; // Add necessary styles here
-import mockEvents, {editEvent, getEventById} from '../mockEvents';
 import { Drawer, Button } from 'antd'; // Ant Design imports
 import './EventDetails.css';
-import {getUserIdFromToken} from "@/components/Functions.jsx"; // Assuming you will style with this CSS file
+import {fetchEvent, getUserIdFromToken, editEvent} from "@/components/Functions.jsx"; // Assuming you will style with this CSS file
 
 const EventDetails = () => {
     const { eventName, eventId } = useParams(); // Extract eventName and eventId from the URL
@@ -79,21 +78,12 @@ const EventDetails = () => {
     useEffect(() => {
 
         setUserId(getUserIdFromToken());
-        const fetchEvent = async () => {
-            try {
-                const response = await getEventById(eventId);  // Wait for the promise to resolve
-                if (response.success) {
-                    console.log(response.event);
-                    setEventDetails(response.event);  // Set event details once the event is retrieved
-                } else {
-                    console.log('Event not found');
-                }
-            } catch (error) {
-                console.error("Error fetching event:", error);
+        
+        fetchEvent(eventId).then(event => {
+            if (event) {
+                setEventDetails(event);
             }
-        };
-
-        fetchEvent();  // Call the async function inside useEffect
+        });
     }, [eventId]);
 
     if (!eventDetails) {

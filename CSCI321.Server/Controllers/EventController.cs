@@ -55,5 +55,71 @@ public class EventController : ControllerBase
         return Ok(events);
     }
 
+    
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetEventById(string id)
+    {
+        try
+        {
+            var eventDetails = await _eventService.GetEventByIdAsync(id);
+
+            if (eventDetails == null)
+            {
+                return NotFound(new { message = "Event not found" });
+            }
+
+            return Ok(eventDetails);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = "Error retrieving the event", error = ex.Message });
+        }
+    }
+
+    [Authorize]
+    [HttpPut("{id}")]
+    public async Task<IActionResult> UpdateEvent(string id, [FromBody] Event updatedEvent)
+    {
+        if (id != updatedEvent.id)
+        {
+            return BadRequest("Event ID mismatch");
+        }
+
+        var existingEvent = await _eventService.GetEventByIdAsync(id);
+        if (existingEvent == null)
+        {
+            return NotFound($"Event with id {id} not found");
+        }
+
+        await _eventService.UpdateAsync(id, updatedEvent);
+        return NoContent(); // Return 204 on successful update
+    }
+    
+    [HttpGet("byUser/{userId}")]
+    public async Task<ActionResult<List<Event>>> GetEventsByUserId(string userId)
+    {
+        var events = await _eventService.GetEventsByUserIdAsync(userId);
+    
+        // if (events == null || events.Count == 0)
+        // {
+        //     return NotFound($"No events found for user with id {userId}");
+        // }
+
+        return Ok(events);
+    }
+
+    [HttpGet("byUser/{userId}/drafts")]
+    public async Task<ActionResult<List<Event>>> GetDraftEventsByUserId(string userId)
+    {
+        var events = await _eventService.GetDraftEventsByUserIdAsync(userId);
+    
+        // if (events == null || events.Count == 0)
+        // {
+        //     return NotFound($"No draft events found for user with id {userId}");
+        // }
+
+        return Ok(events);
+    }
+
 
 }

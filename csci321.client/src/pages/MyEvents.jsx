@@ -3,7 +3,7 @@ import './MyEvents.css';
 import Navbar from "../components/Navbar.jsx"; // Add necessary styles here
 import mockEvents, {mockDraftEvents} from "../mockEvents.jsx";
 import EventCardLarge from "../components/EventCardLarge.jsx";
-import {getUserIdFromToken} from "@/components/Functions.jsx";
+import {getUserIdFromToken, fetchEventsByUserId, fetchDraftEventsByUserId} from "@/components/Functions.jsx";
 
 
 
@@ -12,6 +12,8 @@ const MyEvents = () => {
     const [pastEvents, setPastEvents] = useState([]);
     const [draftEvents, setDraftEvents] = useState([]);
     const [currentTab, setCurrentTab] = useState('active'); // To handle tab switching
+    const [userEvents, setUserEvents] = useState([]);
+    
 
     useEffect(() => {
         const token = localStorage.getItem('accessToken');
@@ -19,26 +21,30 @@ const MyEvents = () => {
         if (token) {
             
             const userId = getUserIdFromToken(token);
-
-            const userEvents = mockEvents.filter(event => event.userId === userId);
+            fetchEventsByUserId(userId).then(events => {
+                if (events && events.length > 0) {
+                    setUserEvents(events);
+                }
+            })
             
-            const drafts = mockDraftEvents.filter(event => event.userId === userId);
-
-            const now = new Date();
-
-            // Split user events into active and past based on their date
-            const past = userEvents.filter(event => new Date(event.startDate) < now);
-            const active = userEvents.filter(event => new Date(event.startDate) >= now);
-            
-            setDraftEvents(drafts);
-            setActiveEvents(active);
-            setPastEvents(past);
+            fetchDraftEventsByUserId(userId).then(events => {
+                if (events && events.length > 0) {
+                    setDraftEvents(events);
+                }
+            })
         }
-
     }, []);
+    
+    useEffect(() => {
+        const now = new Date();
+        // Split user events into active and past based on their date
+        const past = userEvents.filter(event => new Date(event.startDate) < now);
+        const active = userEvents.filter(event => new Date(event.startDate) >= now);
 
-
-
+        setActiveEvents(active);
+        setPastEvents(past);
+    }, [userEvents]);
+    
     return (
         <div>
             <Navbar />
