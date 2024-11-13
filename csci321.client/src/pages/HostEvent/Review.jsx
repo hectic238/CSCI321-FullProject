@@ -1,5 +1,6 @@
 import React, {useEffect, useState} from 'react';
-import './Review.css'; // CSS for the Review Page
+import './Review.css';
+import {getUserIdFromToken} from "@/components/Functions.jsx"; // CSS for the Review Page
 
 
 const Review = ({ eventDetails}) => {
@@ -26,11 +27,9 @@ const Review = ({ eventDetails}) => {
 
 
     useEffect(() => {
-        const storedUser = localStorage.getItem('user');
-        if (storedUser) {
-            const parsedUser = JSON.parse(storedUser);
-            setUser(parsedUser);
-            eventDetails.userId = parsedUser.userId;
+        const token = localStorage.getItem('accessToken');
+        if (token) {
+            eventDetails.userId = getUserIdFromToken(token)
         }
     }, [eventDetails])
 

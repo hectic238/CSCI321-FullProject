@@ -1,7 +1,7 @@
 ﻿import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { editEvent } from '../mockEvents';
 import Navbar from "@/components/Navbar.jsx"; // Assuming this updates the event in mock backend
+import {editEvent} from "@/components/Functions.jsx"; // Assuming you will style with this CSS file
 
 const Checkout = () => {
     const location = useLocation(); // Get event and selected tickets from state
@@ -29,6 +29,7 @@ const Checkout = () => {
                     // Reduce the available ticket count
                     event.numberAttendees += selectedTicket.quantity;
                     updatedTickets[ticketIndex].count = (availableCount - selectedTicket.quantity).toString();
+                    updatedTickets[ticketIndex].bought += selectedTicket.quantity;
                 } else {
                     newSoldOutTickets.push(selectedTicket.name); // Mark this ticket as sold out
 

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import {useLocation, useNavigate} from "react-router-dom";
 import { signUpUser } from '../mockBackend'; // Import the mock backend
+import {generateObjectId} from "@/components/Functions.jsx";
 
 const SignUp = () => {
     const location = useLocation();
@@ -12,12 +13,12 @@ const SignUp = () => {
         company: '', // Only for organizers
         preferences: '', // Only for attendees
         userType: location.state?.userType,
-        userId: "3b8ec461c8d8753c60a166da",
+        userId: generateObjectId(),
+        refreshToken: '',
+        refreshTokenExpiry: '2024-10-21T05:41:09.675+00:00',
     });
 
     const navigate = useNavigate();
-
-
 
     // Handle input changes
     const handleInputChange = (field, value) => {
@@ -30,16 +31,9 @@ const SignUp = () => {
     // Handle form submission
     const handleSubmit = async (e) => {
         e.preventDefault();
-
-        const loginModel = {
-            Email: formData.email,
-            Password: formData.password,
-            UserType: userType,
-        };
-
-
+        
         try {
-            const response = await fetch('http://localhost:5144/api/User', {
+            const response = await fetch('https://localhost:5144/api/User/signUp', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

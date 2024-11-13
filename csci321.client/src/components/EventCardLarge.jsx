@@ -4,7 +4,7 @@ import {useNavigate} from "react-router-dom";
 import mockEvents, {getEventById} from "@/mockEvents.jsx";
 import editIcon from '../assets/editIcon.png';
 
-function EventCardLarge({ event }) {
+function EventCardLarge({ event, isDraft }) {
     const navigate = useNavigate();
     const formatDate = (dateString) => {
         const date = new Date(dateString);
@@ -26,9 +26,26 @@ function EventCardLarge({ event }) {
         return `${formattedHours}:${minutes} ${ampm}`; // Return formatted time
     };
 
+    let isActive = null;
+    let isPast = null;
+    
+    
+    if(!isDraft){
+        isActive = new Date(event.startDate) >= new Date();
+        isPast = new Date(event.startDate) < new Date();
+    }
+
+    
+
+
     const editEvent = () => {
         
         navigate('/host', { state: event });
+    };
+
+    const viewStatistics = () => {
+        // Navigate to the statistics page for this event
+        navigate(`/events/${event.id}/statistics`);
     };
     
     
@@ -46,8 +63,24 @@ function EventCardLarge({ event }) {
             </div>
 
             <div className="event-Card-Column-buttons">
-                <img src={editIcon} alt={event.title} className="edit-image"/>
-                <button onClick={editEvent} className="edit-button">Edit Event Details</button>
+                {isActive && (
+                    <div>
+                        <img src={editIcon} alt={event.title} className="edit-image"/>
+                        <button onClick={viewStatistics} className="edit-button">View Statistics</button>
+                    </div>
+                )}
+                {isPast && (
+                    <div>
+                        <img src={editIcon} alt={event.title} className="edit-image"/>
+                        <button onClick={viewStatistics} className="edit-button">View Statistics</button>
+                    </div>
+                )}
+                {isDraft && (
+                    <div>
+                    <img src={editIcon} alt={event.title} className="edit-image"/>
+                    <button onClick={editEvent} className="edit-button">Edit Event Details</button>
+                    </div>
+                )}
             </div>
         </div>
     );

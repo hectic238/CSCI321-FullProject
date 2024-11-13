@@ -19,43 +19,13 @@ import MyEvents from "./pages/MyEvents.jsx";
 import MyTickets from "./pages/MyTickets.jsx";
 import EventDetails from "@/pages/EventDetails.jsx";
 import Checkout from './pages/Checkout.jsx';
-
-
-
-
+import EventStatistics from './pages/EventStats.jsx';
+import { RefreshToken, logoutUser } from './components/refreshToken';
 
 const App = () => {
     const [accessToken, setAccessToken] = useState(localStorage.getItem("accessToken"));
-    const [refreshToken, setRefreshToken] = useState(localStorage.getItem("refreshToken"));
     const [isLoggedOut, setIsLoggedOut] = useState(false);
     const location = useLocation();
-    const navigate = useNavigate();
-
-    const handleLogout = () => {
-      // Clear user data from localStorage and update state
-      
-      localStorage.removeItem('user');
-      localStorage.removeItem('accessToken');
-      localStorage.removeItem('refreshToken');
-      navigate("/home");
-      navigate(0); // Redirect to home after logout
-      
-    };
-    // Function to decode the JWT token and extract the expiration time (exp)
-    const getTokenExpirationTime = (token) => {
-        if (!token) return null;
-      
-        const base64Url = token.split('.')[1]; // Extract the payload part of the JWT
-        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/'); // Replace URL-safe characters
-        const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
-          return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-        }).join(''));
-      
-        const payload = JSON.parse(jsonPayload);
-      
-        // Return the expiration time (exp), which is in seconds since the Unix epoch
-        return payload.exp ? payload.exp * 1000 : null; // Convert to milliseconds
-      };
     
     // Track user activity (idle timeout)
     const useIdleTimer = (timeout, onIdle) => {
@@ -80,71 +50,16 @@ const App = () => {
         }, [timeout, onIdle]);
       };
 
-    // Handle token refresh
-  const refreshAccessToken = async () => {
-    try {
-      const response = await fetch("http://localhost:5144/refreshToken", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${refreshToken}`, // Add the refresh token to Authorization header
-          "Access-Token": accessToken,
-        },
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setAccessToken(data.accessToken);
-        localStorage.setItem("accessToken", data.accessToken); // Update token in localStorage
-      } else {
-        console.log("Failed to refresh token");
-        setIsLoggedOut(true); // Log out user if the refresh fails
-      }
-    } catch (error) {
-      console.error("Error refreshing token:", error);
-      setIsLoggedOut(true);
-    }
-  };
-
   // Detect user inactivity (5 minutes = 300000ms)
   useIdleTimer(300000, () => {
     console.log("User is idle for more than 5 minutes, logging out.");
-    setIsLoggedOut(true);
+    logoutUser();
   });
 
     useEffect(() => {
-      const storedAccessToken = localStorage.getItem("accessToken");
-    const storedRefreshToken = localStorage.getItem("refreshToken");
-
-    // Use the state setter functions
-    setAccessToken(storedAccessToken);
-    setRefreshToken(storedRefreshToken);
-
-    const tokenExpirationTime = getTokenExpirationTime(accessToken);
-
-    // On any page refresh, refresh the accessToken
     if(accessToken) {
-      refreshAccessToken();
-    }
-    
-
-      // if(isLoggedOut) {
-      //   console.log("handling Logout");
-      //   handleLogout();
-      // } 
-      
-      const interval = setInterval(() => {
-        
-        if (accessToken) {
-          if (tokenExpirationTime < Date.now()) {
-            refreshAccessToken();
-          }
-        }
-      }, 90000); // Check every minute
-      
-
-        
-
+       RefreshToken();
+     }
 
         // Check if the current route requires scrolling or not
         if (location.pathname === '/explore') {
@@ -166,9 +81,9 @@ const App = () => {
         return () => {
             document.body.classList.remove('scrollable');
             document.body.classList.remove('no-scroll');
-            clearInterval(interval);
+            //clearInterval(interval);
         };
-    }, [location.pathname, accessToken, refreshToken, isLoggedOut]);
+    }, [location.pathname, accessToken, isLoggedOut]);
 
 
 
@@ -197,6 +112,7 @@ const App = () => {
                     <Route path="/host/ticketing" element={<HostEventTicketing />} />
                     <Route path="/host/review" element={<HostEventReview />} />
                     <Route path="/profile" element={<ProfileDetails />} />
+                    
                     <Route path="/myEvents" element={
                         <PrivateRoute allowedUserType="organiser">
                             <MyEvents />
@@ -212,6 +128,12 @@ const App = () => {
 
                     <Route path="/:eventName/:eventId" element={<EventDetails />} />
                     <Route path="/checkout/:eventId" element={<Checkout />} />
+                    <Route path="/events/:eventId/statistics" element={
+                        <PrivateRoute allowedUserType="organiser">
+                            <EventStatistics />
+                        </PrivateRoute>
+                    }
+                    />
                 </Routes>
             </main>
         </div>

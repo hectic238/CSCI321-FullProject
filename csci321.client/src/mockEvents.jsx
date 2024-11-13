@@ -2,7 +2,7 @@
 export const mockEvents = [
     {
         id: 1,
-        userId: 'c20dee40-7ae1-4aca-bb08-13bf2739f49c',
+        userId: 'c20dee40-7ae1-4aca-bb08-13bf2739f49b',
         title: "Music Festival",
         date: "2024-09-15",
         location: "Sydney",
@@ -12,7 +12,7 @@ export const mockEvents = [
     },
     {
         id: 2,
-        userId: 'c20dee40-7ae1-4aca-bb08-13bf2739f49c',
+        userId: 'c20dee40-7ae1-4aca-bb08-13bf2739f49d',
         title: "Tech Conference",
         date: "2024-10-05",
         location: "Melbourne Convention Center",
@@ -22,7 +22,7 @@ export const mockEvents = [
     },
     {
         id: 3,
-        userId: 'c20dee40-7ae1-4aca-bb08-13bf2739f49c',
+        userId: 'c20dee40-7ae1-4aca-bb08-13bf2739f49a',
         title: "Art Expo",
         date: "2024-11-20",
         location: "National Art Gallery",
@@ -61,19 +61,82 @@ export const mockEvents = [
                 price: "100",
                 count: "15",
                 soldOut: false,
+                bought: "0",
             },
             {
                 name: "VIP",
                 price: "100",
                 count: "1",
                 soldOut: false,
+                bought: "0",
             }
         ],
         editing: false,
         numberAttendees: 0,
     },
     {
-        id: "842bd01c-10e5-4b81-bf75-efe168906ddc",
+        id: "842bd01c-10e5-4b81-bf75-efe168906ddd",
+        userId: "3b8ec461c8d8753c60a166fd",
+        title: "Sydney Concert",
+        category: "Music",
+        eventType: "single",
+        eventTicketType: "free",
+        startDate: "2024-09-09",
+        startTime: "16:10",
+        endTime: "18:10",
+        location: "Sydney",
+        additionalInfo: "Hi",
+        recurrenceFrequency: "",
+        recurrenceEndDate: "",
+        image: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC0A", // Placeholder image base64 string
+        tickets: [
+        ],
+        editing: false,
+        numberAttendees: 0,
+    },
+    {
+        id: "842bd01c-10e5-4b81-bf75-efe168906dde",
+        userId: "3b8ec461c8d8753c60a166fd",
+        title: "Sydney Concert",
+        category: "Music",
+        eventType: "single",
+        eventTicketType: "ticketed",
+        startDate: "2024-11-11",
+        startTime: "16:10",
+        endTime: "18:10",
+        location: "Sydney",
+        additionalInfo: "Hi",
+        recurrenceFrequency: "",
+        recurrenceEndDate: "",
+        image: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC0A", // Placeholder image base64 string
+        tickets: [
+            {
+                name: "General Admission",
+                price: "100",
+                count: "15",
+                soldOut: false,
+                bought: "0",
+            },
+            {
+                name: "VIP",
+                price: "100",
+                count: "1",
+                soldOut: false,
+                bought: "0",
+            }
+        ],
+        editing: false,
+        numberAttendees: 0,
+    }
+
+
+
+];
+
+export const mockDraftEvents = [
+
+    {
+        id: "842bd01c-10e5-4b81-bf75-efe168906abc",
         userId: "3b8ec461c8d8753c60a166fd",
         title: "Sydney Concert",
         category: "Music",
@@ -92,12 +155,9 @@ export const mockEvents = [
         editing: false,
         numberAttendees: 0,
     }
-
-
-
+    
+    
 ];
-
-export const mockDraftEvents = [];
 
 
 export const addDraftEvent = (formData) => {
@@ -116,7 +176,7 @@ export const addEvent = (formData) => {
     const exisitingEventIndex = mockEvents.findIndex(event => event.id === formData.id);
     
     if (exisitingEventIndex !== -1) {
-        return editEvent(formData);
+        //return editEvent(formData);
     } 
     else {
         if(formData.id === "") {

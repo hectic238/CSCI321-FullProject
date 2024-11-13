@@ -18,7 +18,7 @@ function Ticketing ({eventDetails, handleTicketFormChange, setEventDetails}) {
     };
 
     const handleAddTicket = () => {
-        setTickets([...tickets, { name: '', price: '', count: '', soldOut: false }]);
+        setTickets([...tickets, { name: '', price: '', count: '', soldOut: false, bought: 0 }]);
     };
 
     const handleTicketChange = (index, field, value) => {
