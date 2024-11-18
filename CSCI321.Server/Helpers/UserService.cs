@@ -74,6 +74,27 @@ namespace CSCI321.Server.Helpers
         // New method to get user by Email
         public async Task<User?> GetByEmailAsync(string email) =>
             await _UserCollection.Find(x => x.email == email).FirstOrDefaultAsync();
+        
+        public async Task UpdateUserAsync(User updatedUser)
+        {
+            if (updatedUser == null || string.IsNullOrEmpty(updatedUser.userId))
+            {
+                throw new ArgumentException("Invalid user data.");
+            }
+
+            var filter = Builders<User>.Filter.Eq(u => u.userId, updatedUser.userId);
+            var updateDefinition = Builders<User>.Update
+                .Set(u => u.name, updatedUser.name)
+                .Set(u => u.email, updatedUser.email)
+                .Set(u => u.tickets, updatedUser.tickets);
+
+            var result = await _UserCollection.UpdateOneAsync(filter, updateDefinition);
+
+            if (result.ModifiedCount == 0)
+            {
+                throw new InvalidOperationException("No records were updated. The user might not exist.");
+            }
+        }
     }
 }
 

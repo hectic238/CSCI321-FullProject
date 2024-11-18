@@ -18,5 +18,6 @@ namespace CSCI321.Server.Models
     public string refreshToken { get; set; }
     public DateTime refreshTokenExpiry { get; set; } // Expiration date for the refresh token
 
+    public List<Ticket> tickets { get; set; }
     }
 }

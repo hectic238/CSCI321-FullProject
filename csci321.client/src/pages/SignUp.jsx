@@ -16,6 +16,7 @@ const SignUp = () => {
         userId: generateObjectId(),
         refreshToken: '',
         refreshTokenExpiry: '2024-10-21T05:41:09.675+00:00',
+        tickets: [],
     });
 
     const navigate = useNavigate();

@@ -94,6 +94,8 @@ export const editEvent = async (updatedEventDetails) => {
     }
 };
 
+
+
 export const fetchEventsByUserId = async (userId) => {
     try {
         const response = await fetch(`https://localhost:5144/api/Event/byUser/${userId}`);
@@ -125,6 +127,43 @@ export const fetchDraftEventsByUserId = async (userId) => {
         console.error("Error fetching draft events by userId:", error);
     }
 };
+
+export const updateUser = async (updatedUser) => {
+    const accessToken = localStorage.getItem('accessToken');
+
+    if (!accessToken) {
+        console.error('No access token found. Please log in.');
+        return;
+    }
+
+    try {
+        const response = await fetch('https://localhost:5144/api/User/updateUser', {
+            method: 'PUT',
+            headers: {
+                'Authorization': `Bearer ${accessToken}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(updatedUser),
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || "Failed to update user!");
+        }
+
+        const updatedUserResponse = await response.json();
+
+        // Optionally update local storage or state with the new user information
+        localStorage.setItem('user', JSON.stringify(updatedUserResponse));
+        console.log("User updated successfully:", updatedUserResponse);
+
+        return updatedUserResponse;
+    } catch (error) {
+        console.error('Error updating user:', error);
+        alert(`Error: ${error.message}`);
+    }
+};
+
 
 
 
