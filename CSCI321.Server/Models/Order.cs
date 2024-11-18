@@ -10,7 +10,8 @@ public class Order
     [BsonId]
     [BsonRepresentation(BsonType.ObjectId)]
     public string orderId { get; set; }
-    //public string orderDate { get; set; }
+    public long orderDate { get; set; }
+    public DateTime actualDate { get; set; }
     public string userId { get; set; }
     public string eventId { get; set; }
     public double totalPrice { get; set; }

@@ -27,6 +27,13 @@ public class OrderController : ControllerBase
         try
         {
             Console.WriteLine("Order Received " + order);
+            
+            var utcDateTime = DateTimeOffset.FromUnixTimeMilliseconds(order.orderDate).UtcDateTime;
+            var sydneyTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Australia/Sydney");
+            var sydneyDateTime = TimeZoneInfo.ConvertTimeFromUtc(utcDateTime, sydneyTimeZone);
+            
+            order.actualDate = sydneyDateTime;
+
             // Save order to database
             await _orderService.CreateAsync(order);
 

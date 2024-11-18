@@ -31,7 +31,7 @@ const Checkout = () => {
     
     const [order, setOrder] = useState({
         billingInfo: null,
-        //orderDate: "",
+        orderDate: "",
         tickets: [],
         eventId: "",
         userId: "",
@@ -206,7 +206,7 @@ const Checkout = () => {
                 billingInfo: billingInfo,
                 totalPrice: totalPrice,
                 tickets: totalTickets, // If tickets are part of the order
-                //orderDate: Date.now(),
+                orderDate: Date.now(),
                 userId: getUserIdFromToken(),
                 eventId: event.id,
                 refundable: isRefundableSelected,
