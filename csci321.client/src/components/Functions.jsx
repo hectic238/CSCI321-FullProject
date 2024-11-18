@@ -162,7 +162,49 @@ export const updateUser = async (updatedUser) => {
         console.error('Error updating user:', error);
         alert(`Error: ${error.message}`);
     }
+    
+    
 };
+
+export const handlePublishOrder = async (orderDetails) => {
+    const accessToken = localStorage.getItem('accessToken');
+
+    if (!accessToken) {
+        console.error('No access token found. Please log in.');
+        alert('No access token found. Please log in.');
+        return;
+    }
+    
+
+    try {
+        const response = await fetch('https://localhost:5144/api/Order/publish', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${accessToken}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(orderDetails),
+        });
+        
+
+        if (!response.ok) {
+            let errorData;
+            try {
+                errorData = await response.json();
+            } catch (error) {
+                throw new Error('Failed to parse error response');
+            }
+            throw new Error(errorData.message || 'Order publish failed!');
+        }
+
+        await response.json();
+        alert('Order successfully published!');
+    } catch (error) {
+        console.error('Error publishing order:', error);
+        alert(`Error: ${error.message}`);
+    }
+};
+
 
 
 

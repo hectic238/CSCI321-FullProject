@@ -1,7 +1,7 @@
 ﻿import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Navbar from "@/components/Navbar.jsx"; // Assuming this updates the event in mock backend
-import {editEvent, generateObjectId, getUserIdFromToken} from "@/components/Functions.jsx";
+import {editEvent, generateObjectId, getUserIdFromToken, handlePublishOrder} from "@/components/Functions.jsx";
 import eventDetails from "@/pages/EventDetails.jsx"; // Assuming you will style with this CSS file
 
 const Checkout = () => {
@@ -31,19 +31,23 @@ const Checkout = () => {
     
     const [order, setOrder] = useState({
         billingInfo: null,
-        orderDate: "",
+        //orderDate: "",
         tickets: [],
         eventId: "",
         userId: "",
         totalPrice: "",
         orderId: generateObjectId(),
+        paymentMethod: "",
+        refundable: false,
     })
 
     const [soldOutTickets, setSoldOutTickets] = useState([]); // Keep track of sold-out tickets
     const [isFormValid, setIsFormValid] = useState(false);
     const [totalTickets, setTotalTickets] = useState([...selectedTickets]); // Updated ticket list
-
-    const totalPrice = totalTickets.reduce((total, ticket) => total + ticket.price * ticket.quantity, 0);
+    
+    //const totalPrice = totalTickets.reduce((total, ticket) => total + ticket.price * ticket.quantity, 0);
+    const [totalPrice, setTotalPrice] = useState({})
+    
 
     // List of countries
     const countries = [
@@ -75,20 +79,16 @@ const Checkout = () => {
         validateFormOnChange();
     }, [selectedPaymentMethod]);
 
-    // Use Effect to add refundable tickets
     useEffect(() => {
-        if (isRefundableSelected) {
-            const refundableTicket = {
-                name: "Refundable Tickets",
-                quantity: 1,
-                price: 30, // Assuming $10 per refundable ticket
-            };
-            setTotalTickets((prevTickets) => [...prevTickets, refundableTicket]);
-        } else {
-            setTotalTickets(selectedTickets); // Reset to original tickets
-        }
+        const basePrice = selectedTickets.reduce(
+            (total, ticket) => total + ticket.quantity * ticket.price,
+            0
+        );
+        const refundableFee = isRefundableSelected ? 30 : 0;
+        setTotalPrice(basePrice + refundableFee);
     }, [isRefundableSelected]);
-    
+
+
     useEffect(() => {
         validateFormOnChange();
         
@@ -206,14 +206,18 @@ const Checkout = () => {
                 billingInfo: billingInfo,
                 totalPrice: totalPrice,
                 tickets: totalTickets, // If tickets are part of the order
-                orderDate: Date.now(),
+                //orderDate: Date.now(),
                 userId: getUserIdFromToken(),
                 eventId: event.id,
+                refundable: isRefundableSelected,
+                paymentMethod: selectedPaymentMethod,
                 
             };
 
             // Update the state with the new order
             setOrder(updatedOrder);
+            
+            handlePublishOrder(updatedOrder);
 
             // Log the updated order explicitly
             console.log("Updated order:", updatedOrder);
@@ -365,10 +369,19 @@ const Checkout = () => {
                             </div>
                         ))}
                     </div>
+
+                    {isRefundableSelected && (
+
+                        <div>
+                            <hr/>
+                            Refundable Tickets - $30
+                        </div>
+                    )}
                     <hr/>
-                    <h3>Total Price: ${totalPrice.toFixed(2)}</h3>
                     {/* Finalize Purchase Button */}
-                    
+                    <h3>Total Price: ${typeof totalPrice === "number" ? totalPrice.toFixed(2) : 0}</h3>
+
+
                 </div>
             </div>
         </div>

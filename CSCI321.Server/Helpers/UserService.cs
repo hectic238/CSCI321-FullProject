@@ -9,6 +9,7 @@ namespace CSCI321.Server.Helpers
     {
         private readonly IMongoCollection<User> _UserCollection;
 
+
         public UserService(
             IOptions<UserDatabaseSettings> UserDatabaseSettings)
         {
@@ -21,6 +22,7 @@ namespace CSCI321.Server.Helpers
             _UserCollection = mongoDatabase.GetCollection<User>(
                 UserDatabaseSettings.Value.UserCollectionName);
         }
+        
         
         // Method to get a refresh token from the database
         public async Task<(string refreshToken, DateTime expiry)?> GetRefreshTokenFromDB(string userId)
