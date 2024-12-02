@@ -19,9 +19,13 @@ builder.Services.Configure<UserDatabaseSettings>(
 builder.Services.Configure<EventDatabaseSettings>(
     builder.Configuration.GetSection("Database"));
 
+builder.Services.Configure<OrderDatabaseSettings>(
+    builder.Configuration.GetSection("Database"));
+
 builder.Services.AddSingleton<UserService>();
 builder.Services.AddSingleton<AuthService>();
 builder.Services.AddSingleton<EventService>();
+builder.Services.AddSingleton<OrderService>();
 
 // JWT Authentication setup
 

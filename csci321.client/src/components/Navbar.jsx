@@ -113,7 +113,7 @@ function Navbar() {
                                 <Link to="/explore">Explore Events</Link>
                                 <Link to="/about">Contact Us</Link>
 
-                                <Link to="/tickets" className="attendee-btn">
+                                <Link to="/myTickets" className="attendee-btn">
                                     <img src={ticketIcon} alt="Tickets" className="attendee-icon" />
                                     <span>Tickets</span>
                                 </Link>

@@ -230,6 +230,31 @@ public class UserController : ControllerBase
         // Return the token and user data
         return Ok(new { accessToken});
     }
+    
+    [HttpPut("updateUser")]
+    public async Task<IActionResult> UpdateUser([FromBody] User updatedUser)
+    {
+        if (updatedUser == null || string.IsNullOrEmpty(updatedUser.userId))
+        {
+            return BadRequest("Invalid user data.");
+        }
+
+        var existingUser = await _userService.GetByIdAsync(updatedUser.userId);
+        if (existingUser == null)
+        {
+            return NotFound("User not found.");
+        }
+
+        // Update the user object with new details
+        existingUser.name = updatedUser.name;
+        existingUser.email = updatedUser.email;
+        existingUser.tickets = updatedUser.tickets; // Or merge tickets as needed
+
+        await _userService.UpdateUserAsync(existingUser);
+
+        return Ok(existingUser);
+    }
+
 
 }
 

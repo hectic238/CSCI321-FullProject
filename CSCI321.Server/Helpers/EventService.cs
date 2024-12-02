@@ -35,6 +35,14 @@ public class EventService
         // Start with an empty filter
         var filterBuilder = Builders<Event>.Filter;
         var filter = filterBuilder.Empty; // Create an empty filter
+        
+        var now = DateTime.UtcNow;
+        var futureEventsFilter = filterBuilder.Gte(e => e.startDate, now.ToString("yyyy-MM-dd")) &
+                                 filterBuilder.Or(
+                                     filterBuilder.Gt(e => e.startTime, now.ToString("HH:mm")),
+                                     filterBuilder.Gt(e => e.startDate, now.ToString("yyyy-MM-dd"))
+                                 );
+        filter = filterBuilder.And(filter, futureEventsFilter);
 
         // If a search term is provided, build a search filter
         if (!string.IsNullOrWhiteSpace(searchTerm))
