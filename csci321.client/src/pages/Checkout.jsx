@@ -193,19 +193,22 @@ const Checkout = () => {
             return; // Exit if tickets are sold out
         }
 
+        const newTickets = selectedTickets.map(({ price, quantity, name }) => ({ price, quantity, name }));
+
+        console.log(selectedTickets);
         // If all tickets are available, finalize purchase
         const updatedEvent = { ...event, tickets: updatedTickets };
         editEvent(updatedEvent).then(() => {
             console.log("Purchase completed");
             console.log(totalPrice + " Deducted From " + selectedPaymentMethod);
-            console.log(updatedTickets);
+            console.log(newTickets);
 
             // Construct the updated order object
             const updatedOrder = {
                 ...order,
                 billingInfo: billingInfo,
                 totalPrice: totalPrice,
-                tickets: totalTickets, // If tickets are part of the order
+                tickets: newTickets, // If tickets are part of the order
                 orderDate: Date.now(),
                 userId: getUserIdFromToken(),
                 eventId: event.id,

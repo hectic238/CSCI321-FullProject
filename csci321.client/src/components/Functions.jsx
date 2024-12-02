@@ -262,12 +262,14 @@ export const enrichOrdersWithEventDetails = async (userId) => {
                 };
             })
         );
+        console.log(enrichedOrders);
         return enrichedOrders;
     } catch (error) {
         console.error('Error enriching orders:', error);
         return [];
     }
 };
+
 
 
 

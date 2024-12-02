@@ -11,5 +11,6 @@ namespace CSCI321.Server.Models
         public int count { get; set; }
         public bool soldOut { get; set; }
         public int bought { get; set; }
+        public int quantity { get; set; }
     }
 }

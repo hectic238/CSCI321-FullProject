@@ -37,8 +37,9 @@ const MyTickets = () => {
             const enrichedOrders = await enrichOrdersWithEventDetails(userId);
             setOrders(enrichedOrders || []);
         };
-
+        
         fetchOrders();
+        console.log(orders);
     }, [userId]);
 
     return (
