@@ -25,4 +25,9 @@ public class OrderService
     
     public async Task CreateAsync(Order newOrder) =>
         await _OrderCollection.InsertOneAsync(newOrder);
+    
+    public async Task<List<Order>> GetOrdersByUserIdAsync(string userId)
+    {
+        return await _OrderCollection.Find(o => o.userId == userId).ToListAsync();
+    }
 }

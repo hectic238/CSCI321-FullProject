@@ -44,4 +44,25 @@ public class OrderController : ControllerBase
             return StatusCode(500, new { message = $"An error occurred: {ex.Message}" });
         }
     }
+    
+    [Authorize]
+    [HttpGet("getOrdersByUserId/{userId}")]
+    public async Task<IActionResult> GetOrdersByUserId(string userId)
+    {
+        try
+        {
+            var orders = await _orderService.GetOrdersByUserIdAsync(userId);
+
+            if (orders == null || !orders.Any())
+            {
+                return NotFound(new { message = "No orders found for the given user ID." });
+            }
+
+            return Ok(orders);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = "An error occurred while retrieving orders.", error = ex.Message });
+        }
+    }
 }

@@ -203,7 +203,73 @@ export const handlePublishOrder = async (orderDetails) => {
         console.error('Error publishing order:', error);
         alert(`Error: ${error.message}`);
     }
+    
+    
 };
+
+export const fetchOrdersByUserId = async (userId) => {
+    const accessToken = localStorage.getItem('accessToken');
+
+    if (!accessToken) {
+        console.error('No access token found. Please log in.');
+        return;
+    }
+
+    try {
+        const response = await fetch(`https://localhost:5144/api/Order/getOrdersByUserId/${userId}`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${accessToken}`,
+                'Content-Type': 'application/json',
+            },
+        });
+
+        if (!response.ok) {
+            let errorData;
+            try {
+                errorData = await response.json();
+            } catch {
+                throw new Error('Failed to parse error response');
+            }
+            throw new Error(errorData.message || 'Failed to fetch orders');
+        }
+
+        const orders = await response.json();
+        return orders; // This will return the list of orders
+    } catch (error) {
+        console.error('Error fetching orders:', error);
+        alert(`Error: ${error.message}`);
+    }
+};
+
+export const enrichOrdersWithEventDetails = async (userId) => {
+    try {
+        const orders = await fetchOrdersByUserId(userId);
+
+        const enrichedOrders = await Promise.all(
+            orders.map(async (order) => {
+                const eventDetails = await fetchEvent(order.eventId);
+
+                return {
+                    ...order,
+                    title: eventDetails?.title || 'Unknown Event',
+                    image: eventDetails?.image || 'default.jpg',
+                    location: eventDetails?.location || 'Unknown Location',
+                    startDate: eventDetails?.startDate || '',
+                    startTime: eventDetails?.startTime || '',
+                    endTime: eventDetails?.endTime || '',
+                    
+                };
+            })
+        );
+        return enrichedOrders;
+    } catch (error) {
+        console.error('Error enriching orders:', error);
+        return [];
+    }
+};
+
+
 
 
 
