@@ -1,13 +1,5 @@
 import React, { useState } from 'react';
-import { styled } from '@mui/material/styles';
-import Card from '@mui/material/Card';
-import CardHeader from '@mui/material/CardHeader';
-import CardMedia from '@mui/material/CardMedia';
-import CardContent from '@mui/material/CardContent';
-import CardActions from '@mui/material/CardActions';
-import Collapse from '@mui/material/Collapse';
-import Avatar from '@mui/material/Avatar';
-import IconButton from '@mui/material/IconButton';
+
 
 
 
@@ -24,7 +16,7 @@ const OrdersList = ({ orders, formatDate, formatTime }) => {
     return (
         <ul>
             {orders.map((order) => (
-                <Card>
+                <div>
                 <div className="ticket-row" key={order.orderId}>
                     <div className="ticket-image">
                         <img src={order.image} alt={order.title} />
@@ -70,7 +62,7 @@ const OrdersList = ({ orders, formatDate, formatTime }) => {
 
                     )}
                 </div>
-                </Card>
+                </div>
             ))}
         </ul>
     );
