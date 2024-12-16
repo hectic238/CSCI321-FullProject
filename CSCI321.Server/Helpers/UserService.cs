@@ -2,6 +2,12 @@
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 using CSCI321.Server.Models;
+using Amazon.DynamoDBv2;
+using Amazon.DynamoDBv2.DataModel;
+using Amazon.DynamoDBv2.DocumentModel;
+using Amazon.Internal;
+using Amazon.Runtime;
+using Amazon;
 
 namespace CSCI321.Server.Helpers
 {
@@ -39,6 +45,33 @@ namespace CSCI321.Server.Helpers
             return null; // Return null if user is not found
         }
 
+        public async Task CreateUser(User newUser)
+        {
+            
+
+// Initialize DynamoDB Client
+            var config = new AmazonDynamoDBConfig
+            {
+                RegionEndpoint = RegionEndpoint.APSoutheast2  // Change region if needed
+            };
+
+            var dynamoClient = new AmazonDynamoDBClient(config);
+
+// Example: Insert an Item
+            var table = Table.LoadTable(dynamoClient, "Users");
+
+            var item = new Document
+            {
+                ["Id"] = Guid.NewGuid().ToString(),
+                ["Name"] = "Test Item",
+                ["CreatedDate"] = DateTime.UtcNow.ToString()
+            };
+
+            await table.PutItemAsync(item);
+            Console.WriteLine("Item inserted successfully!");
+
+        }
+
         // Method to store a refresh token and its expiry date in the database
         public async Task StoreRefreshToken(string userId, string refreshToken, DateTime expiry)
         {
@@ -57,8 +90,11 @@ namespace CSCI321.Server.Helpers
         public async Task<User?> GetAsync(string id) =>
             await _UserCollection.Find(x => x.userId == id).FirstOrDefaultAsync();
 
-        public async Task CreateAsync(User newUser) =>
+        public async Task CreateAsync(User newUser)
+        {
+            await CreateUser(newUser);
             await _UserCollection.InsertOneAsync(newUser);
+        }
 
         public async Task UpdateAsync(string id, User updateUser) =>
             await _UserCollection.ReplaceOneAsync(x => x.userId == id, updateUser);
