@@ -88,6 +88,8 @@ app.UseAuthentication(); // This ensures JWT authentication is enabled before au
 
 app.UseAuthorization();
 
+app.Urls.Add("https://localhost:5144");
+
 app.MapControllers();
 
 app.MapFallbackToFile("/index.html");
