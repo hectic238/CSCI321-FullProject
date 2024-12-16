@@ -62,7 +62,7 @@ namespace CSCI321.Server.Helpers
 
             var item = new Document
             {
-                ["Id"] = Guid.NewGuid().ToString(),
+                ["userId"] = Guid.NewGuid().ToString(),
                 ["Name"] = "Test Item",
                 ["CreatedDate"] = DateTime.UtcNow.ToString()
             };
