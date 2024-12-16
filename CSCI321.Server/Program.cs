@@ -66,6 +66,17 @@ builder.Services.AddCors(options =>
 // Add other services
 builder.Services.AddControllers(); 
 
+builder.WebHost.ConfigureKestrel(options =>
+{
+    // Listen on any IP for HTTP and HTTPS
+    options.ListenAnyIP(5144, listenOptions =>
+    {
+        listenOptions.UseHttps();  // Enable HTTPS
+    });
+});
+
+
+
 
 var app = builder.Build();
 
