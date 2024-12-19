@@ -3,9 +3,7 @@ import React, { useState } from "react";
 import {Link, useNavigate} from 'react-router-dom';
 import Navbar from '../components/Navbar'; // Import Navbar
 import logo from '../assets/logo_slogan.png'; // Assuming your image is in src/assets
-import { signInUser } from '../mockBackend'; // Import the mock backend
-import { EyeInvisibleOutlined, EyeTwoTone } from '@ant-design/icons';
-import { Button, Input, Space } from 'antd';
+
 
 
 const OrganiserLogin = () => {
@@ -37,7 +35,7 @@ const OrganiserLogin = () => {
             };
             
 
-            const response = await fetch('https://localhost:5144/api/User/login', {
+            const response = await fetch('/api/User/login', {
                 method: 'POST',
                 headers: {
                     
