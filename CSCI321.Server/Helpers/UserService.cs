@@ -91,7 +91,7 @@ namespace CSCI321.Server.Helpers
             {
                 TableName = TableName,
                 IndexName = "EmailIndex",  // Use the created GSI
-                KeyConditionExpression = "Email = :email",
+                KeyConditionExpression = "email = :email",
                 ExpressionAttributeValues = new Dictionary<string, AttributeValue>
                 {
                     { ":email", new AttributeValue { S = email } }
