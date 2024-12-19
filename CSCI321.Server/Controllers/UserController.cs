@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Security.Cryptography;
 using System.Text;
 using Amazon.DynamoDBv2.DocumentModel;
+using Amazon.DynamoDBv2.Model;
 
 namespace CSCI321.Server.Controllers;
 
@@ -225,26 +226,19 @@ public class UserController : ControllerBase
     {
         
         // Find the user by email
-        Document userDocument = await _userService.GetUserByEmailAsync(loginData.Email);
+        Dictionary<string, AttributeValue> userAttributes = await _userService.GetUserByEmailAsync(loginData.Email);
 
-        var userId = "";
-        var userType = "";
-        var password = "";
-        var name = "";
-        var email = "";
+        var userId = userAttributes.ContainsKey("userId") ? userAttributes["userId"].S : null;
+        var userType = userAttributes.ContainsKey("userType") ? userAttributes["userType"].S : null;
+        var password = userAttributes.ContainsKey("password") ? userAttributes["password"].S : null;
+        var name = userAttributes.ContainsKey("name") ? userAttributes["name"].S : null;  // If name is present
+        var email = userAttributes.ContainsKey("email") ? userAttributes["email"].S : null;
         
-        if (userDocument != null)
-        {
-            userId = userDocument["userId"];
-            userType = userDocument["userType"];
-            password = userDocument["password"];
-            name = userDocument["name"];
-            email = userDocument["email"];
-        }
+        
 
         
         // Log if user was found or not
-        if (userDocument != null)
+        if (userAttributes != null)
         {
             Console.WriteLine($"User found: {email}");
         }

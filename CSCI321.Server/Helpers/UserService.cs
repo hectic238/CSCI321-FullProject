@@ -136,27 +136,32 @@ namespace CSCI321.Server.Helpers
             await _UserCollection.Find(x => x.userId == userId).FirstOrDefaultAsync();
 
         // New method to get user by Email
-        public async Task<Document> GetUserByEmailAsync(string email)
+        public async Task<Dictionary<string, AttributeValue>> GetUserByEmailAsync(string email)
         {
             var table = Table.LoadTable(dynamoClient, TableName);
             
             // Create a query configuration
-            var query = new QueryOperationConfig
+            var queryRequest = new QueryRequest
             {
-                KeyExpression = new Expression
+                TableName = TableName,
+                IndexName = "EmailIndex", // Specify the GSI name
+                KeyConditionExpression = "email = :email", // Email is the partition key for the GSI
+                ExpressionAttributeValues = new Dictionary<string, AttributeValue>
                 {
-                    ExpressionStatement = "email = :email", // Assuming 'email' is the key
-                    ExpressionAttributeValues = new Dictionary<string, DynamoDBEntry>
-                    {
-                        { ":email", email }
-                    }
-                }
+                    { ":email", new AttributeValue { S = email } }
+                },
+                ProjectionExpression = "userId, userType, password, name, email" // Specify the attributes you want to retrieve
             };
 
-            var search = table.Query(query);
-            var results = await search.GetNextSetAsync();
-        
-            return results.FirstOrDefault(); // Return the first user found, or null
+            // Execute the query
+            var response = await dynamoClient.QueryAsync(queryRequest);
+
+            if (response.Items.Count > 0)
+            {
+                return response.Items[0]; // Return the first matching user
+            }
+
+            return null; // No match found
         }
         public async Task UpdateUserAsync(User updatedUser)
         {
