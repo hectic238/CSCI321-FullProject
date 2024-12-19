@@ -145,20 +145,21 @@ namespace CSCI321.Server.Helpers
             {
                 TableName = TableName,
                 IndexName = "EmailIndex", // Specify the GSI name
-                KeyConditionExpression = "email = :email", // Email is the partition key for the GSI
+                KeyConditionExpression = "Email = :email", // Correctly capitalized 'Email' for the partition key
                 ExpressionAttributeValues = new Dictionary<string, AttributeValue>
                 {
-                    { ":email", new AttributeValue { S = email } }
+                    { ":email", new AttributeValue { S = email } } // The email value you're searching for
                 },
-                ProjectionExpression = "#userId, #userType, #password, #name, #email", // Use placeholders for reserved words
+                // Specify the attributes to retrieve with exact capitalized names
+                ProjectionExpression = "#userId, #userType, #password, #name, #email",
                 ExpressionAttributeNames = new Dictionary<string, string>
                 {
                     { "#userId", "userId" },
                     { "#userType", "userType" },
                     { "#password", "password" },
-                    { "#name", "name" },    // Map 'name' to '#name'
-                    { "#email", "email" }
-                }// Specify the attributes you want to retrieve
+                    { "#name", "name" }, // 'name' should be handled as a reserved word in DynamoDB
+                    { "#email", "Email" } // Ensure 'Email' is the exact capitalization used in the index
+                }
             };
 
             // Execute the query
