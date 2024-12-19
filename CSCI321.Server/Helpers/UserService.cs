@@ -69,16 +69,16 @@ namespace CSCI321.Server.Helpers
             var item = new Document
             {
                 ["userId"] = Guid.NewGuid().ToString(),
-                ["Name"] = newUser.name,
-                ["Email"] = newUser.email,
-                ["Password"] = newUser.password,
-                ["UserType"] = newUser.userType,
-                ["Company"] = newUser.company,
-                ["Preferences"] = newUser.preferences,
-                ["RefreshToken"] = newUser.refreshToken,
-                ["RefreshTokenExpiry"] = newUser.refreshTokenExpiry,
-                ["Tickets"] = JsonSerializer.Serialize(newUser.tickets),  // Serialize to JSON string
-                ["CreatedDate"] = DateTime.UtcNow.ToString()
+                ["name"] = newUser.name,
+                ["email"] = newUser.email,
+                ["password"] = newUser.password,
+                ["userType"] = newUser.userType,
+                ["company"] = newUser.company,
+                ["preferences"] = newUser.preferences,
+                ["refreshToken"] = newUser.refreshToken,
+                ["refreshTokenExpiry"] = newUser.refreshTokenExpiry,
+                ["tickets"] = JsonSerializer.Serialize(newUser.tickets),  // Serialize to JSON string
+                ["createdDate"] = DateTime.UtcNow.ToString()
             };
 
             await table.PutItemAsync(item);
@@ -145,7 +145,7 @@ namespace CSCI321.Server.Helpers
             {
                 TableName = TableName,
                 IndexName = "EmailIndex", // Specify the GSI name
-                KeyConditionExpression = "Email = :email", // Correctly capitalized 'Email' for the partition key
+                KeyConditionExpression = "email = :email", // Correctly capitalized 'Email' for the partition key
                 ExpressionAttributeValues = new Dictionary<string, AttributeValue>
                 {
                     { ":email", new AttributeValue { S = email } } // The email value you're searching for
@@ -154,11 +154,11 @@ namespace CSCI321.Server.Helpers
                 ProjectionExpression = "#userId, #userType, #password, #name, #email",
                 ExpressionAttributeNames = new Dictionary<string, string>
                 {
-                    { "#userId", "UserId" },
-                    { "#userType", "UserType" },
-                    { "#password", "Password" },
-                    { "#name", "Name" }, // 'name' should be handled as a reserved word in DynamoDB
-                    { "#email", "Email" } // Ensure 'Email' is the exact capitalization used in the index
+                    { "#userId", "userId" },
+                    { "#userType", "userType" },
+                    { "#password", "password" },
+                    { "#name", "name" }, // 'name' should be handled as a reserved word in DynamoDB
+                    { "#email", "email" } // Ensure 'Email' is the exact capitalization used in the index
                 }
             };
 

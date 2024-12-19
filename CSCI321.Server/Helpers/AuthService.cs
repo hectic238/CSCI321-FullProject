@@ -68,10 +68,10 @@ namespace CSCI321.Server.Helpers
 
             var claims = new[]
             {
-                new Claim(JwtRegisteredClaimNames.Sub, userId.ToString()),  // This should work for sub
+                new Claim(JwtRegisteredClaimNames.Sub, userId),  // This should work for sub
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                new Claim(JwtRegisteredClaimNames.Email, email.ToString()),
-                new Claim("userType", userType.ToString()),
+                new Claim(JwtRegisteredClaimNames.Email, email),
+                new Claim("userType", userType),
             };
             
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Key"]));
