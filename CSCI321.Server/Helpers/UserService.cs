@@ -1,4 +1,5 @@
-﻿using CSCI321.Server.DBSettings;
+﻿using System.Text.Json;
+using CSCI321.Server.DBSettings;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 using CSCI321.Server.Models;
@@ -64,6 +65,14 @@ namespace CSCI321.Server.Helpers
             {
                 ["userId"] = Guid.NewGuid().ToString(),
                 ["Name"] = newUser.name,
+                ["Email"] = newUser.email,
+                ["Password"] = newUser.password,
+                ["UserType"] = newUser.userType,
+                ["Company"] = newUser.company,
+                ["Preferences"] = newUser.preferences,
+                ["RefreshToken"] = newUser.refreshToken,
+                ["RefreshTokenExpiry"] = newUser.refreshTokenExpiry,
+                ["Tickets"] = JsonSerializer.Serialize(newUser.tickets),  // Serialize to JSON string
                 ["CreatedDate"] = DateTime.UtcNow.ToString()
             };
 
