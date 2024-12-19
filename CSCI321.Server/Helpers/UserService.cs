@@ -150,7 +150,15 @@ namespace CSCI321.Server.Helpers
                 {
                     { ":email", new AttributeValue { S = email } }
                 },
-                ProjectionExpression = "userId, userType, password, name, email" // Specify the attributes you want to retrieve
+                ProjectionExpression = "userId, userType, password, name, email",
+                ExpressionAttributeNames = new Dictionary<string, string>
+                {
+                    { "#userId", "userId" },
+                    { "#userType", "userType" },
+                    { "#password", "password" },
+                    { "#name", "name" },    // Map 'name' to '#name'
+                    { "#email", "email" }
+                }// Specify the attributes you want to retrieve
             };
 
             // Execute the query
