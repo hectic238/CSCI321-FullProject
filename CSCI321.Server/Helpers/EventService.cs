@@ -1,7 +1,11 @@
-﻿using CSCI321.Server.DBSettings;
+﻿using Amazon;
+using Amazon.DynamoDBv2;
+using Amazon.DynamoDBv2.Model;
+using CSCI321.Server.DBSettings;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 using CSCI321.Server.Models;
+using Newtonsoft.Json;
 
 
 namespace CSCI321.Server.Helpers;
@@ -10,9 +14,20 @@ public class EventService
 {
     private readonly IMongoCollection<Event> _EventCollection;
     
+    private readonly AmazonDynamoDBClient dynamoClient;
+        
+    private const string TableName = "Events";  // Replace with your table name
+    
     public EventService(
         IOptions<EventDatabaseSettings> EventDatabaseSettings)
     {
+        var config = new AmazonDynamoDBConfig
+        {
+            RegionEndpoint = RegionEndpoint.APSoutheast2  // Change region if needed
+        };
+
+        dynamoClient = new AmazonDynamoDBClient(config);
+        
         var mongoClient = new MongoClient(
             EventDatabaseSettings.Value.ConnectionString);
 
@@ -26,10 +41,38 @@ public class EventService
     
     public async Task<List<Event>> GetAsync() =>
         await _EventCollection.Find(_ => true).ToListAsync();
-    
-    public async Task CreateAsync(Event newEvent) =>
-        await _EventCollection.InsertOneAsync(newEvent);
-    
+
+    public async Task CreateAsync(Event newEvent)
+    {
+        var request = new PutItemRequest
+        {
+            TableName = "Events",  // Replace with your DynamoDB table name
+            Item = new Dictionary<string, AttributeValue>
+            {
+                { "Id", new AttributeValue { S = newEvent.id } },
+                { "Title", new AttributeValue { S = newEvent.title } },
+                { "UserId", new AttributeValue { S = newEvent.userId } },
+                { "EventTicketType", new AttributeValue { S = newEvent.eventTicketType } },
+                { "EventType", new AttributeValue { S = newEvent.eventType } },
+                { "Category", new AttributeValue { S = newEvent.category } },
+                { "StartDate", new AttributeValue { S = newEvent.startDate } },
+                { "StartTime", new AttributeValue { S = newEvent.startTime } },
+                { "EndTime", new AttributeValue { S = newEvent.endTime } },
+                { "Location", new AttributeValue { S = newEvent.location } },
+                { "AdditionalInfo", new AttributeValue { S = newEvent.additionalInfo } },
+                { "RecurrenceFrequency", new AttributeValue { S = newEvent.recurrenceFrequency } },
+                { "RecurrenceEndDate", new AttributeValue { S = newEvent.recurrenceEndDate } },
+                { "NumberAttendees", new AttributeValue { N = newEvent.numberAttendees.ToString() } },
+                { "IsDraft", new AttributeValue { BOOL = newEvent.isDraft } },
+                { "Image", new AttributeValue { S = newEvent.image } },
+                { "Tickets", new AttributeValue { S = JsonConvert.SerializeObject(newEvent.tickets) } }
+            }
+        };
+
+        await dynamoClient.PutItemAsync(request);
+        //await _EventCollection.InsertOneAsync(newEvent);
+    }
+
     public async Task<List<EventSummary>> GetEventSummariesAsync(string searchTerm = null, string category = null)
     {
         // Start with an empty filter

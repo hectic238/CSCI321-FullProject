@@ -34,8 +34,10 @@ const OrganiserLogin = () => {
                 UserType: "organiser",
             };
             
+            var baseUrl = process.env.REACT_APP_API_BASE_URL;
+            
 
-            const response = await fetch('/api/User/login', {
+            const response = await fetch(`${baseUrl}/api/User/login`, {
                 method: 'POST',
                 headers: {
                     
