@@ -154,10 +154,10 @@ namespace CSCI321.Server.Helpers
                 ProjectionExpression = "#userId, #userType, #password, #name, #email",
                 ExpressionAttributeNames = new Dictionary<string, string>
                 {
-                    { "#userId", "userId" },
-                    { "#userType", "userType" },
-                    { "#password", "password" },
-                    { "#name", "name" }, // 'name' should be handled as a reserved word in DynamoDB
+                    { "#userId", "UserId" },
+                    { "#userType", "UserType" },
+                    { "#password", "Password" },
+                    { "#name", "Name" }, // 'name' should be handled as a reserved word in DynamoDB
                     { "#email", "Email" } // Ensure 'Email' is the exact capitalization used in the index
                 }
             };
