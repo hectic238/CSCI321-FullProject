@@ -57,7 +57,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowSpecificOrigin",
         builder =>
         {
-            builder.WithOrigins("https://localhost:5173") // Replace with your frontend URL
+            builder.WithOrigins("https://localhost:5173","http://localhost:5173") // Replace with your frontend URL
                    .AllowAnyHeader()
                    .AllowAnyMethod();
         });
@@ -65,6 +65,17 @@ builder.Services.AddCors(options =>
 
 // Add other services
 builder.Services.AddControllers(); 
+
+builder.WebHost.ConfigureKestrel(options =>
+{
+    // Listen on any IP for HTTP and HTTPS
+    options.ListenAnyIP(5144, listenOptions =>
+    {
+        listenOptions.UseHttps();  // Enable HTTPS
+    });
+});
+
+
 
 
 var app = builder.Build();
@@ -87,6 +98,8 @@ app.UseHttpsRedirection();
 app.UseAuthentication(); // This ensures JWT authentication is enabled before authorization
 
 app.UseAuthorization();
+
+app.Urls.Add("https://localhost:5144");
 
 app.MapControllers();
 
