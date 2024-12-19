@@ -34,7 +34,9 @@ const SignUp = () => {
         e.preventDefault();
         
         try {
-            const response = await fetch('https://localhost:5144/api/User/signUp', {
+            
+            const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
+            const response = await fetch(`${API_BASE_URL}/User/signUp`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
