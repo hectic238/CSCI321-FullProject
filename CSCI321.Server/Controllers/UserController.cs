@@ -228,11 +228,11 @@ public class UserController : ControllerBase
         // Find the user by email
         Dictionary<string, AttributeValue> userAttributes = await _userService.GetUserByEmailAsync(loginData.Email);
 
-        var userId = userAttributes.ContainsKey("UserId") ? userAttributes["UserId"].S : null;
-        var userType = userAttributes.ContainsKey("UserType") ? userAttributes["UserType"].S : null;
-        var password = userAttributes.ContainsKey("Password") ? userAttributes["Password"].S : null;
-        var name = userAttributes.ContainsKey("Name") ? userAttributes["Name"].S : null;  // If name is present
-        var email = userAttributes.ContainsKey("Email") ? userAttributes["Email"].S : null;
+        var userId = userAttributes.ContainsKey("userId") ? userAttributes["userId"].S : null;
+        var userType = userAttributes.ContainsKey("userType") ? userAttributes["userType"].S : null;
+        var password = userAttributes.ContainsKey("password") ? userAttributes["password"].S : null;
+        var name = userAttributes.ContainsKey("name") ? userAttributes["name"].S : null;  // If name is present
+        var email = userAttributes.ContainsKey("email") ? userAttributes["email"].S : null;
         
         
 
