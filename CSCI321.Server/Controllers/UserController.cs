@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Cryptography;
 using System.Text;
+using Amazon.DynamoDBv2.DocumentModel;
 
 namespace CSCI321.Server.Controllers;
 
@@ -163,7 +164,7 @@ public class UserController : ControllerBase
 
 
         // Generate a new access token
-        var newAccessToken = _authService.GenerateAccessToken(user);
+        var newAccessToken = _authService.GenerateAccessToken(user.userId, user.email, user.userType);
 
         
         return Ok(new { accessToken = newAccessToken });
@@ -206,35 +207,68 @@ public class UserController : ControllerBase
 
         return Ok(user);
     }
+    
+    public async Task<IActionResult> GetUserByEmail(string email)
+    {
+        var user = await _userService.GetUserByEmailAsync(email);
+        
+        if (user == null)
+        {
+            return NotFound("User not found");
+        }
+
+        return Ok(user); // Return user details
+    }
 
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginModel loginData)
     {
-
+        
         // Find the user by email
-        var user = await _userService.GetByEmailAsync(loginData.Email);
+        Document userDocument = await _userService.GetUserByEmailAsync(loginData.Email);
+
+        var userId = "";
+        var userType = "";
+        var password = "";
+        var name = "";
+        var email = "";
+        
+        if (userDocument != null)
+        {
+            userId = userDocument["userId"];
+            userType = userDocument["userType"];
+            password = userDocument["password"];
+            name = userDocument["name"];
+            email = userDocument["email"];
+        }
+
         
         // Log if user was found or not
-        if (user != null) { Console.WriteLine($"User found: {user.email}");}
-        else { Console.WriteLine("User not found"); }
-        
-        if (user == null) { return Unauthorized("Invalid credentials."); }
+        if (userDocument != null)
+        {
+            Console.WriteLine($"User found: {email}");
+        }
+        else
+        {
+            
+            Console.WriteLine("User not found");
+            return Unauthorized("Invalid credentials.");
+        }
 
         // Hash the password provided in loginData and compare it with the stored hashed password
         var hashedPassword = HashPassword(loginData.Password);
         
-        if (user.password != hashedPassword) { return Unauthorized("Invalid credentials."); }
+        if (password != hashedPassword) { return Unauthorized("Invalid credentials."); }
 
         // if user is of different type
-        if(user.userType != loginData.UserType) { return Unauthorized("Invalid Credentials"); }
-
-        var userId = user.userId;
+        if(userType != loginData.UserType) { return Unauthorized("Invalid Credentials"); }
+        
         // Generate JWT token
-        var accessToken = _authService.GenerateAccessToken(user); // minute accessToken
+        var accessToken = _authService.GenerateAccessToken(userId, email, userType); // minute accessToken
 
         var refreshToken = _authService.GenerateRefreshToken();
         
-        await _userService.StoreRefreshToken(userId, refreshToken, DateTime.UtcNow.AddDays(7)); // 7 days expiration
+        //await _userService.StoreRefreshToken(userId, refreshToken, DateTime.UtcNow.AddDays(7)); // 7 days expiration
         
         // Return the token and user data
         return Ok(new { accessToken});

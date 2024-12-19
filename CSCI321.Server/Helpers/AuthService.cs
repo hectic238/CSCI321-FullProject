@@ -61,17 +61,17 @@ namespace CSCI321.Server.Helpers
         }
 
 
-        public string GenerateAccessToken( User user)
+        public string GenerateAccessToken(string userId, string email, string userType)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
             //var key = Encoding.ASCII.GetBytes("a very long and secure secret key");
 
             var claims = new[]
             {
-                new Claim(JwtRegisteredClaimNames.Sub, user.userId.ToString()),  // This should work for sub
+                new Claim(JwtRegisteredClaimNames.Sub, userId.ToString()),  // This should work for sub
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                new Claim(JwtRegisteredClaimNames.Email, user.email.ToString()),
-                new Claim("userType", user.userType.ToString()),
+                new Claim(JwtRegisteredClaimNames.Email, email.ToString()),
+                new Claim("userType", userType.ToString()),
             };
             
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Key"]));

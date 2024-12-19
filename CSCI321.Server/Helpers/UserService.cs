@@ -4,7 +4,7 @@ using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 using CSCI321.Server.Models;
 using Amazon.DynamoDBv2;
-using Amazon.DynamoDBv2.DataModel;
+using Amazon.DynamoDBv2.Model;
 using Amazon.DynamoDBv2.DocumentModel;
 using Amazon.Internal;
 using Amazon.Runtime;
@@ -60,7 +60,7 @@ namespace CSCI321.Server.Helpers
             return null; // Return null if user is not found
         }
 
-        public async Task CreateUser(User newUser)
+        public async Task CreateAsync(User newUser)
         {
 
             // Example: Insert an Item
@@ -120,12 +120,7 @@ namespace CSCI321.Server.Helpers
 
         public async Task<User?> GetAsync(string id) =>
             await _UserCollection.Find(x => x.userId == id).FirstOrDefaultAsync();
-
-        public async Task CreateAsync(User newUser)
-        {
-            await CreateUser(newUser);
-            //await _UserCollection.InsertOneAsync(newUser);
-        }
+        
 
         public async Task UpdateAsync(string id, User updateUser) =>
             await _UserCollection.ReplaceOneAsync(x => x.userId == id, updateUser);
@@ -141,9 +136,28 @@ namespace CSCI321.Server.Helpers
             await _UserCollection.Find(x => x.userId == userId).FirstOrDefaultAsync();
 
         // New method to get user by Email
-        public async Task<User?> GetByEmailAsync(string email) =>
-            await _UserCollection.Find(x => x.email == email).FirstOrDefaultAsync();
+        public async Task<Document> GetUserByEmailAsync(string email)
+        {
+            var table = Table.LoadTable(dynamoClient, TableName);
+            
+            // Create a query configuration
+            var query = new QueryOperationConfig
+            {
+                KeyExpression = new Expression
+                {
+                    ExpressionStatement = "email = :email", // Assuming 'email' is the key
+                    ExpressionAttributeValues = new Dictionary<string, DynamoDBEntry>
+                    {
+                        { ":email", email }
+                    }
+                }
+            };
+
+            var search = table.Query(query);
+            var results = await search.GetNextSetAsync();
         
+            return results.FirstOrDefault(); // Return the first user found, or null
+        }
         public async Task UpdateUserAsync(User updatedUser)
         {
             if (updatedUser == null || string.IsNullOrEmpty(updatedUser.userId))
