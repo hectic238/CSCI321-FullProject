@@ -30,10 +30,8 @@ public class UserController : ControllerBase
     [HttpPost("signUp")]
     public async Task<IActionResult> Post(User newUser)
     {
-        
         try
         {
-            
             var existingUser = await _userService.CheckDuplicateEmailAsync(newUser.email);
 
             if (existingUser)
@@ -41,23 +39,13 @@ public class UserController : ControllerBase
                 return BadRequest(new { message = "Email already exists!" });
             }
             
-            
-            Console.WriteLine("Before password hashing: " + newUser.password);
-
             newUser.password = HashPassword(newUser.password);
-
-            Console.WriteLine("After password hashing: " + newUser.password);
-
             newUser.refreshTokenExpiry = DateTime.UtcNow.AddDays(30);
-
             await _userService.CreateAsync(newUser);
-
-            Console.WriteLine($"User created with Id: {newUser.userId}");
             return CreatedAtAction(nameof(Get), new { id = newUser.userId }, newUser);
         }
         catch (Exception ex)
-        {
-            Console.WriteLine($"Error occurred: {ex.Message}");
+        { 
             return StatusCode(500, "Internal server error.");
         }
     }
@@ -262,7 +250,7 @@ public class UserController : ControllerBase
 
         var refreshToken = _authService.GenerateRefreshToken();
         
-        //await _userService.StoreRefreshToken(userId, refreshToken, DateTime.UtcNow.AddDays(7)); // 7 days expiration
+        await _userService.StoreRefreshToken(userId, refreshToken, DateTime.UtcNow.AddDays(7)); // 7 days expiration
         
         // Return the token and user data
         return Ok(new { accessToken});
