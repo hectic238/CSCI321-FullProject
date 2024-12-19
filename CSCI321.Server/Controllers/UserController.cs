@@ -250,7 +250,7 @@ public class UserController : ControllerBase
 
         var refreshToken = _authService.GenerateRefreshToken();
         
-        await _userService.StoreRefreshToken(userId, refreshToken, DateTime.UtcNow.AddDays(7)); // 7 days expiration
+        await _userService.StoreRefreshToken(userId, refreshToken, DateTime.UtcNow.AddDays(30)); // 30 days expiration
         
         // Return the token and user data
         return Ok(new { accessToken});
