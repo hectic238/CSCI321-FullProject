@@ -9,17 +9,31 @@ using Amazon.DynamoDBv2.DocumentModel;
 using Amazon.Internal;
 using Amazon.Runtime;
 using Amazon;
+using Amazon.DynamoDBv2.Model;
+using Microsoft.AspNetCore.Mvc;
 
 namespace CSCI321.Server.Helpers
 {
     public class UserService
     {
         private readonly IMongoCollection<User> _UserCollection;
+        
+        private readonly AmazonDynamoDBClient dynamoClient;
+        
+        private const string TableName = "Users";  // Replace with your table name
+
 
 
         public UserService(
             IOptions<UserDatabaseSettings> UserDatabaseSettings)
         {
+            
+            var config = new AmazonDynamoDBConfig
+            {
+                RegionEndpoint = RegionEndpoint.APSoutheast2  // Change region if needed
+            };
+
+            dynamoClient = new AmazonDynamoDBClient(config);
             var mongoClient = new MongoClient(
                 UserDatabaseSettings.Value.ConnectionString);
 
@@ -48,18 +62,9 @@ namespace CSCI321.Server.Helpers
 
         public async Task CreateUser(User newUser)
         {
-            
 
-// Initialize DynamoDB Client
-            var config = new AmazonDynamoDBConfig
-            {
-                RegionEndpoint = RegionEndpoint.APSoutheast2  // Change region if needed
-            };
-
-            var dynamoClient = new AmazonDynamoDBClient(config);
-
-// Example: Insert an Item
-            var table = Table.LoadTable(dynamoClient, "Users");
+            // Example: Insert an Item
+            var table = Table.LoadTable(dynamoClient, TableName);
 
             var item = new Document
             {
@@ -78,8 +83,25 @@ namespace CSCI321.Server.Helpers
 
             await table.PutItemAsync(item);
             Console.WriteLine("Item inserted successfully!");
-
         }
+        
+        public async Task<bool> CheckDuplicateEmailAsync(string email)
+        {
+            var request = new QueryRequest
+            {
+                TableName = TableName,
+                IndexName = "EmailIndex",  // Use the created GSI
+                KeyConditionExpression = "Email = :email",
+                ExpressionAttributeValues = new Dictionary<string, AttributeValue>
+                {
+                    { ":email", new AttributeValue { S = email } }
+                }
+            };
+
+            var response = await dynamoClient.QueryAsync(request);
+            return response.Count > 0;
+        }
+
 
         // Method to store a refresh token and its expiry date in the database
         public async Task StoreRefreshToken(string userId, string refreshToken, DateTime expiry)

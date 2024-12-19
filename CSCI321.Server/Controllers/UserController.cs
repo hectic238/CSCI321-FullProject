@@ -31,6 +31,15 @@ public class UserController : ControllerBase
         
         try
         {
+            
+            var existingUser = await _userService.CheckDuplicateEmailAsync(newUser.email);
+
+            if (existingUser)
+            {
+                return BadRequest(new { message = "Email already exists!" });
+            }
+            
+            
             Console.WriteLine("Before password hashing: " + newUser.password);
 
             newUser.password = HashPassword(newUser.password);
