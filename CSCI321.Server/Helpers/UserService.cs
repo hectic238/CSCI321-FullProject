@@ -93,7 +93,7 @@ namespace CSCI321.Server.Helpers
         public async Task CreateAsync(User newUser)
         {
             await CreateUser(newUser);
-            await _UserCollection.InsertOneAsync(newUser);
+            //await _UserCollection.InsertOneAsync(newUser);
         }
 
         public async Task UpdateAsync(string id, User updateUser) =>
