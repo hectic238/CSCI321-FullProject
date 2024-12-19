@@ -150,7 +150,7 @@ namespace CSCI321.Server.Helpers
                 {
                     { ":email", new AttributeValue { S = email } }
                 },
-                ProjectionExpression = "userId, userType, password, name, email",
+                ProjectionExpression = "#userId, #userType, #password, #name, #email", // Use placeholders for reserved words
                 ExpressionAttributeNames = new Dictionary<string, string>
                 {
                     { "#userId", "userId" },
