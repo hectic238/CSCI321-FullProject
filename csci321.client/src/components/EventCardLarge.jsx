@@ -45,12 +45,12 @@ function EventCardLarge({ event, isDraft }) {
 
     const viewStatistics = () => {
         // Navigate to the statistics page for this event
-        navigate(`/events/${event.id}/statistics`);
+        navigate(`/events/${event.eventId}/statistics`);
     };
     
     
     return (
-        <div key={event.id} className="event-card-large">
+        <div key={event.eventId} className="event-card-large">
             <div className="event-card-large-column-image">
                 <img src={event.image} alt={event.title} className="event-image"/>
             </div>

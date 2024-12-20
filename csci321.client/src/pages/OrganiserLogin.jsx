@@ -2,7 +2,8 @@
 import React, { useState } from "react";
 import {Link, useNavigate} from 'react-router-dom';
 import Navbar from '../components/Navbar'; // Import Navbar
-import logo from '../assets/logo_slogan.png'; // Assuming your image is in src/assets
+import logo from '../assets/logo_slogan.png';
+import {getURL} from "@/components/URL.jsx"; // Assuming your image is in src/assets
 
 
 
@@ -34,9 +35,8 @@ const OrganiserLogin = () => {
                 UserType: "organiser",
             };
             
-            var baseUrl = process.env.REACT_APP_API_BASE_URL;
+            var baseUrl = getURL();
             
-
             const response = await fetch(`${baseUrl}/api/User/login`, {
                 method: 'POST',
                 headers: {

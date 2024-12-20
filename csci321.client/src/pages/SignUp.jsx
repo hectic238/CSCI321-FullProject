@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import {useLocation, useNavigate} from "react-router-dom";
 import { signUpUser } from '../mockBackend'; // Import the mock backend
 import {generateObjectId} from "@/components/Functions.jsx";
+import {getURL} from "@/components/URL.jsx";
 
 const SignUp = () => {
     const location = useLocation();
@@ -35,9 +36,10 @@ const SignUp = () => {
         
         //
         try {
+
+            var baseUrl = getURL();
             
-            
-            const response = await fetch(`/api/User/signUp`, {
+            const response = await fetch(`${baseUrl}/api/User/signUp`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

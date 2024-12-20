@@ -1,4 +1,5 @@
-﻿import {jwtDecode} from 'jwt-decode'; // Import the jwt-decode library
+﻿import {jwtDecode} from 'jwt-decode';
+import {getURL} from "@/components/URL.jsx"; // Import the jwt-decode library
 
 
 export const getUserIdFromToken = () => {
@@ -33,7 +34,8 @@ export const generateObjectId = () =>  {
 }
 
 export const fetchEventSummaries = async (searchTerm) => {
-    const response = await fetch(`https://localhost:5144/api/Event/search?searchTerm=${searchTerm || ''}`);
+    var baseUrl = getURL();
+    const response = await fetch(`${baseUrl}/api/Event/search?searchTerm=${searchTerm || ''}`);
     if (!response.ok) {
         throw new Error('Failed to fetch event summaries');
     }
@@ -41,7 +43,9 @@ export const fetchEventSummaries = async (searchTerm) => {
 };
 
 export const fetchEventsByCategory = async (category) => {
-    const response = await fetch(`https://localhost:5144/api/Event/category/${category}`);
+    var baseUrl = getURL();
+
+    const response = await fetch(`${baseUrl}/api/Event/category/${category}`);
     if (!response.ok) {
         throw new Error('Failed to fetch events by category');
     }
@@ -49,8 +53,10 @@ export const fetchEventsByCategory = async (category) => {
 };
 
 export const fetchEvent = async (eventId) => {
+    var baseUrl = getURL();
+
     try {
-        const response = await fetch(`https://localhost:5144/api/Event/${eventId}`);
+        const response = await fetch(`${baseUrl}/api/Event/${eventId}`);
 
         if (!response.ok) {
             const errorData = await response.json();
@@ -71,9 +77,10 @@ export const editEvent = async (updatedEventDetails) => {
         console.error('No access token found. Please log in.');
         return;
     }
-    
+    var baseUrl = getURL();
+    console.log(updatedEventDetails);
     try {
-        const response = await fetch(`https://localhost:5144/api/Event/${updatedEventDetails.id}`, {
+        const response = await fetch(`${baseUrl}/api/Event/${updatedEventDetails.eventId}`, {
             method: 'PUT',
             headers: {
                 'Authorization': `Bearer ${accessToken}`,
@@ -81,6 +88,8 @@ export const editEvent = async (updatedEventDetails) => {
             },
             body: JSON.stringify(updatedEventDetails),
         });
+        
+        console.log(response);
 
         if (!response.ok) {
             const errorData = await response.json();
@@ -97,8 +106,10 @@ export const editEvent = async (updatedEventDetails) => {
 
 
 export const fetchEventsByUserId = async (userId) => {
+    var baseUrl = getURL();
+
     try {
-        const response = await fetch(`https://localhost:5144/api/Event/byUser/${userId}`);
+        const response = await fetch(`${baseUrl}/api/Event/byUser/${userId}`);
 
         if (!response.ok) {
             const errorData = await response.json();
@@ -113,8 +124,10 @@ export const fetchEventsByUserId = async (userId) => {
 };
 
 export const fetchDraftEventsByUserId = async (userId) => {
+    var baseUrl = getURL();
+
     try {
-        const response = await fetch(`https://localhost:5144/api/Event/byUser/${userId}/drafts`);
+        const response = await fetch(`${baseUrl}/api/Event/byUser/${userId}/drafts`);
 
         if (!response.ok) {
             const errorData = await response.json();
@@ -135,9 +148,10 @@ export const updateUser = async (updatedUser) => {
         console.error('No access token found. Please log in.');
         return;
     }
+    var baseUrl = getURL();
 
     try {
-        const response = await fetch('https://localhost:5144/api/User/updateUser', {
+        const response = await fetch(`${baseUrl}/api/User/updateUser`, {
             method: 'PUT',
             headers: {
                 'Authorization': `Bearer ${accessToken}`,
@@ -174,10 +188,11 @@ export const handlePublishOrder = async (orderDetails) => {
         alert('No access token found. Please log in.');
         return;
     }
-    
+
+    var baseUrl = getURL();
 
     try {
-        const response = await fetch('https://localhost:5144/api/Order/publish', {
+        const response = await fetch(`${baseUrl}/api/Order/publish`, {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${accessToken}`,
@@ -214,9 +229,10 @@ export const fetchOrdersByUserId = async (userId) => {
         console.error('No access token found. Please log in.');
         return;
     }
+    var baseUrl = getURL();
 
     try {
-        const response = await fetch(`https://localhost:5144/api/Order/getOrdersByUserId/${userId}`, {
+        const response = await fetch(`${baseUrl}/api/Order/getOrdersByUserId/${userId}`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${accessToken}`,

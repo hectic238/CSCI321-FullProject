@@ -4,7 +4,8 @@ import {Link, useNavigate} from 'react-router-dom';
 import './AttendeeLogin.css'; // Import CSS for the login page
 import Navbar from '../components/Navbar'; // Import Navbar
 import logo from '../assets/logo_slogan.png';
-import {signInUser} from "../mockBackend.jsx"; // Assuming your image is in src/assets
+import {signInUser} from "../mockBackend.jsx";
+import {getURL} from "@/components/URL.jsx"; // Assuming your image is in src/assets
 
 
 const AttendeeLogin = () => {
@@ -32,8 +33,9 @@ const AttendeeLogin = () => {
                 UserType: "attendee",
             };
 
-
-            const response = await fetch('/api/User/login', {
+            var baseUrl = getURL();
+            
+            const response = await fetch(`${baseUrl}/api/User/login`, {
                 method: 'POST',
                 headers: {
 

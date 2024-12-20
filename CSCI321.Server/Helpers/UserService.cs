@@ -21,20 +21,30 @@ namespace CSCI321.Server.Helpers
         
         private readonly AmazonDynamoDBClient dynamoClient;
         
+        private readonly IConfiguration _configuration;
+        
         private const string TableName = "Users";  // Replace with your table name
 
 
 
         public UserService(
-            IOptions<UserDatabaseSettings> UserDatabaseSettings)
+            IOptions<UserDatabaseSettings> UserDatabaseSettings, IConfiguration configuration)
         {
-            
+            _configuration = configuration;
+
             var config = new AmazonDynamoDBConfig
             {
                 RegionEndpoint = RegionEndpoint.APSoutheast2  // Change region if needed
             };
+            
+            var awsAccessKeyId = _configuration["Database:AWS_ACCESS_KEY_ID"];
+            var awsSecretAccessKey = _configuration["Database:AWS_SECRET_ACCESS_KEY"];
 
-            dynamoClient = new AmazonDynamoDBClient(config);
+            dynamoClient = new AmazonDynamoDBClient(
+                new BasicAWSCredentials(
+                    awsAccessKeyId,awsSecretAccessKey
+                ),
+                config);
             var mongoClient = new MongoClient(
                 UserDatabaseSettings.Value.ConnectionString);
 
@@ -55,7 +65,7 @@ namespace CSCI321.Server.Helpers
                 TableName = "Users",  // Replace with your table name
                 Key = new Dictionary<string, AttributeValue>
                 {
-                    { "UserId", new AttributeValue { S = userId } }  // Key should match DynamoDB table
+                    { "userId", new AttributeValue { S = userId } }  // Key should match DynamoDB table
                 }
             };
 
@@ -69,8 +79,8 @@ namespace CSCI321.Server.Helpers
             // Convert DynamoDB attributes to a User object
             var user = new User
             {
-                refreshToken = response.Item["RefreshToken"].S,
-                refreshTokenExpiry = DateTime.Parse(response.Item["RefreshTokenExpiry"].S),
+                refreshToken = response.Item["refreshToken"].S,
+                refreshTokenExpiry = DateTime.Parse(response.Item["refreshTokenExpiry"].S),
                 
             };
     
@@ -168,7 +178,7 @@ namespace CSCI321.Server.Helpers
                 TableName = "Users",  // Replace with your table name
                 Key = new Dictionary<string, AttributeValue>
                 {
-                    { "UserId", new AttributeValue { S = userId } }  // Key should match DynamoDB table
+                    { "userId", new AttributeValue { S = userId } }  // Key should match DynamoDB table
                 }
             };
 
@@ -182,13 +192,13 @@ namespace CSCI321.Server.Helpers
             // Convert DynamoDB attributes to a User object
             var user = new User
             {
-                userId = response.Item["UserId"].S,
-                name = response.Item["Name"].S,
-                email = response.Item["Email"].S,
-                tickets = response.Item.ContainsKey("Tickets") ? 
-                    JsonConvert.DeserializeObject<List<Ticket>>(response.Item["Tickets"].S) : new List<Ticket>(),
-                refreshToken = response.Item["RefreshToken"].S,
-                refreshTokenExpiry = DateTime.Parse(response.Item["RefreshTokenExpiry"].S),
+                userId = response.Item["userId"].S,
+                name = response.Item["name"].S,
+                email = response.Item["email"].S,
+                tickets = response.Item.ContainsKey("tickets") ? 
+                    JsonConvert.DeserializeObject<List<Ticket>>(response.Item["tickets"].S) : new List<Ticket>(),
+                refreshToken = response.Item["refreshToken"].S,
+                refreshTokenExpiry = DateTime.Parse(response.Item["refreshTokenExpiry"].S),
                 
             };
 
@@ -198,8 +208,6 @@ namespace CSCI321.Server.Helpers
         // New method to get user by Email
         public async Task<Dictionary<string, AttributeValue>> GetUserByEmailAsync(string email)
         {
-            var table = Table.LoadTable(dynamoClient, TableName);
-            
             // Create a query configuration
             var queryRequest = new QueryRequest
             {
