@@ -22,7 +22,7 @@ const HostEvent = () => {
     const [eventDetails, setEventDetails] = useState({
         eventTicketType: '',
         tickets:  [],
-        id:  generateObjectId(),
+        eventId:  generateObjectId(),
         userId:  '',
         title:  passedEvent.title || '',
         category:  'Music',

@@ -191,21 +191,34 @@ public class EventService
 
         // Convert the result to EventSummary
         var eventSummaries = new List<EventSummary>();
+        var now = DateTime.UtcNow;
+
         foreach (var item in scanResponse.Items)
         {
-            var eventSummary = new EventSummary
-            {
-                id = item["eventId"].S,
-                title = item["title"].S,
-                location = item["location"].S,
-                startDate = item["startDate"].S,
-                startTime = item["startTime"].S,
-                endTime = item["endTime"].S,
-                category = item["category"].S,
-                image = item.ContainsKey("image") ? item["image"].S : null  // Get imageUrl if it exists
-            };
+            // Parse event date and time
+            var eventStartDate = DateTime.ParseExact(
+                $"{item["startDate"].S} {item["startTime"].S}",
+                "yyyy-MM-dd HH:mm",
+                System.Globalization.CultureInfo.InvariantCulture
+            );
 
-            eventSummaries.Add(eventSummary);
+            // Include only future events
+            if (eventStartDate >= now)
+            {
+                var eventSummary = new EventSummary
+                {
+                    id = item["eventId"].S,
+                    title = item["title"].S,
+                    location = item["location"].S,
+                    startDate = item["startDate"].S,
+                    startTime = item["startTime"].S,
+                    endTime = item["endTime"].S,
+                    category = item["category"].S,
+                    image = item.ContainsKey("image") ? item["image"].S : null
+                };
+
+                eventSummaries.Add(eventSummary);
+            }
         }
 
         return eventSummaries;

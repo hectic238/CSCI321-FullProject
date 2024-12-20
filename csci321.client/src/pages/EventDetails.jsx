@@ -12,6 +12,7 @@ const EventDetails = () => {
     const [totalTickets, setTotalTickets] = useState(0);
     const [totalPrice, setTotalPrice] = useState(0);
     const [attendeeCount, setAttendeeCount] = useState(0); // State for free event attendees
+    const [isEventInPast, setIsEventInPast] = useState(false);
 
     const [isDrawerVisible, setIsDrawerVisible] = useState(false);
     const [sidebarVisible, setSidebarVisible] = useState(false);
@@ -68,11 +69,11 @@ const EventDetails = () => {
     };
 
     const handleAttendClick = () => {
-        // Increment the event's attendee count
-        eventDetails.numberAttendees += attendeeCount;
-        editEvent(eventDetails);
-        console.log(`Added ${attendeeCount} attendees to the event.`); // This is where you might want to save the updated event
-        
+        if (!isEventInPast) {
+            eventDetails.numberAttendees += attendeeCount;
+            editEvent(eventDetails);
+            console.log(`Added ${attendeeCount} attendees to the event.`);
+        }
     };
 
     useEffect(() => {
@@ -82,6 +83,9 @@ const EventDetails = () => {
         fetchEvent(eventId).then(event => {
             if (event) {
                 setEventDetails(event);
+                const now = new Date();
+                const eventDateTime = new Date(`${event.startDate}T${event.startTime}`);
+                setIsEventInPast(eventDateTime < now);
             }
         });
     }, [eventId]);
@@ -140,7 +144,17 @@ const EventDetails = () => {
                                 <button onClick={() => handleAttendeeCountChange(1)}>+</button>
                             </div>
                             <Button
-                                onClick={() => handleAttendClick()}>Attend</Button>
+                                onClick={handleAttendClick}
+                                disabled={isEventInPast}
+                            >
+                                Attend
+                            </Button>
+
+                            {isEventInPast && (
+                                <p className="event-message">
+                                    This event has already happened. Tickets can no longer be purchased or attended.
+                                </p>
+                            )}
                         </div>
                     ) : (
                         <div>{eventDetails.tickets.map((ticket, index) => (
@@ -151,16 +165,18 @@ const EventDetails = () => {
                                     <button
                                         className="quantity-btn"
                                         onClick={() => handleRemoveTicket(ticket)}
-                                        disabled={ticket.count < 1} // Disable if sold out
-                                    >-
+                                        disabled={ticket.count < 1 || isEventInPast} // Disable if sold out or event passed
+                                    >
+                                        -
                                     </button>
                                     <span>{selectedTickets.find(t => t.name === ticket.name)?.quantity || 0}</span>
 
                                     <button
                                         className="quantity-btn"
                                         onClick={() => handleAddTicket(ticket)}
-                                        disabled={ticket.count < 1} // Disable if sold out
-                                    >+
+                                        disabled={ticket.count < 1 || isEventInPast} // Disable if sold out or event passed
+                                    >
+                                        +
                                     </button>
                                 </div>
                             </div>
@@ -168,7 +184,18 @@ const EventDetails = () => {
                             <div className="total-section">
                                 <p>Total Tickets: {totalTickets}</p>
                                 <p>Total Price: ${totalPrice}</p>
-                                <Button onClick={handleCheckout} disabled={totalTickets === 0}>Checkout</Button>
+                                <Button
+                                    onClick={handleCheckout}
+                                    disabled={totalTickets === 0 || isEventInPast} // Disable checkout if event passed
+                                >
+                                    Checkout
+                                </Button>
+
+                                {isEventInPast && (
+                                    <p className="event-message">
+                                        This event has already happened. Tickets can no longer be purchased or attended.
+                                    </p>
+                                )}
                             </div>
                         </div>
                     )}
