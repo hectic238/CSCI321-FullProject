@@ -1,3 +1,4 @@
+using System.Text.Json;
 using CSCI321.Server.Helpers;
 using CSCI321.Server.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -26,8 +27,9 @@ public class OrderController : ControllerBase
 
         try
         {
-            Console.WriteLine("Order Received " + order);
-            
+            Console.WriteLine("Order Received " + order.orderId);
+            Console.WriteLine($"Order Received: {JsonSerializer.Serialize(order)}");
+
             var utcDateTime = DateTimeOffset.FromUnixTimeMilliseconds(order.orderDate).UtcDateTime;
             var sydneyTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Australia/Sydney");
             var sydneyDateTime = TimeZoneInfo.ConvertTimeFromUtc(utcDateTime, sydneyTimeZone);
@@ -51,8 +53,12 @@ public class OrderController : ControllerBase
     {
         try
         {
+            
+            Console.WriteLine("Before Orders");
             var orders = await _orderService.GetOrdersByUserIdAsync(userId);
-
+            Console.WriteLine("After Orders");
+            
+            
             if (orders == null || !orders.Any())
             {
                 return NotFound(new { message = "No orders found for the given user ID." });

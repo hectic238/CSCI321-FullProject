@@ -32,14 +32,11 @@ const MyTickets = () => {
         return `${formattedHours}:${minutes} ${ampm}`; // Return formatted time
     };
 
-    useEffect(() => {
-        const fetchOrders = async () => {
+    useEffect(() => {const fetchOrders = async () => {
             const enrichedOrders = await enrichOrdersWithEventDetails(userId);
             setOrders(enrichedOrders || []);
         };
-        
         fetchOrders();
-        console.log(orders);
     }, [userId]);
 
     return (

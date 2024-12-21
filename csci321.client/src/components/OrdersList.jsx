@@ -1,9 +1,5 @@
 import React, { useState } from 'react';
 
-
-
-
-
 const OrdersList = ({ orders, formatDate, formatTime }) => {
     const [expandedOrderId, setExpandedOrderId] = useState(null);
 
@@ -11,37 +7,33 @@ const OrdersList = ({ orders, formatDate, formatTime }) => {
         setExpandedOrderId(expandedOrderId === orderId ? null : orderId);
     };
 
-    const [expanded, setExpanded] = React.useState(false);
-    
     return (
         <ul>
             {orders.map((order) => (
-                <div>
-                <div className="ticket-row" key={order.orderId}>
-                    <div className="ticket-image">
-                        <img src={order.image} alt={order.title} />
-                    </div>
-                    <div className="ticket-details">
-                        <div className="ticket-name">{order.title}</div>
-                        <div className="ticket-date">{formatDate(order.startDate)}</div>
-                        <div className="ticket-time">
-                            {formatTime(order.startTime)} - {formatTime(order.endTime)}
+                <div key={order.orderId}> {/* Add key here */}
+                    <div className="ticket-row">
+                        <div className="ticket-image">
+                            <img src={order.image} alt={order.title} />
                         </div>
-                        <div className="ticket-location">{order.location}</div>
+                        <div className="ticket-details">
+                            <div className="ticket-name">{order.title}</div>
+                            <div className="ticket-date">{formatDate(order.startDate)}</div>
+                            <div className="ticket-time">
+                                {formatTime(order.startTime)} - {formatTime(order.endTime)}
+                            </div>
+                            <div className="ticket-location">{order.location}</div>
+                        </div>
+                        <div className="ticket-actions">
+                            <button onClick={() => toggleExpand(order.orderId)}>
+                                {expandedOrderId === order.orderId ? 'Hide Info' : 'Additional Info'}
+                            </button>
+                            <button>Download Info</button>
+                            <button>Add to Apple Wallet</button>
+                            <button>Add to Google Wallet</button>
+                        </div>
                     </div>
-                    <div className="ticket-actions">
-                        <button onClick={() => toggleExpand(order.orderId)}>
-                            {expandedOrderId === order.orderId ? 'Hide Info' : 'Additional Info'}
-                        </button>
-                        <button>Download Info</button>
-                        <button>Add to Apple Wallet</button>
-                        <button>Add to Google Wallet</button>
-                    </div>
-                </div>
-                <div>
                     {expandedOrderId === order.orderId && (
                         <div className="ticket-expanded">
-                            {/* Expanded content goes here */}
                             <div className="ticket-section">
                                 <h4>Ticket Information</h4>
                                 {order.tickets.map((ticket, index) => (
@@ -49,19 +41,14 @@ const OrdersList = ({ orders, formatDate, formatTime }) => {
                                 ))}
                                 <strong>Total: ${order.totalPrice}</strong>
                             </div>
-                            <div className="ticket-section">
                             {order.refundable && (
                                 <div className="ticket-section">
                                     <h4>Refunds</h4>
                                     <button>Request Refund</button>
                                 </div>
                             )}
-                            </div>
-                            
                         </div>
-
                     )}
-                </div>
                 </div>
             ))}
         </ul>

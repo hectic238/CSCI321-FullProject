@@ -74,7 +74,9 @@ export const logoutUser = () => {
 }
 
 
-function accessTokenIsExpired(accessToken) {
+export const accessTokenIsExpired = () => {
+    const accessToken = localStorage.getItem('accessToken');
+
     if (!accessToken) return true;
 
     const decodedToken = parseJwt(accessToken);

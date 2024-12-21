@@ -1,6 +1,6 @@
 ﻿import {jwtDecode} from 'jwt-decode';
 import {getURL} from "@/components/URL.jsx"; // Import the jwt-decode library
-
+import {accessTokenIsExpired, RefreshToken} from "@/components/RefreshToken.jsx"
 
 export const getUserIdFromToken = () => {
     const token = localStorage.getItem("accessToken");
@@ -22,6 +22,13 @@ export const getUserTypeFromToken = () => {
         const decodedToken = jwtDecode(token);
         return decodedToken['userType'];
     }
+}
+
+const tryRefreshToken = () => {
+    if(accessTokenIsExpired()) {
+        RefreshToken();
+    }
+    
 }
 
 export const generateObjectId = () =>  {
@@ -77,6 +84,9 @@ export const editEvent = async (updatedEventDetails) => {
         console.error('No access token found. Please log in.');
         return;
     }
+    
+    tryRefreshToken();
+    
     var baseUrl = getURL();
     console.log(updatedEventDetails);
     try {
@@ -190,6 +200,8 @@ export const handlePublishOrder = async (orderDetails) => {
     }
 
     var baseUrl = getURL();
+    
+    tryRefreshToken();
 
     try {
         const response = await fetch(`${baseUrl}/api/Order/publish`, {
@@ -230,6 +242,7 @@ export const fetchOrdersByUserId = async (userId) => {
         return;
     }
     var baseUrl = getURL();
+    tryRefreshToken();
 
     try {
         const response = await fetch(`${baseUrl}/api/Order/getOrdersByUserId/${userId}`, {
@@ -278,7 +291,6 @@ export const enrichOrdersWithEventDetails = async (userId) => {
                 };
             })
         );
-        console.log(enrichedOrders);
         return enrichedOrders;
     } catch (error) {
         console.error('Error enriching orders:', error);
