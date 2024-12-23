@@ -30,33 +30,33 @@ const App = () => {
     
     
     // Track user activity (idle timeout)
-    const useIdleTimer = (timeout, onIdle) => {
-        useEffect(() => {
-          let timer;
-      
-          const resetTimer = () => {
-            clearTimeout(timer);
-            timer = setTimeout(onIdle, timeout);
-          };
-      
-          window.addEventListener("mousemove", resetTimer);
-          window.addEventListener("keydown", resetTimer);
-      
-          resetTimer(); // Initialize timer
-      
-          return () => {
-            clearTimeout(timer);
-            window.removeEventListener("mousemove", resetTimer);
-            window.removeEventListener("keydown", resetTimer);
-          };
-        }, [timeout, onIdle]);
-      };
-
+    // const useIdleTimer = (timeout, onIdle) => {
+    //     useEffect(() => {
+    //       let timer;
+    //  
+    //       const resetTimer = () => {
+    //         clearTimeout(timer);
+    //         timer = setTimeout(onIdle, timeout);
+    //       };
+    //  
+    //       window.addEventListener("mousemove", resetTimer);
+    //       window.addEventListener("keydown", resetTimer);
+    //  
+    //       resetTimer(); // Initialize timer
+    //  
+    //       return () => {
+    //         clearTimeout(timer);
+    //         window.removeEventListener("mousemove", resetTimer);
+    //         window.removeEventListener("keydown", resetTimer);
+    //       };
+    //     }, [timeout, onIdle]);
+    //   };
+//
   // Detect user inactivity (5 minutes = 300000ms)
-  useIdleTimer(300000, () => {
-    console.log("User is idle for more than 5 minutes, logging out.");
-    logoutUser();
-  });
+  // useIdleTimer(300000, () => {
+  //   console.log("User is idle for more than 5 minutes, logging out.");
+  //   logoutUser();
+  // });
 
     useEffect(() => {
     if(accessToken) {

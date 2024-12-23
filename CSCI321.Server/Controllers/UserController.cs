@@ -187,8 +187,13 @@ public class UserController : ControllerBase
 
         var userId =  User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         
+        Console.WriteLine(userId);
+        
         var user = await _userService.GetByIdAsync(userId);
 
+        Console.WriteLine(user.ToString());
+        
+        
         if (user == null)
         {
             return NotFound("User not found.");

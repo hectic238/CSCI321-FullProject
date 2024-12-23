@@ -35,7 +35,16 @@ function EventCardLarge({ event, isDraft }) {
         isPast = new Date(event.startDate) < new Date();
     }
 
-    
+    const handleAddToCalendar = (event) => {
+        const { title, description, startDate, endDate, location } = event;
+        const url = `/api/calendar/generate-ics?title=${encodeURIComponent(title)}&description=${encodeURIComponent(description)}&startDate=${encodeURIComponent(startDate)}&endDate=${encodeURIComponent(endDate)}&location=${encodeURIComponent(location)}`;
+        window.open(url, '_blank');
+    };
+
+    return (
+        <button onClick={() => handleAddToCalendar(event)}>Add to Calendar</button>
+    );
+
 
 
     const editEvent = () => {
