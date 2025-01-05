@@ -27,8 +27,6 @@ const App = () => {
     const [isLoggedOut, setIsLoggedOut] = useState(false);
     const location = useLocation();
     
-    
-    
     // Track user activity (idle timeout)
     // const useIdleTimer = (timeout, onIdle) => {
     //     useEffect(() => {

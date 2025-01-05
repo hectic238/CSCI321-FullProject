@@ -121,7 +121,10 @@ public class UserController : ControllerBase
             return Unauthorized("Invalid access token.");
         }
         
-        Console.WriteLine(principal);
+        var userType = principal.FindFirst("userType").Value;
+        
+        Console.WriteLine($"UserType in refreshToken: {userType}");
+        
         
         var userId = principal.FindFirst(ClaimTypes.NameIdentifier).Value;
     
@@ -133,6 +136,8 @@ public class UserController : ControllerBase
         {
             return NotFound("User not found.");
         }
+        
+        Console.WriteLine($"UserType in refreshToken2: {userType}");
 
         // Validate the refresh token
         var refreshTokenData = await _userService.GetRefreshTokenFromDB(userId); // Make sure userId is defined
@@ -153,7 +158,7 @@ public class UserController : ControllerBase
 
 
         // Generate a new access token
-        var newAccessToken = _authService.GenerateAccessToken(user.userId, user.email, user.userType);
+        var newAccessToken = _authService.GenerateAccessToken(user.userId, user.email, userType);
 
         
         return Ok(new { accessToken = newAccessToken });

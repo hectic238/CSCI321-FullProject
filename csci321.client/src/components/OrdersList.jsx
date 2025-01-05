@@ -73,54 +73,66 @@ const OrdersList = ({ orders, formatDate, formatTime }) => {
         link.remove();
     };
 
+    const isEventInThePast = (startDate, startTime) => {
+        const eventDate = new Date(`${startDate}T${startTime}`);
+        const now = new Date();
+        return eventDate < now;
+    };
 
 
     return (
         <ul>
-            {orders.map((order) => (
-                <div key={order.orderId}> {/* Add key here */}
-                    <div className="ticket-row">
-                        <div className="ticket-image">
-                            <img src={order.image} alt={order.title} />
-                        </div>
-                        <div className="ticket-details">
-                            <div className="ticket-name">{order.title}</div>
-                            <div className="ticket-date">{formatDate(order.startDate)}</div>
-                            <div className="ticket-time">
-                                {formatTime(order.startTime)} - {formatTime(order.endTime)}
+            {orders.map((order) => {
+                const isPast = isEventInThePast(order.startDate, order.startTime);
+                return (
+                    <div key={order.orderId}>
+                        <div className="ticket-row">
+                            <div className="ticket-image">
+                                <img src={order.image} alt={order.title} />
                             </div>
-                            <div className="ticket-location">{order.location}</div>
-                        </div>
-                        <div className="ticket-actions">
-                            <button onClick={() => toggleExpand(order.orderId)}>
-                                {expandedOrderId === order.orderId ? 'Hide Info' : 'Additional Info'}
-                            </button>
-                            <button>Download Info</button>
-                            <button>Add to Apple Wallet</button>
-                            <button>Add to Google Wallet</button>
-                            <button onClick={() => addToCalendar(order)}>Add to Calendar</button>
-                            <button onClick={() => handleAddToGoogleCalendar(order)}>Add to Google Calendar</button>
-                        </div>
-                    </div>
-                    {expandedOrderId === order.orderId && (
-                        <div className="ticket-expanded">
-                            <div className="ticket-section">
-                                <h4>Ticket Information</h4>
-                                {order.tickets.map((ticket, index) => (
-                                    <p key={index}>{`${ticket.name}: ${ticket.quantity} x $${ticket.price}`}</p>
-                                ))}
-                                <strong>Total: ${order.totalPrice}</strong>
-                            </div>
-                            {order.refundable && (
-                                <div className="ticket-section">
-                                    <h4>Refunds</h4>
-                                    <button>Request Refund</button>
+                            <div className="ticket-details">
+                                <div className="ticket-name">{order.title}</div>
+                                <div className="ticket-date">{formatDate(order.startDate)}</div>
+                                <div className="ticket-time">
+                                    {formatTime(order.startTime)} - {formatTime(order.endTime)}
                                 </div>
-                            )}
+                                <div className="ticket-location">{order.location}</div>
+                            </div>
+                            <div className="ticket-actions">
+                                <button onClick={() => toggleExpand(order.orderId)}>
+                                    {expandedOrderId === order.orderId ? 'Hide Info' : 'Additional Info'}
+                                </button>
+                                {!isPast && (
+                                    <>
+                                        <button>Download Info</button>
+                                        <button>Add to Apple Wallet</button>
+                                        <button>Add to Google Wallet</button>
+                                        <button onClick={() => addToCalendar(order)}>Add to Calendar</button>
+                                        <button onClick={() => handleAddToGoogleCalendar(order)}>Add to Google Calendar</button>
+                                    </>
+                                )}
+                            </div>
                         </div>
-                    )}
-                </div>
-            ))}
+                        {expandedOrderId === order.orderId && (
+                            <div className="ticket-expanded">
+                                <div className="ticket-section">
+                                    <h4>Ticket Information</h4>
+                                    {order.tickets.map((ticket, index) => (
+                                        <p key={index}>{`${ticket.name}: ${ticket.quantity} x $${ticket.price}`}</p>
+                                    ))}
+                                    <strong>Total: ${order.totalPrice}</strong>
+                                </div>
+                                {order.refundable && !isPast && (
+                                    <div className="ticket-section">
+                                        <h4>Refunds</h4>
+                                        <button>Request Refund</button>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                    </div>
+                );
+            })}
         </ul>
     );
 };

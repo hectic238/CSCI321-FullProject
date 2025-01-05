@@ -1,19 +1,24 @@
 import React, { useEffect, useState } from 'react';
 import Navbar from "../components/Navbar.jsx";
 import {RefreshToken} from "@/components/RefreshToken.jsx";
+import { Link } from 'react-router-dom';
+
 import './ProfileDetails.css'
 import {TextField, FormControl, InputLabel, MenuItem, Select} from '@mui/material';
-import dayjs from 'dayjs';
 import { DateField } from '@mui/x-date-pickers/DateField';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DemoContainer } from '@mui/x-date-pickers/internals/demo';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { MuiTelInput } from 'mui-tel-input'
+import {enrichOrdersWithEventDetails} from "@/components/Functions.jsx";
+import OrdersList from "@/components/OrdersList.jsx";
 
 const ProfileDetails = () => {
     const [userDetails, setUserDetails] = useState(null);
     const [error, setError] = useState(null);
-    
+    const [orders, setOrders] = useState([]);
+
+
     const [title, setTitle] = useState(null);
     const [dateOfBirth, setDateOfBirth] = useState(null);
     const [phoneNumber, setPhoneNumber] = useState(null);
@@ -61,12 +66,39 @@ const ProfileDetails = () => {
         setUserDetails({ ...userDetails, [name]: value });
     };
 
+    useEffect(() => {const fetchOrders = async () => {
+        const enrichedOrders = await enrichOrdersWithEventDetails(true);
+        setOrders(enrichedOrders || []);
+    };
+        fetchOrders();
+    }, []);
+
     const handleChange = (event) => {
         setTitle(event.target.value); // Update state with the selected value
     };
 
     const handlePhoneChange = (value) => {
         setPhoneNumber(value);
+    };
+
+    const formatDate = (dateString) => {
+        const date = new Date(dateString);
+
+        // Options for formatting
+        const options = { day: 'numeric', month: 'long', year: 'numeric' };
+
+        // Get formatted date
+        return date.toLocaleDateString('en-GB', options);
+    };
+
+    const formatTime = (timeString) => {
+        if(timeString === undefined){
+            return '';
+        }
+        const [hours, minutes] = timeString.split(':');
+        const formattedHours = hours % 12 || 12; // Convert to 12-hour format
+        const ampm = hours >= 12 ? 'PM' : 'AM'; // Determine AM/PM
+        return `${formattedHours}:${minutes} ${ampm}`; // Return formatted time
     };
 
     // Toggle notifications
@@ -197,7 +229,17 @@ const ProfileDetails = () => {
                 {tab === "orders" && (
                     <div className="order-history">
                         <h2>Order History</h2>
-                        <p>No orders yet!</p>
+                        <div className="tickets-container">
+
+                            {orders.length === 0 ? (
+                                <div className="no-tickets">
+                                    <p>No current tickets to display.</p>
+                                    <Link to="/explore">Explore Events</Link>
+                                </div>
+                            ) : (
+                                <OrdersList orders={orders} formatDate={formatDate} formatTime={formatTime}/>
+                            )}
+                        </div>
                     </div>
                 )}
 

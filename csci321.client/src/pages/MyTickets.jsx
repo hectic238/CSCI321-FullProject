@@ -33,7 +33,7 @@ const MyTickets = () => {
     };
 
     useEffect(() => {const fetchOrders = async () => {
-            const enrichedOrders = await enrichOrdersWithEventDetails(userId);
+            const enrichedOrders = await enrichOrdersWithEventDetails(false);
             setOrders(enrichedOrders || []);
         };
         fetchOrders();

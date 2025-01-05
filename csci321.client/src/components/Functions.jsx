@@ -1,6 +1,6 @@
 ﻿import {jwtDecode} from 'jwt-decode';
 import {getURL} from "@/components/URL.jsx"; // Import the jwt-decode library
-import {accessTokenIsExpired, RefreshToken} from "@/components/RefreshToken.jsx"
+import {accessTokenIsExpired, logoutUser, RefreshToken} from "@/components/RefreshToken.jsx"
 
 export const getUserIdFromToken = () => {
     const token = localStorage.getItem("accessToken");
@@ -26,6 +26,8 @@ export const getUserTypeFromToken = () => {
 
 const tryRefreshToken = () => {
     if(accessTokenIsExpired()) {
+        console.log("AccessToken is expired!!!")
+
         RefreshToken();
     }
     
@@ -235,15 +237,14 @@ export const handlePublishOrder = async (orderDetails) => {
 };
 
 export const fetchOrdersByUserId = async (userId) => {
-    const accessToken = localStorage.getItem('accessToken');
+    let accessToken = localStorage.getItem('accessToken');
 
     if (!accessToken) {
         console.error('No access token found. Please log in.');
         return;
     }
     var baseUrl = getURL();
-    tryRefreshToken();
-
+    
     try {
         const response = await fetch(`${baseUrl}/api/Order/getOrdersByUserId/${userId}`, {
             method: 'GET',
@@ -252,6 +253,31 @@ export const fetchOrdersByUserId = async (userId) => {
                 'Content-Type': 'application/json',
             },
         });
+        
+        if( response.status === 401) {
+            const newAccessToken = await RefreshToken();
+            
+            console.log("access Token " + newAccessToken);
+            localStorage.setItem('accessToken',newAccessToken);
+            
+            if(!newAccessToken) {
+                
+                console.log("should log out user");
+                //logoutUser();
+            }
+            const retryResponse = await fetch(`${baseUrl}/api/Order/getOrdersByUserId/${userId}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${newAccessToken}`,
+                    'Content-Type': 'application/json',
+                },
+            });
+            if (!retryResponse.ok) {
+                throw new Error(`Request failed: ${retryResponse.statusText}`);
+            }
+
+            return retryResponse.json();
+        }
 
         if (!response.ok) {
             let errorData;
@@ -271,9 +297,12 @@ export const fetchOrdersByUserId = async (userId) => {
     }
 };
 
-export const enrichOrdersWithEventDetails = async (userId) => {
+export const enrichOrdersWithEventDetails = async (includePastOrders = true) => {
     try {
+        const userId = getUserIdFromToken()
         const orders = await fetchOrdersByUserId(userId);
+
+        const now = new Date();
 
         const enrichedOrders = await Promise.all(
             orders.map(async (order) => {
@@ -287,11 +316,22 @@ export const enrichOrdersWithEventDetails = async (userId) => {
                     startDate: eventDetails?.startDate || '',
                     startTime: eventDetails?.startTime || '',
                     endTime: eventDetails?.endTime || '',
-                    
                 };
             })
         );
-        return enrichedOrders;
+
+
+        // Filter orders based on event date and time
+        const filteredOrders = enrichedOrders.filter((order) => {
+            const startDate = order.startDate;
+            const startTime = order.startTime;
+            const eventDate = new Date(`${startDate}T${startTime}`);
+            return includePastOrders ? true : eventDate >= now;
+        });
+        
+        return filteredOrders
+        
+        
     } catch (error) {
         console.error('Error enriching orders:', error);
         return [];
