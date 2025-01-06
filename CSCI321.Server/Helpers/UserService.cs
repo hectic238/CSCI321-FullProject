@@ -197,8 +197,8 @@ namespace CSCI321.Server.Helpers
                 email = response.Item["email"].S,
                 tickets = response.Item.ContainsKey("tickets") ? 
                     JsonConvert.DeserializeObject<List<Ticket>>(response.Item["tickets"].S) : new List<Ticket>(),
-                refreshToken = response.Item["refreshToken"].S,
-                refreshTokenExpiry = DateTime.Parse(response.Item["refreshTokenExpiry"].S),
+                // refreshToken = response.Item["refreshToken"].S,
+                // refreshTokenExpiry = DateTime.Parse(response.Item["refreshTokenExpiry"].S),
                 
             };
 

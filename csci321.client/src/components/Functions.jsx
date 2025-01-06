@@ -1,6 +1,7 @@
 ﻿import {jwtDecode} from 'jwt-decode';
 import {getURL} from "@/components/URL.jsx"; // Import the jwt-decode library
-import {accessTokenIsExpired, logoutUser, RefreshToken} from "@/components/RefreshToken.jsx"
+import {accessTokenIsExpired, RefreshToken} from "@/components/RefreshToken.jsx"
+import {APIWithToken} from "@/components/API.js";
 
 export const getUserIdFromToken = () => {
     const token = localStorage.getItem("accessToken");
@@ -193,108 +194,63 @@ export const updateUser = async (updatedUser) => {
 };
 
 export const handlePublishOrder = async (orderDetails) => {
-    const accessToken = localStorage.getItem('accessToken');
-
-    if (!accessToken) {
-        console.error('No access token found. Please log in.');
-        alert('No access token found. Please log in.');
-        return;
-    }
+    // const accessToken = localStorage.getItem('accessToken');
+    //
+    // if (!accessToken) {
+    //     console.error('No access token found. Please log in.');
+    //     alert('No access token found. Please log in.');
+    //     return;
+    // }
 
     var baseUrl = getURL();
     
-    tryRefreshToken();
+    let url = `${baseUrl}/api/Order/publish`;
 
-    try {
-        const response = await fetch(`${baseUrl}/api/Order/publish`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${accessToken}`,
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(orderDetails),
-        });
-        
-
-        if (!response.ok) {
-            let errorData;
-            try {
-                errorData = await response.json();
-            } catch (error) {
-                throw new Error('Failed to parse error response');
-            }
-            throw new Error(errorData.message || 'Order publish failed!');
-        }
-
-        await response.json();
-        alert('Order successfully published!');
-    } catch (error) {
-        console.error('Error publishing order:', error);
-        alert(`Error: ${error.message}`);
-    }
+    let response = APIWithToken(url, 'Get');
     
+    alert('Order successfully published!');
+
+
+    // tryRefreshToken();
+    //
+    // try {
+    //     const response = await fetch(`${baseUrl}/api/Order/publish`, {
+    //         method: 'POST',
+    //         headers: {
+    //             'Authorization': `Bearer ${accessToken}`,
+    //             'Content-Type': 'application/json',
+    //         },
+    //         body: JSON.stringify(orderDetails),
+    //     });
+    //    
+    //
+    //     if (!response.ok) {
+    //         let errorData;
+    //         try {
+    //             errorData = await response.json();
+    //         } catch (error) {
+    //             throw new Error('Failed to parse error response');
+    //         }
+    //         throw new Error(errorData.message || 'Order publish failed!');
+    //     }
+    //
+    //     await response.json();
+    // } catch (error) {
+    //     console.error('Error publishing order:', error);
+    //     alert(`Error: ${error.message}`);
+    // }
+    //
     
 };
 
 export const fetchOrdersByUserId = async (userId) => {
-    let accessToken = localStorage.getItem('accessToken');
-
-    if (!accessToken) {
-        console.error('No access token found. Please log in.');
-        return;
-    }
-    var baseUrl = getURL();
+    const baseUrl = getURL();
     
-    try {
-        const response = await fetch(`${baseUrl}/api/Order/getOrdersByUserId/${userId}`, {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${accessToken}`,
-                'Content-Type': 'application/json',
-            },
-        });
-        
-        if( response.status === 401) {
-            const newAccessToken = await RefreshToken();
-            
-            console.log("access Token " + newAccessToken);
-            localStorage.setItem('accessToken',newAccessToken);
-            
-            if(!newAccessToken) {
-                
-                console.log("should log out user");
-                //logoutUser();
-            }
-            const retryResponse = await fetch(`${baseUrl}/api/Order/getOrdersByUserId/${userId}`, {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${newAccessToken}`,
-                    'Content-Type': 'application/json',
-                },
-            });
-            if (!retryResponse.ok) {
-                throw new Error(`Request failed: ${retryResponse.statusText}`);
-            }
+    let url = `${baseUrl}/api/Order/getOrdersByUserId/${userId}`;
+    
+    let response = APIWithToken(url, 'Get');
 
-            return retryResponse.json();
-        }
-
-        if (!response.ok) {
-            let errorData;
-            try {
-                errorData = await response.json();
-            } catch {
-                throw new Error('Failed to parse error response');
-            }
-            throw new Error(errorData.message || 'Failed to fetch orders');
-        }
-
-        const orders = await response.json();
-        return orders; // This will return the list of orders
-    } catch (error) {
-        console.error('Error fetching orders:', error);
-        alert(`Error: ${error.message}`);
-    }
+    return await response;
 };
 
 export const enrichOrdersWithEventDetails = async (includePastOrders = true) => {

@@ -12,6 +12,8 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { MuiTelInput } from 'mui-tel-input'
 import {enrichOrdersWithEventDetails} from "@/components/Functions.jsx";
 import OrdersList from "@/components/OrdersList.jsx";
+import {getURL} from "@/components/URL.jsx";
+import {APIWithToken} from "@/components/API.js";
 
 const ProfileDetails = () => {
     const [userDetails, setUserDetails] = useState(null);
@@ -24,36 +26,48 @@ const ProfileDetails = () => {
     const [phoneNumber, setPhoneNumber] = useState(null);
     
     const fetchUserDetails = async () => {
-        const accessToken = localStorage.getItem('accessToken');
+        var baseUrl = getURL();
 
-        if (!accessToken) {
-            console.error('No access token found. Please log in.');
-            return;
-        }
-        try {
-            
-            await RefreshToken();
-            const response = await fetch(`https://localhost:5144/api/User/get`, {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${accessToken}`, // Include the token
-                    'Content-Type': 'application/json',
-                },
-            });
-            
-            if (!response.ok) {
-                console.error('Failed to fetch user details:', response.status);
-                setError('Failed to fetch user details.');
-                return;
-            }
+        let url = `${baseUrl}/api/User/get`;
 
-            const data = await response.json(); // Only call this once
-            setUserDetails(data); // Store user details in state
-        } catch (err) {
-            console.error('An error occurred while fetching user details:', err);
-            setError('An error occurred while fetching user details.');
-        }
+        let response =  await APIWithToken(url, 'Get');
         
+        
+        
+        console.log(response);
+        
+        setUserDetails(response);
+        
+        // const accessToken = localStorage.getItem('accessToken');
+        //
+        // if (!accessToken) {
+        //     console.error('No access token found. Please log in.');
+        //     return;
+        // }
+        // try {
+        //    
+        //     await RefreshToken();
+        //     const response = await fetch(`https://localhost:5144/api/User/get`, {
+        //         method: 'GET',
+        //         headers: {
+        //             'Authorization': `Bearer ${accessToken}`, // Include the token
+        //             'Content-Type': 'application/json',
+        //         },
+        //     });
+        //    
+        //     if (!response.ok) {
+        //         console.error('Failed to fetch user details:', response.status);
+        //         setError('Failed to fetch user details.');
+        //         return;
+        //     }
+        //
+        //     const data = await response.json(); // Only call this once
+        //     setUserDetails(data); // Store user details in state
+        // } catch (err) {
+        //     console.error('An error occurred while fetching user details:', err);
+        //     setError('An error occurred while fetching user details.');
+        // }
+        //
     };
 
     

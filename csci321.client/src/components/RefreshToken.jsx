@@ -24,8 +24,9 @@
     
     // If the refreshTokenExpiry is earlier than now, log the user out
     if (expiryDate < new Date()) {
-        console.log("Refresh token has expired. Logging the user out.");
         logoutUser();
+        console.log("Refresh token has expired. Logging the user out.");
+
         return;
     }
 
@@ -44,9 +45,10 @@
                 });
 
             const data = await response.json();
-            const newAccessToken = data.accessToken;
-            localStorage.setItem('accessToken', newAccessToken); // Store the new access tokenreturn newAccessToken;
-        } catch (error) {logoutUser(); // Log out if refreshing the access token fails
+            localStorage.setItem('accessToken', data.accessToken); // Store the new access tokenreturn newAccessToken;
+            console.log("Access Token Refreshed");
+        } catch (error) {
+            logoutUser(); // Log out if refreshing the access token fails
         }
     }
     
@@ -55,10 +57,10 @@
 export const logoutUser = () => {
     
     localStorage.removeItem('accessToken');
-    localStorage.removeItem('userType');
-    console.log("User has been logged out. Redirecting to login.");
     // You can also add a redirect here to the login page
     window.location.href = '/home'; // For example
+    console.log("User has been logged out. Redirecting to login.");
+
 }
 
 
