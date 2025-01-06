@@ -61,17 +61,19 @@ namespace CSCI321.Server.Helpers
         }
 
 
-        public string GenerateAccessToken( User user)
+        public string GenerateAccessToken(string userId, string email, string userType)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
-            //var key = Encoding.ASCII.GetBytes("a very long and secure secret key");
-
+            
+            Console.WriteLine("UserId in GenerateToken" + userId);
+            Console.WriteLine("Email in GenerateToken" + email);
+            Console.WriteLine("UserType in GenerateToken" + userType);
             var claims = new[]
             {
-                new Claim(JwtRegisteredClaimNames.Sub, user.userId.ToString()),  // This should work for sub
+                new Claim(JwtRegisteredClaimNames.Sub, userId),  // This should work for sub
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                new Claim(JwtRegisteredClaimNames.Email, user.email.ToString()),
-                new Claim("userType", user.userType.ToString()),
+                new Claim(JwtRegisteredClaimNames.Email, email),
+                new Claim("userType", userType),
             };
             
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Key"]));
@@ -81,25 +83,12 @@ namespace CSCI321.Server.Helpers
                 configuration["Jwt:Issuer"],
                 configuration["Jwt:Audience"],
                 claims,
-                expires: DateTime.Now.AddMinutes(15),
+                expires: DateTime.Now.AddMinutes(2),
                 signingCredentials: signIn
                 );
             
             string tokenValue = new JwtSecurityTokenHandler().WriteToken(token);
-
-            // var tokenDescriptor = new SecurityTokenDescriptor
-            // {
-            //     Subject = new ClaimsIdentity(new[]
-            //     {
-            //         new Claim(ClaimTypes.NameIdentifier, userId),
-            //     }),
-            //
-            //     Expires = DateTime.UtcNow.AddMinutes(tokenExpirationMinutes),
-            //     SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key),
-            //         SecurityAlgorithms.HmacSha256Signature)
-            // };
-            //
-            // var token = tokenHandler.CreateToken(tokenDescriptor);
+            
             return tokenValue;
         }
         

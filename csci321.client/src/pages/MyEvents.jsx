@@ -73,21 +73,21 @@ const MyEvents = () => {
                     <p>No Active Events</p>
                 )}
                 {currentTab === 'active' && activeEvents.map(event => (
-                    <EventCardLarge key={event.id} event={event} isDraft={false}/>
+                    <EventCardLarge key={event.eventId} event={event} isDraft={false}/>
                 ))}
                 
                 {currentTab === 'draft' && draftEvents.length === 0 && (
                     <p>No Draft Events</p>
                 )}
                 {currentTab === 'draft' && draftEvents.map(event => (
-                    <EventCardLarge key={event.id} event={event} isDraft={true} />
+                    <EventCardLarge key={event.eventId} event={event} isDraft={true} />
                 ))}
                 
                 {currentTab === 'past' && pastEvents.length === 0 && (
                     <p>No Past Events</p>
                 )}
                 {currentTab === 'past' && pastEvents.map(event => (
-                    <EventCardLarge key={event.id} event={event} isDraft={false} />
+                    <EventCardLarge key={event.eventId} event={event} isDraft={false} />
                 ))}
             </div>
             </div>

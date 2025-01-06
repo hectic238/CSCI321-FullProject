@@ -211,7 +211,7 @@ const Checkout = () => {
                 tickets: newTickets, // If tickets are part of the order
                 orderDate: Date.now(),
                 userId: getUserIdFromToken(),
-                eventId: event.id,
+                eventId: event.eventId,
                 refundable: isRefundableSelected,
                 paymentMethod: selectedPaymentMethod,
                 
@@ -226,7 +226,7 @@ const Checkout = () => {
             console.log("Updated order:", updatedOrder);
 
             // Redirect to confirmation or another page
-            navigate(`/confirmation/${event.id}`);
+            navigate(`/confirmation/${event.eventId}`);
         }).catch(err => {
             console.error("Error updating event:", err);
         });

@@ -1,7 +1,6 @@
 ﻿export const RefreshToken = async () => {
 
-    const accessToken = localStorage.getItem('accessToken');
-    // const refreshToken = localStorage.getItem('refreshToken');
+    let accessToken = localStorage.getItem('accessToken');
     //
     if (!accessToken) {
         console.log("No refresh token found. User is likely logged out.");
@@ -22,17 +21,12 @@
 
     const expiryDateJSON = await expiryResponse.json();
     const expiryDate = new Date(expiryDateJSON.refreshExpiry);
-
-     //Test expired Token
-    //expiryDate.setDate(expiryDate.getDate() - 7);
-    //console.log(expiryDate);
     
-    
-
     // If the refreshTokenExpiry is earlier than now, log the user out
     if (expiryDate < new Date()) {
-        console.log("Refresh token has expired. Logging the user out.");
         logoutUser();
+        console.log("Refresh token has expired. Logging the user out.");
+
         return;
     }
 
@@ -51,13 +45,9 @@
                 });
 
             const data = await response.json();
-            const newAccessToken = data.accessToken;
-            
-            localStorage.setItem('accessToken', newAccessToken); // Store the new access token
-            console.log("Access token successfully refreshed.");
-            return newAccessToken;
+            localStorage.setItem('accessToken', data.accessToken); // Store the new access tokenreturn newAccessToken;
+            console.log("Access Token Refreshed");
         } catch (error) {
-            console.log("Failed to refresh access token:", error);
             logoutUser(); // Log out if refreshing the access token fails
         }
     }
@@ -67,19 +57,20 @@
 export const logoutUser = () => {
     
     localStorage.removeItem('accessToken');
-    localStorage.removeItem('userType');
-    console.log("User has been logged out. Redirecting to login.");
     // You can also add a redirect here to the login page
     window.location.href = '/home'; // For example
+    console.log("User has been logged out. Redirecting to login.");
+
 }
 
 
-function accessTokenIsExpired(accessToken) {
+export const accessTokenIsExpired = () => {
+    const accessToken = localStorage.getItem('accessToken');
+
     if (!accessToken) return true;
 
     const decodedToken = parseJwt(accessToken);
     const currentTime = Math.floor(Date.now() / 1000); // Get current time in seconds
-
     return decodedToken.exp < currentTime; // Compare the expiration time with current time
 }
 

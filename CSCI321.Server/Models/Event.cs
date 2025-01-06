@@ -7,7 +7,7 @@ namespace CSCI321.Server.Models
     {
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
-        public string id { get; set; }
+        public string eventId { get; set; }
         public string title { get; set; }
         public string userId { get; set; }
         public string eventTicketType { get; set; }

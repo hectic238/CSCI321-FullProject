@@ -1,5 +1,7 @@
-﻿import {jwtDecode} from 'jwt-decode'; // Import the jwt-decode library
-
+﻿import {jwtDecode} from 'jwt-decode';
+import {getURL} from "@/components/URL.jsx"; // Import the jwt-decode library
+import {accessTokenIsExpired, RefreshToken} from "@/components/RefreshToken.jsx"
+import {APIWithToken} from "@/components/API.js";
 
 export const getUserIdFromToken = () => {
     const token = localStorage.getItem("accessToken");
@@ -23,6 +25,15 @@ export const getUserTypeFromToken = () => {
     }
 }
 
+const tryRefreshToken = () => {
+    if(accessTokenIsExpired()) {
+        console.log("AccessToken is expired!!!")
+
+        RefreshToken();
+    }
+    
+}
+
 export const generateObjectId = () =>  {
     const timestamp = (Math.floor(new Date().getTime() / 1000)).toString(16);
     const randomHex = 'xxxxxxxxxxxxxxxx'.replace(/[x]/g, function() {
@@ -33,7 +44,8 @@ export const generateObjectId = () =>  {
 }
 
 export const fetchEventSummaries = async (searchTerm) => {
-    const response = await fetch(`https://localhost:5144/api/Event/search?searchTerm=${searchTerm || ''}`);
+    var baseUrl = getURL();
+    const response = await fetch(`${baseUrl}/api/Event/search?searchTerm=${searchTerm || ''}`);
     if (!response.ok) {
         throw new Error('Failed to fetch event summaries');
     }
@@ -41,7 +53,9 @@ export const fetchEventSummaries = async (searchTerm) => {
 };
 
 export const fetchEventsByCategory = async (category) => {
-    const response = await fetch(`https://localhost:5144/api/Event/category/${category}`);
+    var baseUrl = getURL();
+
+    const response = await fetch(`${baseUrl}/api/Event/category/${category}`);
     if (!response.ok) {
         throw new Error('Failed to fetch events by category');
     }
@@ -49,8 +63,10 @@ export const fetchEventsByCategory = async (category) => {
 };
 
 export const fetchEvent = async (eventId) => {
+    var baseUrl = getURL();
+
     try {
-        const response = await fetch(`https://localhost:5144/api/Event/${eventId}`);
+        const response = await fetch(`${baseUrl}/api/Event/${eventId}`);
 
         if (!response.ok) {
             const errorData = await response.json();
@@ -72,8 +88,12 @@ export const editEvent = async (updatedEventDetails) => {
         return;
     }
     
+    tryRefreshToken();
+    
+    var baseUrl = getURL();
+    console.log(updatedEventDetails);
     try {
-        const response = await fetch(`https://localhost:5144/api/Event/${updatedEventDetails.id}`, {
+        const response = await fetch(`${baseUrl}/api/Event/${updatedEventDetails.eventId}`, {
             method: 'PUT',
             headers: {
                 'Authorization': `Bearer ${accessToken}`,
@@ -81,6 +101,8 @@ export const editEvent = async (updatedEventDetails) => {
             },
             body: JSON.stringify(updatedEventDetails),
         });
+        
+        console.log(response);
 
         if (!response.ok) {
             const errorData = await response.json();
@@ -97,8 +119,10 @@ export const editEvent = async (updatedEventDetails) => {
 
 
 export const fetchEventsByUserId = async (userId) => {
+    var baseUrl = getURL();
+
     try {
-        const response = await fetch(`https://localhost:5144/api/Event/byUser/${userId}`);
+        const response = await fetch(`${baseUrl}/api/Event/byUser/${userId}`);
 
         if (!response.ok) {
             const errorData = await response.json();
@@ -113,8 +137,10 @@ export const fetchEventsByUserId = async (userId) => {
 };
 
 export const fetchDraftEventsByUserId = async (userId) => {
+    var baseUrl = getURL();
+
     try {
-        const response = await fetch(`https://localhost:5144/api/Event/byUser/${userId}/drafts`);
+        const response = await fetch(`${baseUrl}/api/Event/byUser/${userId}/drafts`);
 
         if (!response.ok) {
             const errorData = await response.json();
@@ -135,9 +161,10 @@ export const updateUser = async (updatedUser) => {
         console.error('No access token found. Please log in.');
         return;
     }
+    var baseUrl = getURL();
 
     try {
-        const response = await fetch('https://localhost:5144/api/User/updateUser', {
+        const response = await fetch(`${baseUrl}/api/User/updateUser`, {
             method: 'PUT',
             headers: {
                 'Authorization': `Bearer ${accessToken}`,
@@ -167,84 +194,71 @@ export const updateUser = async (updatedUser) => {
 };
 
 export const handlePublishOrder = async (orderDetails) => {
-    const accessToken = localStorage.getItem('accessToken');
+    // const accessToken = localStorage.getItem('accessToken');
+    //
+    // if (!accessToken) {
+    //     console.error('No access token found. Please log in.');
+    //     alert('No access token found. Please log in.');
+    //     return;
+    // }
 
-    if (!accessToken) {
-        console.error('No access token found. Please log in.');
-        alert('No access token found. Please log in.');
-        return;
-    }
+    var baseUrl = getURL();
     
+    let url = `${baseUrl}/api/Order/publish`;
 
-    try {
-        const response = await fetch('https://localhost:5144/api/Order/publish', {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${accessToken}`,
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(orderDetails),
-        });
-        
-
-        if (!response.ok) {
-            let errorData;
-            try {
-                errorData = await response.json();
-            } catch (error) {
-                throw new Error('Failed to parse error response');
-            }
-            throw new Error(errorData.message || 'Order publish failed!');
-        }
-
-        await response.json();
-        alert('Order successfully published!');
-    } catch (error) {
-        console.error('Error publishing order:', error);
-        alert(`Error: ${error.message}`);
-    }
+    let response = APIWithToken(url, 'Get');
     
+    alert('Order successfully published!');
+
+
+    // tryRefreshToken();
+    //
+    // try {
+    //     const response = await fetch(`${baseUrl}/api/Order/publish`, {
+    //         method: 'POST',
+    //         headers: {
+    //             'Authorization': `Bearer ${accessToken}`,
+    //             'Content-Type': 'application/json',
+    //         },
+    //         body: JSON.stringify(orderDetails),
+    //     });
+    //    
+    //
+    //     if (!response.ok) {
+    //         let errorData;
+    //         try {
+    //             errorData = await response.json();
+    //         } catch (error) {
+    //             throw new Error('Failed to parse error response');
+    //         }
+    //         throw new Error(errorData.message || 'Order publish failed!');
+    //     }
+    //
+    //     await response.json();
+    // } catch (error) {
+    //     console.error('Error publishing order:', error);
+    //     alert(`Error: ${error.message}`);
+    // }
+    //
     
 };
 
 export const fetchOrdersByUserId = async (userId) => {
-    const accessToken = localStorage.getItem('accessToken');
+    const baseUrl = getURL();
+    
+    let url = `${baseUrl}/api/Order/getOrdersByUserId/${userId}`;
+    
+    let response = APIWithToken(url, 'Get');
 
-    if (!accessToken) {
-        console.error('No access token found. Please log in.');
-        return;
-    }
-
-    try {
-        const response = await fetch(`https://localhost:5144/api/Order/getOrdersByUserId/${userId}`, {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${accessToken}`,
-                'Content-Type': 'application/json',
-            },
-        });
-
-        if (!response.ok) {
-            let errorData;
-            try {
-                errorData = await response.json();
-            } catch {
-                throw new Error('Failed to parse error response');
-            }
-            throw new Error(errorData.message || 'Failed to fetch orders');
-        }
-
-        const orders = await response.json();
-        return orders; // This will return the list of orders
-    } catch (error) {
-        console.error('Error fetching orders:', error);
-        alert(`Error: ${error.message}`);
-    }
+    return await response;
 };
 
-export const enrichOrdersWithEventDetails = async (userId) => {
+export const enrichOrdersWithEventDetails = async (includePastOrders = true) => {
     try {
+        const userId = getUserIdFromToken()
         const orders = await fetchOrdersByUserId(userId);
+
+        const now = new Date();
 
         const enrichedOrders = await Promise.all(
             orders.map(async (order) => {
@@ -258,12 +272,22 @@ export const enrichOrdersWithEventDetails = async (userId) => {
                     startDate: eventDetails?.startDate || '',
                     startTime: eventDetails?.startTime || '',
                     endTime: eventDetails?.endTime || '',
-                    
                 };
             })
         );
-        console.log(enrichedOrders);
-        return enrichedOrders;
+
+
+        // Filter orders based on event date and time
+        const filteredOrders = enrichedOrders.filter((order) => {
+            const startDate = order.startDate;
+            const startTime = order.startTime;
+            const eventDate = new Date(`${startDate}T${startTime}`);
+            return includePastOrders ? true : eventDate >= now;
+        });
+        
+        return filteredOrders
+        
+        
     } catch (error) {
         console.error('Error enriching orders:', error);
         return [];

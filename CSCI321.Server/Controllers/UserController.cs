@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Cryptography;
 using System.Text;
+using Amazon.DynamoDBv2.DocumentModel;
+using Amazon.DynamoDBv2.Model;
 
 namespace CSCI321.Server.Controllers;
 
@@ -28,25 +30,22 @@ public class UserController : ControllerBase
     [HttpPost("signUp")]
     public async Task<IActionResult> Post(User newUser)
     {
-        
         try
         {
-            Console.WriteLine("Before password hashing: " + newUser.password);
+            var existingUser = await _userService.CheckDuplicateEmailAsync(newUser.email);
 
+            if (existingUser)
+            {
+                return BadRequest(new { message = "Email already exists!" });
+            }
+            
             newUser.password = HashPassword(newUser.password);
-
-            Console.WriteLine("After password hashing: " + newUser.password);
-
             newUser.refreshTokenExpiry = DateTime.UtcNow.AddDays(30);
-
             await _userService.CreateAsync(newUser);
-
-            Console.WriteLine($"User created with Id: {newUser.userId}");
             return CreatedAtAction(nameof(Get), new { id = newUser.userId }, newUser);
         }
         catch (Exception ex)
-        {
-            Console.WriteLine($"Error occurred: {ex.Message}");
+        { 
             return StatusCode(500, "Internal server error.");
         }
     }
@@ -122,7 +121,10 @@ public class UserController : ControllerBase
             return Unauthorized("Invalid access token.");
         }
         
-        Console.WriteLine(principal);
+        var userType = principal.FindFirst("userType").Value;
+        
+        Console.WriteLine($"UserType in refreshToken: {userType}");
+        
         
         var userId = principal.FindFirst(ClaimTypes.NameIdentifier).Value;
     
@@ -134,6 +136,8 @@ public class UserController : ControllerBase
         {
             return NotFound("User not found.");
         }
+        
+        Console.WriteLine($"UserType in refreshToken2: {userType}");
 
         // Validate the refresh token
         var refreshTokenData = await _userService.GetRefreshTokenFromDB(userId); // Make sure userId is defined
@@ -154,7 +158,7 @@ public class UserController : ControllerBase
 
 
         // Generate a new access token
-        var newAccessToken = _authService.GenerateAccessToken(user);
+        var newAccessToken = _authService.GenerateAccessToken(user.userId, user.email, userType);
 
         
         return Ok(new { accessToken = newAccessToken });
@@ -188,8 +192,13 @@ public class UserController : ControllerBase
 
         var userId =  User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         
+        Console.WriteLine(userId);
+        
         var user = await _userService.GetByIdAsync(userId);
 
+        Console.WriteLine(user.ToString());
+        
+        
         if (user == null)
         {
             return NotFound("User not found.");
@@ -197,35 +206,61 @@ public class UserController : ControllerBase
 
         return Ok(user);
     }
+    
+    public async Task<IActionResult> GetUserByEmail(string email)
+    {
+        var user = await _userService.GetUserByEmailAsync(email);
+        
+        if (user == null)
+        {
+            return NotFound("User not found");
+        }
+
+        return Ok(user); // Return user details
+    }
 
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginModel loginData)
     {
-
+        
         // Find the user by email
-        var user = await _userService.GetByEmailAsync(loginData.Email);
+        Dictionary<string, AttributeValue> userAttributes = await _userService.GetUserByEmailAsync(loginData.Email);
+
+        var userId = userAttributes.ContainsKey("userId") ? userAttributes["userId"].S : null;
+        var userType = userAttributes.ContainsKey("userType") ? userAttributes["userType"].S : null;
+        var password = userAttributes.ContainsKey("password") ? userAttributes["password"].S : null;
+        var name = userAttributes.ContainsKey("name") ? userAttributes["name"].S : null;  // If name is present
+        var email = userAttributes.ContainsKey("email") ? userAttributes["email"].S : null;
+        
+        
+
         
         // Log if user was found or not
-        if (user != null) { Console.WriteLine($"User found: {user.email}");}
-        else { Console.WriteLine("User not found"); }
-        
-        if (user == null) { return Unauthorized("Invalid credentials."); }
+        if (userAttributes != null)
+        {
+            Console.WriteLine($"User found: {email}");
+        }
+        else
+        {
+            
+            Console.WriteLine("User not found");
+            return Unauthorized("Invalid credentials.");
+        }
 
         // Hash the password provided in loginData and compare it with the stored hashed password
         var hashedPassword = HashPassword(loginData.Password);
         
-        if (user.password != hashedPassword) { return Unauthorized("Invalid credentials."); }
+        if (password != hashedPassword) { return Unauthorized("Invalid credentials."); }
 
         // if user is of different type
-        if(user.userType != loginData.UserType) { return Unauthorized("Invalid Credentials"); }
-
-        var userId = user.userId;
+        if(userType != loginData.UserType) { return Unauthorized("Invalid Credentials"); }
+        
         // Generate JWT token
-        var accessToken = _authService.GenerateAccessToken(user); // minute accessToken
+        var accessToken = _authService.GenerateAccessToken(userId, email, userType); // minute accessToken
 
         var refreshToken = _authService.GenerateRefreshToken();
         
-        await _userService.StoreRefreshToken(userId, refreshToken, DateTime.UtcNow.AddDays(7)); // 7 days expiration
+        await _userService.StoreRefreshToken(userId, refreshToken, DateTime.UtcNow.AddDays(30)); // 30 days expiration
         
         // Return the token and user data
         return Ok(new { accessToken});

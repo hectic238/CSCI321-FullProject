@@ -32,7 +32,7 @@ public class EventController : ControllerBase
             Console.WriteLine("Event Received: " + newEvent);
 
             await _eventService.CreateAsync(newEvent);
-            return CreatedAtAction(nameof(Get), new { id = newEvent.id }, newEvent);
+            return CreatedAtAction(nameof(Get), new { id = newEvent.eventId }, newEvent);
         }
         catch (Exception ex)
         {
@@ -80,7 +80,12 @@ public class EventController : ControllerBase
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateEvent(string id, [FromBody] Event updatedEvent)
     {
-        if (id != updatedEvent.id)
+        
+        Console.WriteLine("ID: " + id);
+        
+        Console.WriteLine("UpdatedEvent: " + updatedEvent.eventId);
+        
+        if (id != updatedEvent.eventId)
         {
             return BadRequest("Event ID mismatch");
         }

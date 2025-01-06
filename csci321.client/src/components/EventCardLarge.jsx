@@ -35,7 +35,16 @@ function EventCardLarge({ event, isDraft }) {
         isPast = new Date(event.startDate) < new Date();
     }
 
-    
+    const handleAddToCalendar = (event) => {
+        const { title, description, startDate, endDate, location } = event;
+        const url = `/api/calendar/generate-ics?title=${encodeURIComponent(title)}&description=${encodeURIComponent(description)}&startDate=${encodeURIComponent(startDate)}&endDate=${encodeURIComponent(endDate)}&location=${encodeURIComponent(location)}`;
+        window.open(url, '_blank');
+    };
+
+    return (
+        <button onClick={() => handleAddToCalendar(event)}>Add to Calendar</button>
+    );
+
 
 
     const editEvent = () => {
@@ -45,12 +54,12 @@ function EventCardLarge({ event, isDraft }) {
 
     const viewStatistics = () => {
         // Navigate to the statistics page for this event
-        navigate(`/events/${event.id}/statistics`);
+        navigate(`/events/${event.eventId}/statistics`);
     };
     
     
     return (
-        <div key={event.id} className="event-card-large">
+        <div key={event.eventId} className="event-card-large">
             <div className="event-card-large-column-image">
                 <img src={event.image} alt={event.title} className="event-image"/>
             </div>
