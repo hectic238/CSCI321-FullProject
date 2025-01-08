@@ -2,7 +2,9 @@ import React, { useEffect, useState } from 'react';
 import Navbar from "../components/Navbar.jsx";
 import {RefreshToken} from "@/components/RefreshToken.jsx";
 import { Link } from 'react-router-dom';
-
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
 import './ProfileDetails.css'
 import {TextField, FormControl, InputLabel, MenuItem, Select} from '@mui/material';
 import { DateField } from '@mui/x-date-pickers/DateField';
@@ -19,7 +21,9 @@ const ProfileDetails = () => {
     const [userDetails, setUserDetails] = useState(null);
     const [error, setError] = useState(null);
     const [orders, setOrders] = useState([]);
-
+    
+    dayjs.extend(utc);
+    dayjs.extend(timezone);
 
     const [title, setTitle] = useState(null);
     const [dateOfBirth, setDateOfBirth] = useState(null);
@@ -32,45 +36,33 @@ const ProfileDetails = () => {
 
         let response =  await APIWithToken(url, 'Get');
         
-        
-        
-        console.log(response);
-        
         setUserDetails(response);
-        
-        // const accessToken = localStorage.getItem('accessToken');
-        //
-        // if (!accessToken) {
-        //     console.error('No access token found. Please log in.');
-        //     return;
-        // }
-        // try {
-        //    
-        //     await RefreshToken();
-        //     const response = await fetch(`https://localhost:5144/api/User/get`, {
-        //         method: 'GET',
-        //         headers: {
-        //             'Authorization': `Bearer ${accessToken}`, // Include the token
-        //             'Content-Type': 'application/json',
-        //         },
-        //     });
-        //    
-        //     if (!response.ok) {
-        //         console.error('Failed to fetch user details:', response.status);
-        //         setError('Failed to fetch user details.');
-        //         return;
-        //     }
-        //
-        //     const data = await response.json(); // Only call this once
-        //     setUserDetails(data); // Store user details in state
-        // } catch (err) {
-        //     console.error('An error occurred while fetching user details:', err);
-        //     setError('An error occurred while fetching user details.');
-        // }
-        //
     };
 
     
+    const updateUserDetails = async () => {
+        var baseUrl = getURL();
+
+        let url = `${baseUrl}/api/User/updateUser`;
+
+        
+        
+        
+        const updatedDetails = {
+            ...userDetails,
+            dateOfBirth: userDetails.dateOfBirth
+                ? dayjs(userDetails.dateOfBirth).toUTCString() // Convert to Sydney timezone
+                : null, 
+        };
+
+        
+        
+        console.log(updatedDetails);
+        
+        
+        let response = await APIWithToken(url, 'PUT', updatedDetails)
+        
+    }
 
     const [tab, setTab] = useState("profile"); // current active tab
 
@@ -88,13 +80,26 @@ const ProfileDetails = () => {
     }, []);
 
     const handleChange = (event) => {
-        setTitle(event.target.value); // Update state with the selected value
+        const { value } = event.target; // Extract the selected value
+        setUserDetails((prevDetails) => ({
+            ...prevDetails, // Preserve other fields
+            title: value, // Update the title
+        }));
     };
-
     const handlePhoneChange = (value) => {
-        setPhoneNumber(value);
+        setUserDetails((prevDetails) => ({
+            ...prevDetails, // Preserve other fields
+            phoneNumber: value, // Update the phone number
+        }));
     };
 
+    const handleDateChange = (newValue) => {
+        setUserDetails((prevDetails) => ({
+            ...prevDetails,
+            dateOfBirth: newValue, // Update the date of birth
+        }));
+    };
+    
     const formatDate = (dateString) => {
         const date = new Date(dateString);
 
@@ -124,6 +129,8 @@ const ProfileDetails = () => {
     const handleFormSubmit = (e) => {
         e.preventDefault();
         console.log("Updated User Details: ", userDetails);
+        
+        updateUserDetails()
         // Make API call to save details here
     };
 
@@ -186,7 +193,7 @@ const ProfileDetails = () => {
                                 <Select
                                     labelId="demo-simple-select-label"
                                     id="demo-simple-select"
-                                    value={title}
+                                    value={userDetails.title}
                                     type="input"
                                     label="Title"
                                     onChange={handleChange}
@@ -214,13 +221,13 @@ const ProfileDetails = () => {
                                         label="Date of Birth"
                                         value={dateOfBirth}
                                         type="input"
-                                        onChange={(newValue) => setDateOfBirth(newValue)}
+                                        onChange={handleDateChange}
                                     />
                                 </DemoContainer>
                             </LocalizationProvider>
 
                             <MuiTelInput 
-                                value={phoneNumber}                 
+                                value={userDetails.phoneNumber}                 
                                 defaultCountry="AU" // Set a default country (optional)
                                 onChange={handlePhoneChange} />
                             

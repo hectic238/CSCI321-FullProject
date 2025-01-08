@@ -14,22 +14,18 @@ public class CalendarController : ControllerBase
     {
 
         var australiaTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Australia/Sydney");
-
-        // Ensure the input date strings are in the correct format
-        // Convert to string using ToString if needed
+        
         string startDateTimeString = request.startDateTime.ToString("yyyy-MM-ddTHH:mm:sszzz");
         string endDateTimeString = request.endDateTime.ToString("yyyy-MM-ddTHH:mm:sszzz");
 
-        // Parse the incoming start and end date-time strings to DateTime objects, considering the time zone offset
         DateTime startDateTime = DateTime.ParseExact(startDateTimeString, "yyyy-MM-ddTHH:mm:sszzz", CultureInfo.InvariantCulture);
         DateTime endDateTime = DateTime.ParseExact(endDateTimeString, "yyyy-MM-ddTHH:mm:sszzz", CultureInfo.InvariantCulture);
 
-        // Convert to Sydney time, which will account for DST
         DateTime startTimeWithDST = TimeZoneInfo.ConvertTime(startDateTime, australiaTimeZone);
         DateTime endTimeWithDST = TimeZoneInfo.ConvertTime(endDateTime, australiaTimeZone);
 
         
-        var tzid = "Australia/Sydney";  // This ensures that the DST is considered when rendering the ICS file.
+        var tzid = "Australia/Sydney";  
 
         // Create the .ics content
         string icsContent = $@"BEGIN:VCALENDAR

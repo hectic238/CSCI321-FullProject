@@ -199,6 +199,9 @@ namespace CSCI321.Server.Helpers
                     JsonConvert.DeserializeObject<List<Ticket>>(response.Item["tickets"].S) : new List<Ticket>(),
                 // refreshToken = response.Item["refreshToken"].S,
                 // refreshTokenExpiry = DateTime.Parse(response.Item["refreshTokenExpiry"].S),
+                title = response.Item["title"].S,
+                phoneNumber = response.Item["phoneNumber"].S,
+                
                 
             };
 

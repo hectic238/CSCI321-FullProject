@@ -20,7 +20,7 @@ namespace CSCI321.Server.Models
 
     public List<Ticket> tickets { get; set; }
     
-    public DateOnly dateOfBirth { get; set; }
+    public DateTime dateOfBirth { get; set; }
     
     public string title { get; set; }
     

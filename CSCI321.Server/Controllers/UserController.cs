@@ -279,6 +279,8 @@ public class UserController : ControllerBase
         {
             return NotFound("User not found.");
         }
+        
+        Console.WriteLine(updatedUser.ToString());
 
         // Update the user object with new details
         existingUser.name = updatedUser.name;
