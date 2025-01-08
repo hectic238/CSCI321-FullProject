@@ -26,6 +26,8 @@ builder.Services.AddSingleton<UserService>();
 builder.Services.AddSingleton<AuthService>();
 builder.Services.AddSingleton<EventService>();
 builder.Services.AddSingleton<OrderService>();
+builder.Services.AddSingleton<MessageService>();
+
 
 // JWT Authentication setup
 
