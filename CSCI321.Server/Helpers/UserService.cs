@@ -1,4 +1,5 @@
-﻿using CSCI321.Server.DBSettings;
+﻿using System.Text;
+using CSCI321.Server.DBSettings;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 using CSCI321.Server.Models;
@@ -23,7 +24,7 @@ namespace CSCI321.Server.Helpers
         
         private readonly IConfiguration _configuration;
         
-        private const string TableName = "Users";  // Replace with your table name
+        private const string TableName = "Users";  
 
 
 
@@ -34,7 +35,7 @@ namespace CSCI321.Server.Helpers
 
             var config = new AmazonDynamoDBConfig
             {
-                RegionEndpoint = RegionEndpoint.APSoutheast2  // Change region if needed
+                RegionEndpoint = RegionEndpoint.APSoutheast2  
             };
             
             var awsAccessKeyId = _configuration["Database:AWS_ACCESS_KEY_ID"];
@@ -57,15 +58,15 @@ namespace CSCI321.Server.Helpers
         
         
         // Method to get a refresh token from the database
-        public async Task<(string refreshToken, DateTime expiry)?> GetRefreshTokenFromDB(string userId)
+        public async Task<(string refreshToken, DateTime? expiry)?> GetRefreshTokenFromDB(string userId)
         {
             // Find the user by userId
             var request = new GetItemRequest
             {
-                TableName = "Users",  // Replace with your table name
+                TableName = "Users",  
                 Key = new Dictionary<string, AttributeValue>
                 {
-                    { "userId", new AttributeValue { S = userId } }  // Key should match DynamoDB table
+                    { "userId", new AttributeValue { S = userId } }  
                 }
             };
 
@@ -96,7 +97,7 @@ namespace CSCI321.Server.Helpers
         public async Task CreateAsync(User newUser)
         {
 
-            // Example: Insert an Item
+            
             var table = Table.LoadTable(dynamoClient, TableName);
 
             var item = new Document
@@ -110,7 +111,7 @@ namespace CSCI321.Server.Helpers
                 ["preferences"] = newUser.preferences,
                 ["refreshToken"] = newUser.refreshToken,
                 ["refreshTokenExpiry"] = newUser.refreshTokenExpiry,
-                ["tickets"] = JsonSerializer.Serialize(newUser.tickets),  // Serialize to JSON string
+                ["tickets"] = JsonSerializer.Serialize(newUser.tickets),  
                 ["createdDate"] = DateTime.UtcNow.ToString()
             };
 
@@ -123,7 +124,7 @@ namespace CSCI321.Server.Helpers
             var request = new QueryRequest
             {
                 TableName = TableName,
-                IndexName = "EmailIndex",  // Use the created GSI
+                IndexName = "EmailIndex",  
                 KeyConditionExpression = "email = :email",
                 ExpressionAttributeValues = new Dictionary<string, AttributeValue>
                 {
@@ -170,15 +171,14 @@ namespace CSCI321.Server.Helpers
         public async Task<List<User>> GetAsync() =>
             await _UserCollection.Find(_ => true).ToListAsync();
         
-
-        public async Task<User?> GetByIdAsync(string userId)
+        public async Task<User?> GetPasswordByIdAsync(string userId)
         {
             var request = new GetItemRequest
             {
-                TableName = "Users",  // Replace with your table name
+                TableName = "Users",  
                 Key = new Dictionary<string, AttributeValue>
                 {
-                    { "userId", new AttributeValue { S = userId } }  // Key should match DynamoDB table
+                    { "userId", new AttributeValue { S = userId } }  
                 }
             };
 
@@ -186,87 +186,102 @@ namespace CSCI321.Server.Helpers
 
             if (response.Item == null || response.Item.Count == 0)
             {
-                return null;  // User not found
+                return null;  
+            }
+            
+            var user = new User
+            {
+                password = response.Item["password"].S,
+                userId = response.Item["userId"].S,
+            };
+
+            return user;
+        }
+        
+
+        public async Task<User?> GetByIdAsync(string userId)
+        {
+            var request = new GetItemRequest
+            {
+                TableName = "Users",  
+                Key = new Dictionary<string, AttributeValue>
+                {
+                    { "userId", new AttributeValue { S = userId } }  
+                }
+            };
+
+            var response = await dynamoClient.GetItemAsync(request);
+
+            if (response.Item == null || response.Item.Count == 0)
+            {
+                return null;  
             }
 
-            // Convert DynamoDB attributes to a User object
+            
             var user = new User
             {
                 userId = response.Item["userId"].S,
                 name = response.Item["name"].S,
                 email = response.Item["email"].S,
-                tickets = response.Item.ContainsKey("tickets") ? 
-                    JsonConvert.DeserializeObject<List<Ticket>>(response.Item["tickets"].S) : new List<Ticket>(),
+                
                 // refreshToken = response.Item["refreshToken"].S,
                 // refreshTokenExpiry = DateTime.Parse(response.Item["refreshTokenExpiry"].S),
                 title = response.Item["title"].S,
+                dateOfBirth = DateTime.Parse(response.Item["dateOfBirth"].S),
+                    
                 phoneNumber = response.Item["phoneNumber"].S,
-                
                 
             };
 
             return user;
         }
 
-        // New method to get user by Email
+        
         public async Task<Dictionary<string, AttributeValue>> GetUserByEmailAsync(string email)
         {
-            // Create a query configuration
+            
             var queryRequest = new QueryRequest
             {
                 TableName = TableName,
-                IndexName = "EmailIndex", // Specify the GSI name
-                KeyConditionExpression = "email = :email", // Correctly capitalized 'Email' for the partition key
+                IndexName = "EmailIndex", 
+                KeyConditionExpression = "email = :email", 
                 ExpressionAttributeValues = new Dictionary<string, AttributeValue>
                 {
-                    { ":email", new AttributeValue { S = email } } // The email value you're searching for
+                    { ":email", new AttributeValue { S = email } } 
                 },
-                // Specify the attributes to retrieve with exact capitalized names
+                
                 ProjectionExpression = "#userId, #userType, #password, #name, #email",
                 ExpressionAttributeNames = new Dictionary<string, string>
                 {
                     { "#userId", "userId" },
                     { "#userType", "userType" },
                     { "#password", "password" },
-                    { "#name", "name" }, // 'name' should be handled as a reserved word in DynamoDB
-                    { "#email", "email" } // Ensure 'Email' is the exact capitalization used in the index
+                    { "#name", "name" }, 
+                    { "#email", "email" } 
                 }
             };
 
-            // Execute the query
+            
             var response = await dynamoClient.QueryAsync(queryRequest);
 
             if (response.Items.Count > 0)
             {
-                return response.Items[0]; // Return the first matching user
+                return response.Items[0]; 
             }
 
-            return null; // No match found
+            return null; 
         }
+        
+        // Updating Users Information from the Profile Page
         public async Task UpdateUserAsync(User updatedUser)
         {
-            // if (updatedUser == null || string.IsNullOrEmpty(updatedUser.userId))
-            // {
-            //     throw new ArgumentException("Invalid user data.");
-            // }
-            //
-            // var filter = Builders<User>.Filter.Eq(u => u.userId, updatedUser.userId);
-            // var updateDefinition = Builders<User>.Update
-            //     .Set(u => u.name, updatedUser.name)
-            //     .Set(u => u.email, updatedUser.email)
-            //     .Set(u => u.tickets, updatedUser.tickets);
-            //
-            // var result = await _UserCollection.UpdateOneAsync(filter, updateDefinition);
-            //
-            // if (result.ModifiedCount == 0)
-            // {
-            //     throw new InvalidOperationException("No records were updated. The user might not exist.");
-            // }
             
             if (updatedUser == null || string.IsNullOrEmpty(updatedUser.userId))
             {
                 throw new ArgumentException("Invalid user data.");
             }
+            
+            
 
             var updateRequest = new UpdateItemRequest
             {
@@ -275,18 +290,67 @@ namespace CSCI321.Server.Helpers
                 {
                     { "userId", new AttributeValue { S = updatedUser.userId } }
                 },
-                UpdateExpression = "SET #name = :name, #email = :email, #tickets = :tickets",
+                UpdateExpression = "SET #name = :name, #email = :email, #dateOfBirth = :dateOfBirth,#phoneNumber = :phoneNumber ,#title = :title ",
                 ExpressionAttributeNames = new Dictionary<string, string>
                 {
-                    { "#name", "name" },   // Use placeholders for reserved keywords
+                    { "#name", "name" },   
                     { "#email", "email" },
-                    { "#tickets", "tickets" }
+                    { "#dateOfBirth", "dateOfBirth" },
+                    { "#phoneNumber", "phoneNumber" },
+                    { "#title", "title" }
                 },
                 ExpressionAttributeValues = new Dictionary<string, AttributeValue>
                 {
                     { ":name", new AttributeValue { S = updatedUser.name ?? string.Empty } },
                     { ":email", new AttributeValue { S = updatedUser.email ?? string.Empty } },
-                    { ":tickets", new AttributeValue { S = Newtonsoft.Json.JsonConvert.SerializeObject(updatedUser.tickets) } }
+                    { ":dateOfBirth", new AttributeValue { S = updatedUser.dateOfBirth.ToString("o") } },
+                    { ":phoneNumber", new AttributeValue { S = updatedUser.phoneNumber ?? string.Empty } },
+                    { ":title", new AttributeValue { S = updatedUser.title ?? string.Empty } },
+
+                },
+                ReturnValues = "UPDATED_NEW"
+            };
+
+            try
+            {
+                var response = await dynamoClient.UpdateItemAsync(updateRequest);
+
+                if (response.Attributes.Count == 0)
+                {
+                    throw new InvalidOperationException("No records were updated. The user might not exist.");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error updating user: {ex.Message}");
+                throw;
+            }
+        }
+        
+        public async Task UpdateUserPasswordAsync(User updatedUser)
+        {
+            
+            if (updatedUser == null || string.IsNullOrEmpty(updatedUser.userId))
+            {
+                throw new ArgumentException("Invalid user data.");
+            }
+            
+            var updateRequest = new UpdateItemRequest
+            {
+                TableName = "Users",
+                Key = new Dictionary<string, AttributeValue>
+                {
+                    { "userId", new AttributeValue { S = updatedUser.userId } }
+                },
+                UpdateExpression = "SET #password = :password",
+                ExpressionAttributeNames = new Dictionary<string, string>
+                {
+                    { "#password", "password" },   
+                },
+                ExpressionAttributeValues = new Dictionary<string, AttributeValue>
+                {
+                    { ":password", new AttributeValue { S = updatedUser.password ?? string.Empty } },
+
                 },
                 ReturnValues = "UPDATED_NEW"
             };

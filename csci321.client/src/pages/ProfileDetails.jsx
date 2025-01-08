@@ -1,10 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import Navbar from "../components/Navbar.jsx";
-import {RefreshToken} from "@/components/RefreshToken.jsx";
+import {RefreshToken} from "../components/RefreshToken.jsx";
 import { Link } from 'react-router-dom';
-import dayjs from 'dayjs';
-import utc from 'dayjs/plugin/utc';
-import timezone from 'dayjs/plugin/timezone';
+
 import './ProfileDetails.css'
 import {TextField, FormControl, InputLabel, MenuItem, Select} from '@mui/material';
 import { DateField } from '@mui/x-date-pickers/DateField';
@@ -15,19 +13,24 @@ import { MuiTelInput } from 'mui-tel-input'
 import {enrichOrdersWithEventDetails} from "@/components/Functions.jsx";
 import OrdersList from "@/components/OrdersList.jsx";
 import {getURL} from "@/components/URL.jsx";
-import {APIWithToken} from "@/components/API.js";
+import dayjs from "dayjs";
+import {APIWithToken} from "../components/API.js";
+import timezone from 'dayjs/plugin/timezone';
+import utc from 'dayjs/plugin/utc';
+
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
+
 
 const ProfileDetails = () => {
     const [userDetails, setUserDetails] = useState(null);
     const [error, setError] = useState(null);
     const [orders, setOrders] = useState([]);
+    const [oldPassword, setOldPassword] = useState("");
+    const [newPassword, setNewPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
     
-    dayjs.extend(utc);
-    dayjs.extend(timezone);
-
-    const [title, setTitle] = useState(null);
-    const [dateOfBirth, setDateOfBirth] = useState(null);
-    const [phoneNumber, setPhoneNumber] = useState(null);
     
     const fetchUserDetails = async () => {
         var baseUrl = getURL();
@@ -36,37 +39,21 @@ const ProfileDetails = () => {
 
         let response =  await APIWithToken(url, 'Get');
         
+        console.log(response);
+        
         setUserDetails(response);
     };
-
     
-    const updateUserDetails = async () => {
-        var baseUrl = getURL();
+    const [tab, setTab] = useState("profile");
 
-        let url = `${baseUrl}/api/User/updateUser`;
 
-        
-        
-        
-        const updatedDetails = {
-            ...userDetails,
-            dateOfBirth: userDetails.dateOfBirth
-                ? dayjs(userDetails.dateOfBirth).toUTCString() // Convert to Sydney timezone
-                : null, 
-        };
+    const handleChange = (field, value) => {
+        setUserDetails((prevDetails) => ({
+            ...prevDetails,
+            [field]: value,
+        }));
+    };
 
-        
-        
-        console.log(updatedDetails);
-        
-        
-        let response = await APIWithToken(url, 'PUT', updatedDetails)
-        
-    }
-
-    const [tab, setTab] = useState("profile"); // current active tab
-
-    // Handle form change
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setUserDetails({ ...userDetails, [name]: value });
@@ -79,34 +66,9 @@ const ProfileDetails = () => {
         fetchOrders();
     }, []);
 
-    const handleChange = (event) => {
-        const { value } = event.target; // Extract the selected value
-        setUserDetails((prevDetails) => ({
-            ...prevDetails, // Preserve other fields
-            title: value, // Update the title
-        }));
-    };
-    const handlePhoneChange = (value) => {
-        setUserDetails((prevDetails) => ({
-            ...prevDetails, // Preserve other fields
-            phoneNumber: value, // Update the phone number
-        }));
-    };
-
-    const handleDateChange = (newValue) => {
-        setUserDetails((prevDetails) => ({
-            ...prevDetails,
-            dateOfBirth: newValue, // Update the date of birth
-        }));
-    };
-    
     const formatDate = (dateString) => {
         const date = new Date(dateString);
-
-        // Options for formatting
         const options = { day: 'numeric', month: 'long', year: 'numeric' };
-
-        // Get formatted date
         return date.toLocaleDateString('en-GB', options);
     };
 
@@ -115,42 +77,67 @@ const ProfileDetails = () => {
             return '';
         }
         const [hours, minutes] = timeString.split(':');
-        const formattedHours = hours % 12 || 12; // Convert to 12-hour format
-        const ampm = hours >= 12 ? 'PM' : 'AM'; // Determine AM/PM
-        return `${formattedHours}:${minutes} ${ampm}`; // Return formatted time
+        const formattedHours = hours % 12 || 12; 
+        const ampm = hours >= 12 ? 'PM' : 'AM'; 
+        return `${formattedHours}:${minutes} ${ampm}`; 
     };
 
-    // Toggle notifications
+    
     const handleToggleNotifications = () => {
         setUserDetails({ ...userDetails, notifications: !userDetails.notifications });
     };
 
-    // Form submission handler
-    const handleFormSubmit = (e) => {
+    
+    const handleFormSubmit = async (e) => {
         e.preventDefault();
-        console.log("Updated User Details: ", userDetails);
+
+        var baseUrl = getURL();
+
+        let url = `${baseUrl}/api/User/updateUser`;
         
-        updateUserDetails()
-        // Make API call to save details here
+        userDetails.dateOfBirth = dayjs(userDetails.dateOfBirth).utc();
+        const sanitizedDetails = Object.fromEntries(
+            Object.entries(userDetails).filter(([_, value]) => value !== null)
+        );
+
+        await APIWithToken(url, 'Put', sanitizedDetails);
+        alert("User updated successfully.");
     };
 
-    // UseEffect should only run once when the component mounts, hence the empty dependency array
+    const handlePasswordFormSubmit = async (e) => {
+        e.preventDefault();
+        
+        if(newPassword !== confirmPassword) {
+            setError("New Passwords do not match");
+            alert("Passwords do not match");
+        }
+
+        var baseUrl = getURL();
+
+        let url = `${baseUrl}/api/User/updateUserPassword`;
+
+        const passwordForm = {
+            userId: userDetails.userId,
+            newPassword: newPassword,
+            oldPassword: oldPassword,
+        }
+
+        await APIWithToken(url, 'Put', passwordForm);
+        alert("User updated successfully.");
+    };
+
+    
     useEffect(() => {
         fetchUserDetails();
-        console.log("Profile details updated", userDetails);
-    }, []); // Empty dependency array to run the effect once when the component mounts
+    }, []); 
 
     if (!userDetails) {
-        return <div>Loading...</div>; // Or redirect to login if user is not found
+        return <div>Loading...</div>; 
     }
 
     return (
         <div>
-
             <Navbar />
-
-        
-        
         <div className="profile-page">
             <div className="sidebar">
                 <div className="sidebar-header">
@@ -182,9 +169,10 @@ const ProfileDetails = () => {
                                     fullWidth
                                     label="Email Address"
                                     type="email"
+                                    name="email"
                                     defaultValue="Email"
                                     value={userDetails.email}
-                                    onChange={handleInputChange}
+                                    onChange={(e) => handleChange(e.target.name, e.target.value)}
                                 />
                             </div>
 
@@ -195,8 +183,9 @@ const ProfileDetails = () => {
                                     id="demo-simple-select"
                                     value={userDetails.title}
                                     type="input"
+                                    name="title"
                                     label="Title"
-                                    onChange={handleChange}
+                                    onChange={(e) => handleChange(e.target.name, e.target.value)}
                                 >
                                     <MenuItem value={"Mr"}>Mr</MenuItem>
                                     <MenuItem value={"Mrs"}>Mrs</MenuItem>
@@ -210,37 +199,30 @@ const ProfileDetails = () => {
                                     fullWidth
                                     label="Full Name" 
                                     type="input"
+                                    name="name"
                                     defaultValue="Name"
                                     value={userDetails.name}
-                                    onChange={handleInputChange}
+                                    onChange={(e) => handleChange(e.target.name, e.target.value)}
                                 />
 
                             <LocalizationProvider dateAdapter={AdapterDayjs}>
                                 <DemoContainer components={['DateField']}>
                                     <DateField
                                         label="Date of Birth"
-                                        value={dateOfBirth}
+                                        value={dayjs(userDetails.dateOfBirth)}
                                         type="input"
-                                        onChange={handleDateChange}
+                                        format="DD/MM/YYYY"
+                                        timezone="UTC"
+                                        onChange={(e) => handleChange("dateOfBirth", e)}
                                     />
                                 </DemoContainer>
                             </LocalizationProvider>
 
                             <MuiTelInput 
-                                value={userDetails.phoneNumber}                 
-                                defaultCountry="AU" // Set a default country (optional)
-                                onChange={handlePhoneChange} />
-                            
-                            <div className="form-group">
-                                <label>
-                                    <input
-                                        type="checkbox"
-                                        checked={userDetails.notifications}
-                                        onChange={handleToggleNotifications}
-                                    />
-                                    Enable Notifications
-                                </label>
-                            </div>
+                                value={userDetails.phoneNumber}
+                                defaultCountry="AU"
+                                onChange={(e) => handleChange("phoneNumber", e)}
+                            />
 
                             <button type="submit">Save Changes</button>
                         </form>
@@ -274,25 +256,34 @@ const ProfileDetails = () => {
                 {tab === "password" && (
                     <div className="change-password">
                         <h2>Change Password</h2>
-                        <form onSubmit={handleFormSubmit}>
+                        <form onSubmit={handlePasswordFormSubmit}>
+                            <div className="form-group">
+                                <label htmlFor="oldPassword">Old Password</label>
+                                <input
+                                    type="password"
+                                    id="oldPassword"
+                                    value={oldPassword}
+                                    onChange={(e) => setOldPassword(e.target.value)}
+                                    required
+                                />
+                            </div>
                             <div className="form-group">
                                 <label htmlFor="newPassword">New Password</label>
                                 <input
                                     type="password"
                                     id="newPassword"
-                                    name="newPassword"
-                                    value={userDetails.password}
-                                    onChange={handleInputChange}
+                                    value={newPassword}
+                                    onChange={(e) => setNewPassword(e.target.value)}
                                     required
                                 />
                             </div>
-
                             <div className="form-group">
                                 <label htmlFor="confirmPassword">Confirm New Password</label>
                                 <input
                                     type="password"
                                     id="confirmPassword"
-                                    name="confirmPassword"
+                                    value={confirmPassword}
+                                    onChange={(e) => setConfirmPassword(e.target.value)}
                                     required
                                 />
                             </div>
