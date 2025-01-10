@@ -70,7 +70,7 @@ function EventCard({ event }) {
                 <div className="event-card">
                     <div className="event-Card-Column-details">
                         <img src={event.images[0].url} alt={event.name} className="event-image"/>
-                        <Link><h3>{event.name}</h3></Link>
+                        <Link to={`/${event.id}`}><h3>{event.name}</h3></Link>
                         <p><strong>Date:</strong> {formatDate(event.dates.start.localDate)}</p>
                         <p><strong>Time:</strong> {formatTime(event.dates.start.localTime)}</p>
                         <p><strong>Location:</strong> {event._embedded.venues[0].address.line1 + ", " + event._embedded.venues[0].city.name + ", " + event._embedded.venues[0].state.stateCode }</p>
