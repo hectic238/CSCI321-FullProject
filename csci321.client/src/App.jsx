@@ -21,6 +21,7 @@ import EventDetails from "@/pages/EventDetails.jsx";
 import Checkout from './pages/Checkout.jsx';
 import EventStatistics from './pages/EventStats.jsx';
 import { RefreshToken, logoutUser } from './components/refreshToken';
+import InterestedPage from './pages/InterestedPage.jsx';
 
 const App = () => {
     const [accessToken, setAccessToken] = useState(localStorage.getItem("accessToken"));
@@ -123,6 +124,13 @@ const App = () => {
                     <PrivateRoute allowedUserType="attendee">
                         <MyTickets />
                     </PrivateRoute>
+                    }
+                    />
+
+                    <Route path="/interested" element={
+                        <PrivateRoute allowedUserType="attendee">
+                            <InterestedPage />
+                        </PrivateRoute>
                     }
                     />
 
