@@ -53,7 +53,7 @@
 
 .event-card {
     width: 250px; /* Set a consistent width */
-    height: 300px; /* Set a consistent height */
+    height: 450px; /* Set a consistent height */
     border: 1px solid #ddd; /* Optional: border for visual separation */
     border-radius: 8px; /* Optional: rounded corners */
     overflow: hidden; /* Prevent overflow */

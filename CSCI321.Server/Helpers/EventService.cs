@@ -69,26 +69,26 @@ public class EventService
         var putRequest = new PutObjectRequest
         {
             BucketName = bucketName,
-            Key = key, // The name of the file in the bucket
-            InputStream = new MemoryStream(imageBytes), // Image byte array
-            ContentType = "image/jpeg", // or other type depending on the image format
-            CannedACL = S3CannedACL.Private // Ensure the image is public
+            Key = key, 
+            InputStream = new MemoryStream(imageBytes), 
+            ContentType = "image/jpeg", 
+            CannedACL = S3CannedACL.Private 
         };
 
         var response = await _s3Client.PutObjectAsync(putRequest);
 
         if (response.HttpStatusCode == System.Net.HttpStatusCode.OK)
         {
-            // Generate a pre-signed URL that expires in 10 years
+            
             var getRequest = new GetPreSignedUrlRequest
             {
                 BucketName = bucketName,
                 Key = key,
-                Expires = DateTime.UtcNow.AddYears(10) // Set a long expiration (e.g., 10 years)
+                Expires = DateTime.UtcNow.AddYears(10) 
             };
 
             string presignedUrl = _s3Client.GetPreSignedURL(getRequest);
-            return presignedUrl; // This URL will be valid for 10 years
+            return presignedUrl; 
         }
 
         return null;
@@ -102,17 +102,17 @@ public class EventService
     public async Task CreateAsync(Event newEvent)
     {
         
-            // Step 2: Extract base64 image and upload to S3
+            
             string imageUrl = null;
             if (!string.IsNullOrEmpty(newEvent.image))
             {
-                // Extract image bytes from base64 string
+                
                 byte[] imageBytes = Convert.FromBase64String(newEvent.image.Split(',')[1]);
-                string imageKey = $"{newEvent.eventId}/banner.jpg"; // Customize image key
+                string imageKey = $"{newEvent.eventId}/banner.jpg"; 
                 imageUrl = await UploadImageAsync(imageKey, imageBytes);
             }
 
-            // Step 3: Update eventDetails with the S3 image URL
+            
             if (!string.IsNullOrEmpty(imageUrl))
             {
                 newEvent.image = imageUrl;
@@ -121,7 +121,7 @@ public class EventService
 
             var request = new PutItemRequest
             {
-                TableName = "Events", // Replace with your DynamoDB table name
+                TableName = "Events", 
                 Item = new Dictionary<string, AttributeValue>
                 {
                     { "eventId", new AttributeValue { S = newEvent.eventId } },
@@ -140,7 +140,7 @@ public class EventService
                     { "numberAttendees", new AttributeValue { N = newEvent.numberAttendees.ToString() } },
                     { "isDraft", new AttributeValue { BOOL = newEvent.isDraft } },
                     { "tickets", new AttributeValue { S = JsonConvert.SerializeObject(newEvent.tickets) } },
-                    { "image", new AttributeValue { S = newEvent.image } } // Add the image URL here
+                    { "image", new AttributeValue { S = newEvent.image } } 
 
                 }
             };
@@ -150,7 +150,7 @@ public class EventService
     
     public async Task<List<EventSummary>> GetEventSummariesAsync(string searchTerm = null, string category = null)
     {
-        // Build the query parameters
+        
         var scanFilter = new Dictionary<string, Condition>();
 
         if (!string.IsNullOrEmpty(searchTerm))
@@ -214,7 +214,8 @@ public class EventService
                     startTime = item["startTime"].S,
                     endTime = item["endTime"].S,
                     category = item["category"].S,
-                    image = item.ContainsKey("image") ? item["image"].S : null
+                    image = item.ContainsKey("image") ? item["image"].S : null,
+                    eventTicketType = item["eventTicketType"].S,
                 };
 
                 eventSummaries.Add(eventSummary);
@@ -224,54 +225,6 @@ public class EventService
         return eventSummaries;
     }
 
-    public async Task<List<EventSummary>> GetEventSummariesAsync2(string searchTerm = null, string category = null)
-    {
-        // Start with an empty filter
-        var filterBuilder = Builders<Event>.Filter;
-        var filter = filterBuilder.Empty; // Create an empty filter
-        
-        var now = DateTime.UtcNow;
-        var futureEventsFilter = filterBuilder.Gte(e => e.startDate, now.ToString("yyyy-MM-dd")) &
-                                 filterBuilder.Or(
-                                     filterBuilder.Gt(e => e.startTime, now.ToString("HH:mm")),
-                                     filterBuilder.Gt(e => e.startDate, now.ToString("yyyy-MM-dd"))
-                                 );
-        filter = filterBuilder.And(filter, futureEventsFilter);
-
-        // If a search term is provided, build a search filter
-        if (!string.IsNullOrWhiteSpace(searchTerm))
-        {
-            var searchFilter = filterBuilder.Or(
-                filterBuilder.Regex(e => e.title, new MongoDB.Bson.BsonRegularExpression(searchTerm, "i")),
-                filterBuilder.Regex(e => e.location, new MongoDB.Bson.BsonRegularExpression(searchTerm, "i"))
-            );
-            filter = filterBuilder.And(filter, searchFilter);
-        }
-
-        // If a category is provided, build a category filter
-        if (!string.IsNullOrWhiteSpace(category))
-        {
-            var categoryFilter = filterBuilder.Eq(e => e.category, category);
-            filter = filterBuilder.And(filter, categoryFilter);
-        }
-
-        // Fetch events based on the filter
-        var events = await _EventCollection.Find(filter)
-            .Project(e => new EventSummary
-            {
-                id = e.eventId,
-                title = e.title,
-                location = e.location,
-                startDate = e.startDate,
-                image = e.image,
-                category = e.category,
-                startTime = e.startTime,
-                endTime = e.endTime
-            })
-            .ToListAsync();
-
-        return events;
-    }
     
     public async Task<Event> GetEventByIdAsync(string id)
 {
