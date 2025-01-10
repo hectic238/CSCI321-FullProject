@@ -6,33 +6,76 @@ import React, { useEffect, useState } from 'react';
 import EventCard from "../components/EventCard.jsx";
 
 import banner from '../assets/exploreEvent.png';
-import {fetchEventSummaries, fetchEventsByCategory} from "@/components/Functions.jsx"; // Assuming your image is in src/assets
+import {fetchEventSummaries, fetchEventsByCategory} from "../components/Functions.jsx"; // Assuming your image is in src/assets
 
 function ExploreEvents() {
-        const [allEvents, setAllEvents] = useState([]); // For all events
-        const [concerts, setConcerts] = useState([]); // For music events
-        const [theatreEvents, setTheatreEvents] = useState([]); // For music events
-        const [familyEvents, setFamilyEvents] = useState([]); // For music events
-        const [comedyEvents, setComedyEvents] = useState([]); // For music events
-        // Add more state variables for other categories as needed
+    const [popularEvents, setPopularEvents] = useState([]); 
+    const [concerts, setConcerts] = useState([]); 
+    const [theatreEvents, setTheatreEvents] = useState([]); 
+    const [familyEvents, setFamilyEvents] = useState([]); 
+    const [comedyEvents, setComedyEvents] = useState([]); 
+    const [events, setEvents] = useState([]);
+    const [combinedEvents, setCombinedEvents] = useState([]);
+
+    const [error, setError] = useState([]);
+    
+
+    const fetchTicketMasterEvents = async (size = 10, category = "") => {
+        const API_URL = "https://app.ticketmaster.com/discovery/v2/events.json";
+        const API_KEY = "bGImLf75hE3oDCJaWIGTpjjH1TuizHnA";
+        // DMAID only shows Events from NSW and ACT
+        const params = `?dmaId=702&size=${size}&apikey=${API_KEY}`;
+
+        try {
+            const response = await fetch(`${API_URL}${params}`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            console.log(data);
+            
+            if(category = "popular") {
+                setPopularEvents(prevEvents => [
+                    ...prevEvents,   
+                    ...data._embedded?.events         
+                ]);
+            }
+            setEvents(data._embedded?.events || []);
+        } catch (err) {
+            console.error("Failed to fetch events:", err);
+            setError(err.message);
+        }
+    };
+        
 
         useEffect(() => {
+            
+            console.log(events)
             const loadEvents = async () => {
                 try {
                     // Fetch general event summaries
-                    const allEventsData = await fetchEventSummaries();
-                    setAllEvents(allEventsData);
+                    const allEventsData = await fetchEventSummaries("", 5);
                     
-                    const concertsData = await fetchEventsByCategory('Concert');
+                    // Set events from website published events and then get the rest from ticketmaster for a total of 5
+                    setPopularEvents(allEventsData);
+                    const numberEvents = popularEvents.length;
+                    
+                    const eventsNeeded = 5 - numberEvents;
+                    
+                    fetchTicketMasterEvents(eventsNeeded, "Popular");
+                    
+                    
+                    const concertsData = await fetchEventsByCategory('Concert',5);
                     setConcerts(concertsData);
                     
-                    const theatreEventsData = await fetchEventsByCategory('Theatre');
+                    const theatreEventsData = await fetchEventsByCategory('Theatre', 5);
                     setTheatreEvents(theatreEventsData);
                     
-                    const familyEventsData = await fetchEventsByCategory('Family');
+                    const familyEventsData = await fetchEventsByCategory('Family', 5);
                     setFamilyEvents(familyEventsData);
                     
-                    const comedyEventsData = await fetchEventsByCategory('Comedy');
+                    const comedyEventsData = await fetchEventsByCategory('Comedy', 5);
                     setComedyEvents(comedyEventsData);
                     
 
@@ -60,9 +103,14 @@ function ExploreEvents() {
                 {/* Four categories with headings and rows of events */}
                 <div className="events-section">
                     {/* 1. Search by Category */}
-                    <h2>Search by Category</h2>
+                    <div>
+                        <h2>Popular Events</h2>
+                        <button onClick={() => navigate('/events/concerts')}>View More</button>
+                    </div>
+
+
                     <div className="events-grid">
-                        {allEvents.map(event => (
+                        {popularEvents.map(event => (
                             <EventCard key={event.id} event={event}/>
                         ))}
                     </div>
@@ -94,9 +142,8 @@ function ExploreEvents() {
                             <EventCard key={event.id} event={event}/>
                         ))}
                     </div>
-                    
-                    
-                    
+
+
                 </div>
             </div>
         </>

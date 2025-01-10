@@ -90,7 +90,7 @@ const ProfileDetails = () => {
     
     const handleFormSubmit = async (e) => {
         e.preventDefault();
-
+        
         var baseUrl = getURL();
 
         let url = `${baseUrl}/api/User/updateUser`;
@@ -125,7 +125,8 @@ const ProfileDetails = () => {
         await APIWithToken(url, 'Put', passwordForm);
         alert("User updated successfully.");
     };
-
+    
+    
     
     useEffect(() => {
         fetchUserDetails();

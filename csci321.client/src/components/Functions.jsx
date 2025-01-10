@@ -43,19 +43,19 @@ export const generateObjectId = () =>  {
     return timestamp + randomHex;
 }
 
-export const fetchEventSummaries = async (searchTerm) => {
+export const fetchEventSummaries = async (searchTerm, count = 10) => {
     var baseUrl = getURL();
-    const response = await fetch(`${baseUrl}/api/Event/search?searchTerm=${searchTerm || ''}`);
+    const response = await fetch(`${baseUrl}/api/Event/search?searchTerm=${searchTerm || ''}&count=${count}`);
     if (!response.ok) {
         throw new Error('Failed to fetch event summaries');
     }
     return await response.json();
 };
 
-export const fetchEventsByCategory = async (category) => {
+export const fetchEventsByCategory = async (category, count = 10) => {
     var baseUrl = getURL();
 
-    const response = await fetch(`${baseUrl}/api/Event/category/${category}`);
+    const response = await fetch(`${baseUrl}/api/Event/category/${category}&count=${count}`);
     if (!response.ok) {
         throw new Error('Failed to fetch events by category');
     }

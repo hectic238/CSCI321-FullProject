@@ -42,17 +42,17 @@ public class EventController : ControllerBase
     }
     
     [HttpGet("search")]
-    public async Task<IActionResult> GetEventSummaries([FromQuery] string searchTerm = null)
+    public async Task<IActionResult> GetEventSummaries([FromQuery] string searchTerm = null, int count = 10)
     {
         var events = await _eventService.GetEventSummariesAsync(searchTerm);
-        return Ok(events);
+        return Ok(events.Take(count));
     }
 
     [HttpGet("category/{category}")]
-    public async Task<IActionResult> GetEventsByCategory(string category)
+    public async Task<IActionResult> GetEventsByCategory(string category, int count = 10)
     {
         var events = await _eventService.GetEventSummariesAsync(category: category);
-        return Ok(events);
+        return Ok(events.Take(count));
     }
 
     
