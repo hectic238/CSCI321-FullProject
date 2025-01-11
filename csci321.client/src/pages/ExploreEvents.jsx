@@ -2,6 +2,7 @@ import Navbar from '../components/Navbar';
 import mockEvents from "../mockEvents.jsx";
 import './ExploreEvents.css';
 import React, { useEffect, useState } from 'react';
+import {useNavigate, useParams} from "react-router-dom";
 
 import EventCard from "../components/EventCard.jsx";
 
@@ -16,10 +17,9 @@ function ExploreEvents() {
     const [comedyEvents, setComedyEvents] = useState([]); 
     const [events, setEvents] = useState([]);
     const [combinedEvents, setCombinedEvents] = useState([]);
-
     const [error, setError] = useState([]);
     
-
+    const navigate = useNavigate();
     const fetchTicketMasterEvents = async (size = 10, category = "") => {
         const API_URL = "https://app.ticketmaster.com/discovery/v2/events.json";
         const API_KEY = "bGImLf75hE3oDCJaWIGTpjjH1TuizHnA";
@@ -120,8 +120,6 @@ function ExploreEvents() {
     };
 
         useEffect(() => {
-            
-            console.log("useeffect");
             loadEvents();
         }, []);
 
@@ -142,7 +140,7 @@ function ExploreEvents() {
                     {/* 1. Search by Category */}
                     <div>
                         <h2>Popular Events</h2>
-                        <button onClick={() => navigate('/events/concerts')}>View More</button>
+                        <button onClick={() => navigate('/explore/popular')}>View More</button>
                     </div>
 
 
@@ -152,28 +150,41 @@ function ExploreEvents() {
                         ))}
                     </div>
 
-                    <h2>Concerts</h2>
+                    <div>
+                        <h2>Concerts</h2>
+                        <button onClick={() => navigate('/explore/music')}>View More</button>
+                    </div>
                     <div className="events-grid">
                         {concerts.map(event => (
                             <EventCard key={event.id} event={event}/>
                         ))}
                     </div>
 
-                    <h2>Family</h2>
+                    <div>
+                        <h2>Family</h2>
+                        <button onClick={() => navigate('/explore/family')}>View More</button>
+                    </div>
                     <div className="events-grid">
                         {familyEvents.map(event => (
                             <EventCard key={event.id} event={event}/>
                         ))}
                     </div>
 
-                    <h2>Theatre</h2>
+
+                    <div>
+                        <h2>Theatre</h2>
+                        <button onClick={() => navigate('/explore/theatre')}>View More</button>
+                    </div>
                     <div className="events-grid">
                         {theatreEvents.map(event => (
                             <EventCard key={event.id} event={event}/>
                         ))}
                     </div>
-
-                    <h2>Comedy</h2>
+                    
+                    <div>
+                        <h2>Comedy</h2>
+                        <button onClick={() => navigate('/explore/comedy')}>View More</button>
+                    </div>
                     <div className="events-grid">
                         {comedyEvents.map(event => (
                             <EventCard key={event.id} event={event}/>

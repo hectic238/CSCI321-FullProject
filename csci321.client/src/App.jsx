@@ -22,6 +22,7 @@ import Checkout from './pages/Checkout.jsx';
 import EventStatistics from './pages/EventStats.jsx';
 import { RefreshToken, logoutUser } from './components/refreshToken';
 import ExternalEventDetails from "./pages/ExternalEventDetails.jsx";
+import ExploreEventPages from "@/pages/ExploreEventPages.jsx";
 
 const App = () => {
     const [accessToken, setAccessToken] = useState(localStorage.getItem("accessToken"));
@@ -126,6 +127,7 @@ const App = () => {
                     </PrivateRoute>
                     }
                     />
+                    <Route path="/explore/:categoryName" element={<ExploreEventPages/>} />
 
                     <Route path="/:eventName/:eventId" element={
                         <PrivateRoute allowedUserType="attendee">

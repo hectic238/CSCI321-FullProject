@@ -39,6 +39,11 @@ const ExternalEventDetails = () => {
         
     };
     
+    const handleWebsiteClick = () => {
+         window.open(eventDetails.url, "_blank");
+
+    }
+    
     
     useEffect( () => {
 
@@ -60,7 +65,7 @@ const ExternalEventDetails = () => {
                 <div className="event-info">
                     <h1 className="event-title">{eventDetails.name}</h1>
                     <p className="event-date-time">{eventDetails.dates.start.localDate} | {eventDetails.dates.start.localTime}</p>
-                    <p className="event-location">{eventDetails._embedded.venues[0].address.line1}</p>
+                    <p className="event-location">{eventDetails._embedded.venues[0].address.line1 + ", " + eventDetails._embedded.venues[0].city.name + ", " + eventDetails._embedded.venues[0].state.stateCode}</p>
                 </div>
                 <Button onClick={() => setIsDrawerVisible(true)}>More Info</Button>
 
@@ -75,7 +80,7 @@ const ExternalEventDetails = () => {
             >
                 <h2>{eventDetails.name}</h2>
                 <p>{eventDetails.dates.start.localDate} | {eventDetails.dates.start.localTime}</p>
-                <p>{eventDetails._embedded.venues[0].address.line1}</p>
+                <p><strong>Location:</strong> {eventDetails._embedded.venues[0].address.line1 + ", " + eventDetails._embedded.venues[0].city.name + ", " + eventDetails._embedded.venues[0].state.stateCode }</p>
                 <p>{eventDetails.info}</p>
                 <p><div
                     dangerouslySetInnerHTML={{ __html: eventDetails.description }}
@@ -104,6 +109,13 @@ const ExternalEventDetails = () => {
                             
                         >
                             Attend
+                        </Button>
+
+                        <Button
+                            onClick={handleWebsiteClick}
+                            
+                        >
+                            Purchase Tickets (This link will take you to TicketMaster)
                         </Button>
                     </div>
                 </div>

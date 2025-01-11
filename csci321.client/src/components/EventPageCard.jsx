@@ -22,7 +22,7 @@ const formatTime = (timeString) => {
     const ampm = hours >= 12 ? 'PM' : 'AM'; // Determine AM/PM
     return `${formattedHours}:${minutes} ${ampm}`; // Return formatted time
 };
-function EventCard({ event }) {
+function EventPageCard({ event }) {
 
     let isSoldOut;
     let totalTicketsLeft;
@@ -31,14 +31,14 @@ function EventCard({ event }) {
     const navigate = useNavigate();
 
     if(event.source === 'local') {
-        isFreeEvent = event.eventTicketType === 'free'; 
+        isFreeEvent = event.eventTicketType === 'free';
     }
-    
+
     return (
-        <div key={event.id} className="event-card">
+        <div key={event.id} className="event-page-card-large">
 
             {event.source === 'local' ? (
-                <div className="event-Card-Column-details">
+                <div className="event-page-Card-Column-details">
 
                     <img src={event.image} alt={event.title} className="event-image"/>
                     <Link to={`/${event.title.replace(/\s+/g, '-')}/${event.id}`}><h3>{event.title}</h3></Link>
@@ -68,15 +68,24 @@ function EventCard({ event }) {
                     )}
                 </div>
             ) : (
-                <div className="event-card">
-                    <div className="event-Card-Column-details">
+                <div className="event-page-card-large">
+                    <div className="event-page-card-large-column-image">
                         <img src={event.images[0].url} alt={event.name} className="event-image"/>
+
+                    </div>
+
+                    <div className="event-page-Card-Column-details">
                         <Link to={`/${event.id}`}><h3>{event.name}</h3></Link>
                         <p><strong>Date:</strong> {formatDate(event.dates.start.localDate)}</p>
                         <p><strong>Time:</strong> {formatTime(event.dates.start.localTime)}</p>
-                        <p><strong>Location:</strong> {event._embedded.venues[0].address.line1 + ", " + event._embedded.venues[0].city.name + ", " + event._embedded.venues[0].state.stateCode }</p>
+                        <p>
+                            <strong>Location:</strong> {event._embedded.venues[0].address.line1 + ", " + event._embedded.venues[0].city.name + ", " + event._embedded.venues[0].state.stateCode}
+                        </p>
+
 
                         
+                    </div>
+                    <div className="event-page-Card-Column-details">
                         <p><strong>Hosted By Ticketmaster</strong></p>
                     </div>
                 </div>
@@ -86,4 +95,4 @@ function EventCard({ event }) {
     );
 }
 
-export default EventCard;
+export default EventPageCard;
