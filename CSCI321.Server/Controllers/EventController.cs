@@ -49,7 +49,7 @@ public class EventController : ControllerBase
     }
 
     [HttpGet("category/{category}")]
-    public async Task<IActionResult> GetEventsByCategory(string category, int count = 10)
+    public async Task<IActionResult> GetEventsByCategory( string category, [FromQuery] int count = 10)
     {
         var events = await _eventService.GetEventSummariesAsync(category: category);
         return Ok(events.Take(count));

@@ -41,9 +41,6 @@ function ExploreEvents() {
             }
 
             const data = await response.json();
-            console.log(data);
-            
-            
             
             return data._embedded?.events;
             
@@ -77,6 +74,10 @@ function ExploreEvents() {
         
         const numberWebsiteEvents = websiteEvents.length;
         const numberEventsNeeded = 5 - numberWebsiteEvents;
+        
+        if(numberEventsNeeded === 0) {
+            return modifiedWebsiteEvents;
+        }
 
         const ticketmasterTickets = await fetchTicketMasterEvents(numberEventsNeeded, category);
         if (Array.isArray(ticketmasterTickets)) {

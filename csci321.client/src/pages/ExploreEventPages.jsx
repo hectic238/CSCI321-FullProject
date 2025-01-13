@@ -8,12 +8,18 @@ import EventPageCard from "@/components/EventPageCard.jsx";
 const ExploreEventPages = () => {
     const category = useParams(); // Extract eventName and eventId from the URL
     const [events, setEvents] = useState([]);
-
-    const [page, setPage] = useState(1);
-
-    const fetchTicketMasterEvents = async (size = 10, page = 1) => {
-        const API_URL = "https://app.ticketmaster.com/discovery/v2/events.json";
-        const API_KEY = "bGImLf75hE3oDCJaWIGTpjjH1TuizHnA";
+    const [currentWebsiteEventCount, setCurrentWebsiteEventCount] = useState(5);
+    const [totalPages, setTotalPages] = useState(null);
+    const [totalElements, setTotalElements] = useState( null);
+    const [page, setPage] = useState(0);
+    const API_URL = "https://app.ticketmaster.com/discovery/v2/events.json";
+    const API_KEY = "bGImLf75hE3oDCJaWIGTpjjH1TuizHnA";
+    const [noMoreWebsiteEvents, setNoMoreWebsiteEvents] = useState(false);
+    const [ticketMasterEventsFetched, setTicketMasterEventsFetched] = useState(null);
+    
+ 
+    const fetchTicketMasterEvents = async (size = 10, page = 0) => {
+        setTicketMasterEventsFetched(true);
 
         let params;
         
@@ -24,19 +30,18 @@ const ExploreEventPages = () => {
             console.log(category.categoryName);
             params = `?dmaId=702&classificationName=${category.categoryName}&size=${size}&page=${page}&apikey=${API_KEY}`;
         }
+        
+        const url = `${API_URL}${params}`;
         // DMAID only shows Events from NSW and ACT
-        console.log(`${API_URL}${params}`);
         try {
-            const response = await fetch(`${API_URL}${params}`);
+            const response = await fetch(url);
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
             }
 
             const data = await response.json();
-            console.log(data);
-
-
-
+            // Setting minus 1 as the last page returns nothing
+            setTotalPages(data.page.totalPages - 1);
             return data._embedded?.events;
 
         } catch (err) {
@@ -44,8 +49,35 @@ const ExploreEventPages = () => {
             setError(err.message);
         }
     };
+    
+    
+    const calculateTotalPage = async (size) => {
+        let params;
 
-    const fetchEvent = async (type, category, page = 1, searchTerm) => {
+        if(category.categoryName === "popular") {
+            params = `?dmaId=702&size=${size}&apikey=${API_KEY}`;
+        }
+        else {
+            console.log(category.categoryName);
+            params = `?dmaId=702&classificationName=${category.categoryName}&size=${size}&apikey=${API_KEY}`;
+        }
+
+        const url = `${API_URL}${params}`;
+        
+        const response = await fetch(url);
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        const data = await response.json();
+
+        setTotalPages(data.page.totalPages);
+        
+
+    }
+
+    const fetchEvent = async (type, category, page = 0, searchTerm, websiteEventCount = 5) => {
+        
+        await calculateTotalPage(5)
         let events;
 
         let websiteEvents;
@@ -53,38 +85,51 @@ const ExploreEventPages = () => {
         let modifiedTicketmasterEventsData;
 
         if (type === "popular") {
-            websiteEvents = await fetchEventSummaries(searchTerm, 5);
+            websiteEvents = await fetchEventSummaries(searchTerm, websiteEventCount);
             modifiedWebsiteEvents = websiteEvents.map(event => ({
                 ...event,
                 source: 'local'  // Mark these events as 'local'
             }));
         }
         else if (type === "category") {
-            websiteEvents = await fetchEventsByCategory(category.categoryName, 5);
+            websiteEvents = await fetchEventsByCategory(category, websiteEventCount);
             modifiedWebsiteEvents = websiteEvents.map(event => ({
                 ...event,
                 source: 'local'  // Mark these events as 'local'
             }));
         }
 
+        
         const numberWebsiteEvents = websiteEvents.length;
-        const numberEventsNeeded = 5 - numberWebsiteEvents;
-        console.log(numberEventsNeeded);
+        if(numberWebsiteEvents === 5) {
+            return modifiedWebsiteEvents;
+        }
+        let numberEventsNeeded = 5 - numberWebsiteEvents % 5;
+        
+        if(noMoreWebsiteEvents) {
+            numberEventsNeeded = 5;
+        }
+        // If no external events are needed then skip this
+        if(numberEventsNeeded === 0) {
+            return modifiedWebsiteEvents;
+        }
 
         const ticketmasterTickets = await fetchTicketMasterEvents(numberEventsNeeded, page);
-        console.log(ticketmasterTickets + "page" + page);
         if (Array.isArray(ticketmasterTickets)) {
             modifiedTicketmasterEventsData = ticketmasterTickets.map(event => ({
                 ...event,
                 source: 'ticketmaster'  // Mark these events as 'ticketmaster'
             }));
-            console.log("after");
 
             events = [
                 ...modifiedWebsiteEvents, // Local events first
                 ...modifiedTicketmasterEventsData, // Ticketmaster events next
             ];
-            return events;
+            
+            if(numberEventsNeeded > 0){
+                setNoMoreWebsiteEvents(true);
+            }
+            return events.slice(-5);
 
         }else {
             console.error('Ticketmaster events data is not an array:', ticketmasterTickets);
@@ -93,7 +138,7 @@ const ExploreEventPages = () => {
 
     const loadEvents = async () => {
         try {
-            const popularEvents = await fetchEvent("popular","popular", 1, "");
+            const popularEvents = await fetchEvent("popular","popular", 0, "");
             setEvents(popularEvents);
             
             if(category.categoryName === "music") {
@@ -112,21 +157,57 @@ const ExploreEventPages = () => {
                 const comedyEventsData = await fetchEvent("category",'comedy');
                 setEvents(comedyEventsData);
             }
-
-            // Add more categories as needed
+            
         } catch (error) {
-            console.log(category);
             console.error('Error fetching events:', error);
         }
     };
     
     const handleViewMore = async () => {
         try {
-            const nextPage = page + 1;
-            setPage(nextPage);
+            if(page >= totalPages) {
+                console.log("No more pages");
+                return;
+            }
+            const updatedCount = currentWebsiteEventCount + 5;
+            setCurrentWebsiteEventCount(updatedCount);
+            let nextPage = 0;
+            if(ticketMasterEventsFetched) {
+                nextPage = page + 1;
+                setPage(nextPage);
+            }
+            
 
-            const newEvents = await fetchEvent("category", category, nextPage,"" );
-            setEvents(prevEvents => [...prevEvents, ...newEvents]); // Append new events
+            try {
+                if(category.categoryName === "popular") {
+                    const newEvents = await fetchEvent("popular", "popular", nextPage, "", updatedCount);
+                    setEvents(prevEvents => [...prevEvents, ...newEvents]); // Append new events
+                }
+                if(category.categoryName === "music") {
+                    const newEvents = await fetchEvent("category",'music', nextPage, "", updatedCount);
+                    console.log(newEvents);
+                    setEvents(prevEvents => [...prevEvents, ...newEvents]); // Append new events
+                }
+                else if(category.categoryName === "theatre") {
+                    const newEvents = await fetchEvent("category",'theatre', nextPage, "", updatedCount);
+                    setEvents(prevEvents => [...prevEvents, ...newEvents]); // Append new events
+                }
+                else if(category.categoryName === "family") {
+                    const newEvents = await fetchEvent("category",'family', nextPage, "", updatedCount);
+                    setEvents(prevEvents => [...prevEvents, ...newEvents]); // Append new events
+                }
+                else if(category.categoryName === "comedy") {
+                    const newEvents = await fetchEvent("category",'comedy', nextPage, "", updatedCount);
+                    setEvents(prevEvents => [...prevEvents, ...newEvents]); // Append new events
+                }
+
+            } catch (error) {
+                console.log(category);
+                console.error('Error fetching events:', error);
+            }
+
+            // const newEvents = await fetchEvent("category", category, nextPage,"", updatedCount );
+            // setEvents(prevEvents => [...prevEvents, ...newEvents]); // Append new events
         } catch (error) {
             console.error("Error loading more events:", error);
         }
@@ -136,9 +217,6 @@ const ExploreEventPages = () => {
     useEffect( () => {
 
         loadEvents();
-
-        console.log(events);
-
     }, [])
 
     return (

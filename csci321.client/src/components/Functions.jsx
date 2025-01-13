@@ -55,7 +55,7 @@ export const fetchEventSummaries = async (searchTerm, count = 10) => {
 export const fetchEventsByCategory = async (category, count = 10) => {
     var baseUrl = getURL();
 
-    const response = await fetch(`${baseUrl}/api/Event/category/${category}&count=${count}`);
+    const response = await fetch(`${baseUrl}/api/Event/category/${category}?count=${count}`);
     if (!response.ok) {
         throw new Error('Failed to fetch events by category');
     }

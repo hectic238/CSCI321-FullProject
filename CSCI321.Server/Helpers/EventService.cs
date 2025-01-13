@@ -217,11 +217,10 @@ public class EventService
                     image = item.ContainsKey("image") ? item["image"].S : null,
                     eventTicketType = item["eventTicketType"].S,
                 };
-
                 eventSummaries.Add(eventSummary);
             }
         }
-
+        ;
         return eventSummaries;
     }
 

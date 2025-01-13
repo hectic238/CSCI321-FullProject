@@ -38,61 +38,66 @@ function EventPageCard({ event }) {
         <div key={event.id} className="event-page-card-large">
 
             {event.source === 'local' ? (
-                <div className="event-page-Card-Column-details">
+                <div className="event-page-card-large">
+                    <div className="event-page-Card-Column-image">
+                        <img src={event.image} alt={event.title} className="event-image"/>
+                    </div>
+                    <div className="event-page-Card-Column-details">
+                        <Link to={`/${event.title.replace(/\s+/g, '-')}/${event.id}`}><h3>{event.title}</h3></Link>
+                        <p><strong>Date:</strong> {formatDate(event.startDate)}</p>
+                        <p><strong>Time:</strong> {formatTime(event.startTime) + " - " + formatTime(event.endTime)}</p>
+                        <p><strong>Location:</strong> {event.location}</p>
+                    </div>
+                    <div className="event-page-Card-Column-details">
 
-                    <img src={event.image} alt={event.title} className="event-image"/>
-                    <Link to={`/${event.title.replace(/\s+/g, '-')}/${event.id}`}><h3>{event.title}</h3></Link>
-                    <p><strong>Date:</strong> {formatDate(event.startDate)}</p>
-                    <p><strong>Time:</strong> {formatTime(event.startTime) + " - " + formatTime(event.endTime)}</p>
-                    <p><strong>Location:</strong> {event.location}</p>
+                        <p><strong>Hosted By PLANIT</strong></p>
+
+                        {isFreeEvent && (
+                            <div className="free-event-tag">
+                                <p><strong>Free Event</strong></p>
+                            </div>
+                        )}
 
 
-                    {isFreeEvent && (
-                        <div className="free-event-tag">
-                            <p><strong>Free Event</strong></p>
-                        </div>
-                    )}
+                        {isSoldOut && (
+                            <div className="sold-out-tag">
+                                <p><strong>SOLD OUT</strong></p>
+                            </div>
+                        )}
 
-
-                    {isSoldOut && (
-                        <div className="sold-out-tag">
-                            <p><strong>SOLD OUT</strong></p>
-                        </div>
-                    )}
-
-                    {/* Conditionally render "Limited Spaces Left" tag if total tickets left is less than 100 */}
-                    {isLimitedSpace && (
-                        <div className="limited-space-tag">
-                            <p><strong>Limited Spaces Left!</strong></p>
-                        </div>
-                    )}
+                        {/* Conditionally render "Limited Spaces Left" tag if total tickets left is less than 100 */}
+                        {isLimitedSpace && (
+                            <div className="limited-space-tag">
+                                <p><strong>Limited Spaces Left!</strong></p>
+                            </div>
+                        )}
+                    </div>
                 </div>
             ) : (
                 <div className="event-page-card-large">
-                    <div className="event-page-card-large-column-image">
-                        <img src={event.images[0].url} alt={event.name} className="event-image"/>
+                        <div className="event-page-card-large-column-image">
+                            <img src={event.images[0].url} alt={event.name} className="event-image"/>
 
+                        </div>
+
+                        <div className="event-page-Card-Column-details">
+                            <Link to={`/${event.id}`}><h3>{event.name}</h3></Link>
+                            <p><strong>Date:</strong> {formatDate(event.dates.start.localDate)}</p>
+                            <p><strong>Time:</strong> {formatTime(event.dates.start.localTime)}</p>
+                            <p>
+                                <strong>Location:</strong> {event._embedded.venues[0].address.line1 + ", " + event._embedded.venues[0].city.name + ", " + event._embedded.venues[0].state.stateCode}
+                            </p>
+
+
+                        </div>
+                        <div className="event-page-Card-Column-details">
+                            <p><strong>Hosted By Ticketmaster</strong></p>
+                        </div>
                     </div>
+                    )}
 
-                    <div className="event-page-Card-Column-details">
-                        <Link to={`/${event.id}`}><h3>{event.name}</h3></Link>
-                        <p><strong>Date:</strong> {formatDate(event.dates.start.localDate)}</p>
-                        <p><strong>Time:</strong> {formatTime(event.dates.start.localTime)}</p>
-                        <p>
-                            <strong>Location:</strong> {event._embedded.venues[0].address.line1 + ", " + event._embedded.venues[0].city.name + ", " + event._embedded.venues[0].state.stateCode}
-                        </p>
-
-
-                        
-                    </div>
-                    <div className="event-page-Card-Column-details">
-                        <p><strong>Hosted By Ticketmaster</strong></p>
-                    </div>
                 </div>
-            )}
+            );
+            }
 
-        </div>
-    );
-}
-
-export default EventPageCard;
+            export default EventPageCard;
