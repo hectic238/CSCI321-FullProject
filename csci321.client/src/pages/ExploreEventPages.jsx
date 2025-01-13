@@ -227,11 +227,7 @@ const ExploreEventPages = () => {
                 <div className="photo-bar">
                     <img src={banner} alt="Event Banner" className="top-banner"/>
                 </div>
-
                     <div className="events-section">
-
-
-
                         <div>
                             {events.map(event => (
                                 <EventPageCard key={event.id} event={event}/>

@@ -139,9 +139,9 @@ function ExploreEvents() {
                 {/* Four categories with headings and rows of events */}
                 <div className="events-section">
                     {/* 1. Search by Category */}
-                    <div>
+                    <div style={{"flex-direction": "row","display": "flex","justify-content": "space-between","align-items": "center","max-height": "75px"}}>
                         <h2>Popular Events</h2>
-                        <button onClick={() => navigate('/explore/popular')}>View More</button>
+                        <button style={{"width": "200px","height":"50px","background-color":"red"}} onClick={() => navigate('/explore/popular')}>View More</button>
                     </div>
 
 
@@ -151,9 +151,9 @@ function ExploreEvents() {
                         ))}
                     </div>
 
-                    <div>
+                    <div style={{"flex-direction": "row","display": "flex","justify-content": "space-between","align-items": "center","max-height": "75px"}}>
                         <h2>Concerts</h2>
-                        <button onClick={() => navigate('/explore/music')}>View More</button>
+                        <button style={{"width": "200px","height":"50px","background-color":"red"}} onClick={() => navigate('/explore/music')}>View More</button>
                     </div>
                     <div className="events-grid">
                         {concerts.map(event => (
@@ -161,9 +161,9 @@ function ExploreEvents() {
                         ))}
                     </div>
 
-                    <div>
+                    <div style={{"flex-direction": "row","display": "flex","justify-content": "space-between","align-items": "center","max-height": "75px"}}>
                         <h2>Family</h2>
-                        <button onClick={() => navigate('/explore/family')}>View More</button>
+                        <button style={{"width": "200px","height":"50px","background-color":"red"}} onClick={() => navigate('/explore/family')}>View More</button>
                     </div>
                     <div className="events-grid">
                         {familyEvents.map(event => (
@@ -172,9 +172,9 @@ function ExploreEvents() {
                     </div>
 
 
-                    <div>
+                    <div style={{"flex-direction": "row","display": "flex","justify-content": "space-between","align-items": "center","max-height": "75px"}}>
                         <h2>Theatre</h2>
-                        <button onClick={() => navigate('/explore/theatre')}>View More</button>
+                        <button style={{"width": "200px","height":"50px","background-color":"red"}} onClick={() => navigate('/explore/theatre')}>View More</button>
                     </div>
                     <div className="events-grid">
                         {theatreEvents.map(event => (
@@ -182,9 +182,9 @@ function ExploreEvents() {
                         ))}
                     </div>
                     
-                    <div>
+                    <div style={{"flex-direction": "row","display": "flex","justify-content": "space-between","align-items": "center","max-height": "75px"}}>
                         <h2>Comedy</h2>
-                        <button onClick={() => navigate('/explore/comedy')}>View More</button>
+                        <button style={{"width": "200px","height":"50px","background-color":"red"}} onClick={() => navigate('/explore/comedy')}>View More</button>
                     </div>
                     <div className="events-grid">
                         {comedyEvents.map(event => (
