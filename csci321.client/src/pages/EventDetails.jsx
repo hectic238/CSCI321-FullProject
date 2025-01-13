@@ -79,7 +79,6 @@ const EventDetails = () => {
     useEffect(() => {
 
         setUserId(getUserIdFromToken());
-        
         fetchEvent(eventId).then(event => {
             if (event) {
                 setEventDetails(event);
@@ -88,6 +87,7 @@ const EventDetails = () => {
                 setIsEventInPast(eventDateTime < now);
             }
         });
+        
     }, [eventId]);
 
     if (!eventDetails) {

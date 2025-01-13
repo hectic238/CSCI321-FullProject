@@ -23,10 +23,6 @@ public class UserController : ControllerBase
         _userService = usersService;
     }
 
-    [HttpGet]
-    public async Task<List<User>> Get() =>
-    await _userService.GetAsync();
-
     [HttpPost("signUp")]
     public async Task<IActionResult> Post(User newUser)
     {
@@ -256,36 +252,104 @@ public class UserController : ControllerBase
         if(userType != loginData.UserType) { return Unauthorized("Invalid Credentials"); }
         
         // Generate JWT token
-        var accessToken = _authService.GenerateAccessToken(userId, email, userType); // minute accessToken
+        var accessToken = _authService.GenerateAccessToken(userId, email, userType); 
 
         var refreshToken = _authService.GenerateRefreshToken();
         
         await _userService.StoreRefreshToken(userId, refreshToken, DateTime.UtcNow.AddDays(30)); // 30 days expiration
         
-        // Return the token and user data
+        
         return Ok(new { accessToken});
     }
     
+    [Authorize]
     [HttpPut("updateUser")]
     public async Task<IActionResult> UpdateUser([FromBody] User updatedUser)
     {
+        
         if (updatedUser == null || string.IsNullOrEmpty(updatedUser.userId))
         {
             return BadRequest("Invalid user data.");
         }
-
+        
+        
+        
+        
         var existingUser = await _userService.GetByIdAsync(updatedUser.userId);
         if (existingUser == null)
         {
             return NotFound("User not found.");
         }
+        
+        if (!string.IsNullOrEmpty(updatedUser.email) && updatedUser.email != existingUser.email)
+        {
+            var emailAlreadyExists = await _userService.CheckDuplicateEmailAsync(updatedUser.email);
 
-        // Update the user object with new details
-        existingUser.name = updatedUser.name;
-        existingUser.email = updatedUser.email;
-        existingUser.tickets = updatedUser.tickets; // Or merge tickets as needed
+            if (emailAlreadyExists)
+            {
+                return BadRequest(new { message = "Email Address Already In Use" });
+            }
+            existingUser.email = updatedUser.email;
+        }
+        
+        // Update fields only if they are not null or empty
+        if (!string.IsNullOrEmpty(updatedUser.name))
+        {
+            existingUser.name = updatedUser.name;
+        }
+
+
+        if (updatedUser.dateOfBirth != null)
+        {
+            existingUser.dateOfBirth = updatedUser.dateOfBirth;
+        }
+
+        if (!string.IsNullOrEmpty(updatedUser.phoneNumber))
+        {
+            existingUser.phoneNumber = updatedUser.phoneNumber;
+        }
+
+        if (!string.IsNullOrEmpty(updatedUser.title))
+        {
+            existingUser.title = updatedUser.title;
+        }
+
+        if (updatedUser.tickets != null && updatedUser.tickets.Any())
+        {
+            existingUser.tickets = updatedUser.tickets;
+        }
 
         await _userService.UpdateUserAsync(existingUser);
+
+        return Ok(existingUser);
+    }
+
+    [Authorize]
+    [HttpPut("updateUserPassword")]
+    public async Task<IActionResult> UpdateUserPassword([FromBody] PasswordForm passwordForm)
+    {
+        
+        if (passwordForm == null || string.IsNullOrEmpty(passwordForm.userId))
+        {
+            return BadRequest("Invalid form data.");
+        }
+        
+        var existingUser = await _userService.GetPasswordByIdAsync(passwordForm.userId);
+        if (existingUser == null)
+        {
+            return NotFound("User not found.");
+        }
+
+        // Check if old Password entered is the same as current user password
+        if (HashPassword(passwordForm.oldPassword) != existingUser.password)
+        {
+            return Unauthorized("Old Password does not match.");
+        }
+        
+        // update existing user password with new hashed password then update user in DB
+        existingUser.password = HashPassword(passwordForm.newPassword);
+        
+        await _userService.UpdateUserPasswordAsync(existingUser);
 
         return Ok(existingUser);
     }

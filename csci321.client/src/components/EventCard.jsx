@@ -1,5 +1,7 @@
 import React from "react";
 import { Link } from 'react-router-dom';
+import './EventPageCard.css';
+import {useNavigate, useParams} from "react-router-dom";
 
 const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -22,48 +24,64 @@ const formatTime = (timeString) => {
 };
 function EventCard({ event }) {
 
-    const isSoldOut = event.eventTicketType === 'ticketed' && event.tickets.every(ticket => parseInt(ticket.count) === 0);
+    let isSoldOut;
+    let totalTicketsLeft;
+    let isLimitedSpace;
+    let isFreeEvent;
+    const navigate = useNavigate();
 
-    // Calculate total tickets left
-    const totalTicketsLeft = event.tickets?.length
-        ? event.tickets.reduce((total, ticket) => total + parseInt(ticket.count, 10), 0)
-        : 0;
-    // Check if total tickets left is less than 100
-    const isLimitedSpace = event.eventTicketType === 'ticketed' && totalTicketsLeft > 0 && totalTicketsLeft < 100;
-    const isFreeEvent = event.eventTicketType === 'free'; // Check if it's a free event
-
-
+    if(event.source === 'local') {
+        isFreeEvent = event.eventTicketType === 'free'; 
+    }
+    
     return (
         <div key={event.id} className="event-card">
 
-            <div className="event-Card-Column-details">
-            <img src={event.image} alt={event.title} className="event-image"/>
-                <Link to={`/${event.title.replace(/\s+/g, '-')}/${event.id}`}><h3>{event.title}</h3></Link>
-                <p><strong>Date:</strong> {formatDate(event.startDate)}</p>
-                <p><strong>Time:</strong> {formatTime(event.startTime) + " - " + formatTime(event.endTime)}</p>
-                <p><strong>Location:</strong> {event.location}</p>
+            {event.source === 'local' ? (
+                <div className="event-Card-Column-details">
+
+                    <img src={event.image} alt={event.title} className="event-image"/>
+                    <Link to={`/${event.title.replace(/\s+/g, '-')}/${event.id}`}><h3>{event.title}</h3></Link>
+                    <p><strong>Date:</strong> {formatDate(event.startDate)}</p>
+                    <p><strong>Time:</strong> {formatTime(event.startTime) + " - " + formatTime(event.endTime)}</p>
+                    <p><strong>Location:</strong> {event.location}</p>
 
 
-                {isFreeEvent && (
-                    <div className="free-event-tag">
-                        <p><strong>Free Event</strong></p>
-                    </div>
-                )}
-                
-                
-                {isSoldOut && (
-                    <div className="sold-out-tag">
-                        <p><strong>SOLD OUT</strong></p>
-                    </div>
-                )}
+                    {isFreeEvent && (
+                        <div className="free-event-tag">
+                            <p><strong>Free Event</strong></p>
+                        </div>
+                    )}
 
-                {/* Conditionally render "Limited Spaces Left" tag if total tickets left is less than 100 */}
-                {isLimitedSpace && (
-                    <div className="limited-space-tag">
-                        <p><strong>Limited Spaces Left!</strong></p>
+
+                    {isSoldOut && (
+                        <div className="sold-out-tag">
+                            <p><strong>SOLD OUT</strong></p>
+                        </div>
+                    )}
+
+                    {/* Conditionally render "Limited Spaces Left" tag if total tickets left is less than 100 */}
+                    {isLimitedSpace && (
+                        <div className="limited-space-tag">
+                            <p><strong>Limited Spaces Left!</strong></p>
+                        </div>
+                    )}
+                </div>
+            ) : (
+                <div className="event-card">
+                    <div className="event-Card-Column-details">
+                        <img src={event.images[0].url} alt={event.name} className="event-image"/>
+                        <Link to={`/${event.id}`}><h3>{event.name}</h3></Link>
+                        <p><strong>Date:</strong> {formatDate(event.dates.start.localDate)}</p>
+                        <p><strong>Time:</strong> {formatTime(event.dates.start.localTime)}</p>
+                        <p><strong>Location:</strong> {event._embedded.venues[0].address.line1 + ", " + event._embedded.venues[0].city.name + ", " + event._embedded.venues[0].state.stateCode }</p>
+
+                        
+                        <p><strong>Hosted By Ticketmaster</strong></p>
                     </div>
-                )}
-            </div>
+                </div>
+            )}
+
         </div>
     );
 }

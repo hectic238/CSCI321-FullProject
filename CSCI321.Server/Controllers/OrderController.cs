@@ -20,11 +20,6 @@ public class OrderController : ControllerBase
     [HttpPost("publish")]
     public async Task<IActionResult> PublishOrder(Order order)
     {
-        // if (order == null || order.billingInfo == null || order.tickets == null)
-        // {
-        //     return BadRequest(new { message = "Invalid order data. Ensure all required fields are filled." });
-        // }
-
         try
         {
             Console.WriteLine("Order Received " + order.orderId);
@@ -53,11 +48,7 @@ public class OrderController : ControllerBase
     {
         try
         {
-            
-            Console.WriteLine("Before Orders");
             var orders = await _orderService.GetOrdersByUserIdAsync(userId);
-            Console.WriteLine("After Orders");
-            
             
             if (orders == null || !orders.Any())
             {

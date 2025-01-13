@@ -14,7 +14,6 @@ namespace CSCI321.Server.Helpers;
 
 public class OrderService
 {
-    private readonly IMongoCollection<Order> _OrderCollection;
     
     private readonly AmazonDynamoDBClient dynamoClient;
         
@@ -22,7 +21,7 @@ public class OrderService
 
     private readonly IConfiguration _configuration;
 
-    public OrderService(IOptions<OrderDatabaseSettings> OrderDatabaseSettings, IConfiguration configuration)
+    public OrderService(IConfiguration configuration)
     {
         _configuration = configuration;
 
@@ -39,15 +38,6 @@ public class OrderService
                 awsAccessKeyId,awsSecretAccessKey
             ),
             config);
-        var mongoClient = new MongoClient(
-            OrderDatabaseSettings.Value.ConnectionString);
-
-        var mongoDatabase = mongoClient.GetDatabase(
-            OrderDatabaseSettings.Value.DatabaseName);
-        
-        _OrderCollection = mongoDatabase.GetCollection<Order>(
-            OrderDatabaseSettings.Value.OrderCollectionName);
-
     }
     
     
@@ -141,7 +131,6 @@ public class OrderService
                 { ":userId", new AttributeValue { S = userId } }
             }
         };
-        Console.WriteLine("Between");
 
         var queryResponse = await dynamoClient.QueryAsync(queryRequest);
 

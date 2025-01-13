@@ -1,4 +1,4 @@
-import {RefreshToken} from "@/components/RefreshToken.jsx";
+import {RefreshToken} from "../components/RefreshToken.jsx";
 
 export const APIWithToken = async (url, method, body = null) => {
 
@@ -21,8 +21,7 @@ export const APIWithToken = async (url, method, body = null) => {
             method,
             headers,
         };
-
-        // Add body only if it's not null or undefined
+        
         if (body) {
             options.body = JSON.stringify(body);
         }
@@ -40,13 +39,7 @@ export const APIWithToken = async (url, method, body = null) => {
                 return null;
             }
             
-            const retryResponse = await fetch(url, {
-                method: method,
-                headers: {
-                    'Authorization': `Bearer ${accessToken}`,
-                    'Content-Type': 'application/json',
-                },
-            });
+            const retryResponse = await fetch(url, options);
             return retryResponse.json();
         }
 
@@ -57,10 +50,11 @@ export const APIWithToken = async (url, method, body = null) => {
             } catch {
                 throw new Error('Failed to parse error response');
             }
-            throw new Error(errorData.message || 'Failed to fetch orders');
+            throw new Error(errorData.message);
         }
-        
-        return response.json();
+
+        const data = await response.json();
+        return data;
     } catch (e) {
         alert(`Error: ${e.message}`);
     }
