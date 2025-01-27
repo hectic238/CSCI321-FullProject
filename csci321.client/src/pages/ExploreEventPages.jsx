@@ -227,14 +227,14 @@ const ExploreEventPages = () => {
                 <div className="photo-bar">
                     <img src={banner} alt="Event Banner" className="top-banner"/>
                 </div>
-                    <div className="events-section">
+                    <div className="events-section" style={{"display":"flex","alignItems":"center","justifyContent":"center"}}>
                         <div>
                             {events.map(event => (
                                 <EventPageCard key={event.id} event={event}/>
                             ))}
 
-                            <div>
-                                <button onClick={handleViewMore}>View More</button>
+                            <div style={{"margin":"10px", "justifyContent":"center","display":"flex" }}>
+                                <button onClick={handleViewMore} style={{"backgroundColor":"red","width":"200px"}}>View More</button>
                             </div>
                         </div>
                     </div>

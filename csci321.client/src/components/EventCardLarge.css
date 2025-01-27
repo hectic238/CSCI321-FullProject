@@ -36,7 +36,6 @@
     margin-left:20px;
     padding: 10px; /* Padding inside the card */
     
-    max-width:200px;
 }
 
 .event-Card-Column-details {
@@ -47,7 +46,6 @@
 
 .event-Card-Column-buttons {
     flex-direction: row;
-    max-width: 175px;
     margin-right:20px;
 }
 

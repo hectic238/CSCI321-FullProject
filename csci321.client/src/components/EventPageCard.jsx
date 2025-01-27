@@ -39,16 +39,16 @@ function EventPageCard({ event }) {
 
             {event.source === 'local' ? (
                 <div className="event-page-card-large">
-                    <div className="event-page-Card-Column-image">
+                    <div className="event-page-Card-Column-image" style={{width: "20%"}}>
                         <img src={event.image} alt={event.title} className="event-image"/>
                     </div>
-                    <div className="event-page-Card-Column-details">
+                    <div className="event-page-Card-Column-details" style={{"width": "500px", "marginLeft":"20px"}}>
                         <Link to={`/${event.title.replace(/\s+/g, '-')}/${event.id}`}><h3>{event.title}</h3></Link>
                         <p><strong>Date:</strong> {formatDate(event.startDate)}</p>
                         <p><strong>Time:</strong> {formatTime(event.startTime) + " - " + formatTime(event.endTime)}</p>
                         <p><strong>Location:</strong> {event.location}</p>
                     </div>
-                    <div className="event-page-Card-Column-details">
+                    <div className="event-page-Card-Column-details" style={{width: "25%"}}>
 
                         <p><strong>Hosted By PLANIT</strong></p>
 
@@ -75,12 +75,12 @@ function EventPageCard({ event }) {
                 </div>
             ) : (
                 <div className="event-page-card-large">
-                        <div className="event-page-card-large-column-image">
+                        <div className="event-page-card-large-column-image" style={{width: "20%"}}>
                             <img src={event.images[0].url} alt={event.name} className="event-image"/>
 
                         </div>
 
-                        <div className="event-page-Card-Column-details">
+                        <div className="event-page-Card-Column-details" style={{"width": "500px", "marginLeft":"20px"}}>
                             <Link to={`/${event.id}`}><h3>{event.name}</h3></Link>
                             <p><strong>Date:</strong> {formatDate(event.dates.start.localDate)}</p>
                             <p><strong>Time:</strong> {formatTime(event.dates.start.localTime)}</p>
@@ -90,7 +90,7 @@ function EventPageCard({ event }) {
 
 
                         </div>
-                        <div className="event-page-Card-Column-details">
+                        <div className="event-page-Card-Column-details" style={{width: "25%"}}>
                             <p><strong>Hosted By Ticketmaster</strong></p>
                         </div>
                     </div>

@@ -59,18 +59,18 @@ function EventCardLarge({ event, isDraft }) {
     
     return (
         <div key={event.eventId} className="event-card-large">
-            <div className="event-card-large-column-image">
+            <div className="event-card-large-column-image"style={{width: "25%"}}>
                 <img src={event.image} alt={event.title} className="event-image"/>
             </div>
 
-            <div className="event-Card-Column-details">
+            <div className="event-Card-Column-details" style={{width: "50%"}}>
                 <h3>{event.title}</h3>
                 <p><strong>Date:</strong> {formatDate(event.startDate)}</p>
                 <p><strong>Time:</strong> {formatTime(event.startTime) + " - " + formatTime(event.endTime)}</p>
                 <p><strong>Location:</strong> {event.location}</p>
             </div>
 
-            <div className="event-Card-Column-buttons">
+            <div className="event-Card-Column-buttons" style={{width: "25%"}}>
                 {isActive && (
                     <div>
                         <img src={editIcon} alt={event.title} className="edit-image"/>

@@ -26,7 +26,10 @@ const ExternalEventDetails = () => {
 
             const data = await response.json();
             console.log(data);
-            
+
+            document.title = data.name + " | PLANIT";
+
+
             setEventDetails(data);
         } catch (err) {
             console.error("Failed to fetch events:", err);
@@ -48,6 +51,7 @@ const ExternalEventDetails = () => {
     useEffect( () => {
 
         fetchExternalEventDetails();
+        
 
         console.log(eventDetails);
     },  []);

@@ -83,10 +83,12 @@ const EventDetails = () => {
                 const now = new Date();
                 const eventDateTime = new Date(`${event.startDate}T${event.startTime}`);
                 setIsEventInPast(eventDateTime < now);
+                document.title = event.title + " | PLANIT";
             }
         });
         
     }, [eventId]);
+    
 
     if (!eventDetails) {
         return <p>Loading event details...</p>;
