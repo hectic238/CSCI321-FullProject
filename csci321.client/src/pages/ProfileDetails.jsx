@@ -132,6 +132,7 @@ const ProfileDetails = () => {
     
     useEffect(() => {
         fetchUserDetails();
+        document.title = "Profile Page | PLANIT"
     }, []); 
 
     if (!userDetails) {

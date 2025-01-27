@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import {useLocation, useNavigate} from "react-router-dom";
-import { signUpUser } from '../mockBackend'; // Import the mock backend
 import {generateObjectId} from "@/components/Functions.jsx";
 import {getURL} from "@/components/URL.jsx";
 import {TextField, FormControl, InputLabel, MenuItem, Select} from '@mui/material';

@@ -8,8 +8,8 @@ import { Button, message, Steps, theme } from 'antd';
 import banner from '../../assets/exploreEvent.png';
 import Navbar from "../../components/Navbar.jsx";
 import Home from "@/pages/Home.jsx"; // Import your CSS file
-import mockEvents , { addDraftEvent } from "../../mockEvents.jsx";
 import {generateObjectId} from "@/components/Functions.jsx";
+import {RefreshToken} from "@/components/RefreshToken.jsx";
 const HostEvent = () => {
     
     const location = useLocation();
@@ -19,6 +19,7 @@ const HostEvent = () => {
     const { token } = theme.useToken();
     const [current, setCurrent] = useState(0);
     const [formErrors, setFormErrors] = useState({});  // Track form errors
+    const [freeTicket, setFreeTicket] = useState([{}]);
     const [eventDetails, setEventDetails] = useState({
         eventTicketType: '',
         tickets:  [],
@@ -67,6 +68,10 @@ const HostEvent = () => {
 
     // Logic to handle publishing or saving the event
     const handlePublishEvent = async () => {
+        
+        await RefreshToken();
+        
+        
         const accessToken = localStorage.getItem('accessToken');
 
         if (!accessToken) {
@@ -112,17 +117,17 @@ const HostEvent = () => {
 
     const handleSaveDraft =  async () => {
         // Add save draft logic here
-        console.log('Event Saved as Draft', eventDetails);
-        try {
-            const response = await addDraftEvent(eventDetails);
-
-            if (response.success) {
-                console.log('Event draft successfully added!', response);
-                navigate("/home"); // Navigate to home on success
-            }
-        } catch (error) {
-            console.error('Error adding event:', error);
-        }
+        // console.log('Event Saved as Draft', eventDetails);
+        // try {
+        //     const response = await addDraftEvent(eventDetails);
+        //
+        //     if (response.success) {
+        //         console.log('Event draft successfully added!', response);
+        //         navigate("/home"); // Navigate to home on success
+        //     }
+        // } catch (error) {
+        //     console.error('Error adding event:', error);
+        // }
         
     };
     
@@ -147,6 +152,7 @@ const HostEvent = () => {
                 eventDetails={eventDetails}
                 handleTicketFormChange={handleTicketFormChange}
                 setEventDetails={setEventDetails}
+                setFreeTicket={setFreeTicket}
             />,
         },
         {
@@ -241,6 +247,15 @@ const HostEvent = () => {
         if (Object.keys(errors).length > 0) {
             const errorMessages = Object.values(errors).join(', ');
             message.error(`Please complete all required fields: ${errorMessages}`);
+        }
+
+        if(eventDetails.eventTicketType === 'free') {
+            setEventDetails((prevDetails) => ({
+                    ...prevDetails,
+                    tickets: freeTicket,
+                }
+
+            ));
         }
         
         return Object.keys(errors).length === 0;

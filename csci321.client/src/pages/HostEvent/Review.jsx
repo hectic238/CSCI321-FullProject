@@ -86,7 +86,20 @@ const Review = ({ eventDetails}) => {
                         ))}
                     </div>
                 ) : (
-                    <p>{eventTicketType === 'ticketed' ? 'No tickets added.' : 'No tickets required for free events.'}</p>
+                    <div className="ticket-section">
+                        <div className="ticket-header">
+                            <div className="ticket-column">Ticket Name</div>
+                            <div className="ticket-column">Price</div>
+                            <div className="ticket-column">Count</div>
+                        </div>
+                        {tickets.map((ticket, index) => (
+                            <div className="ticket-row" key={index}>
+                                <div className="ticket-column">{ticket.name}</div>
+                                <div className="ticket-column">${ticket.price}</div>
+                                <div className="ticket-column">{ticket.count}</div>
+                            </div>
+                        ))}
+                    </div>
                 )}
 
                 <h2>Event Description</h2>

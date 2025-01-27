@@ -1,7 +1,6 @@
 import React from "react";
 import './EventCardLarge.css';
 import {useNavigate} from "react-router-dom";
-import mockEvents, {getEventById} from "@/mockEvents.jsx";
 import editIcon from '../assets/editIcon.png';
 
 function EventCardLarge({ event, isDraft }) {

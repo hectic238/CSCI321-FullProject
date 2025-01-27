@@ -1,6 +1,6 @@
 ﻿import Header from "../components/Header";
 import Navbar from "../components/Navbar";
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import "./about.css";
 import { getURL } from "@/components/URL.jsx";
 import { APIWithToken } from "@/components/API.js"; 
@@ -30,6 +30,10 @@ function About() {
             [field]: value
         }));
     };
+
+    useEffect(() => {
+        document.title = "Contact Us | PLANIT";
+    }, []);
 
     return (
         <>

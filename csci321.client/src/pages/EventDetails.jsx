@@ -32,7 +32,6 @@ const EventDetails = () => {
         }
         setSelectedTickets(newSelectedTickets);
         setTotalTickets(prev => prev + 1);
-        // Ensure the price is a number by using Number(ticket.price)
         setTotalPrice(prev => prev + Number(ticket.price));
     };
 
@@ -46,7 +45,6 @@ const EventDetails = () => {
             }
             setSelectedTickets(newSelectedTickets);
             setTotalTickets(prev => prev - 1);
-            // Ensure the price is a number by using Number(ticket.price)
             setTotalPrice(prev => prev - Number(ticket.price));
         }
     };
@@ -56,12 +54,11 @@ const EventDetails = () => {
     const handleCheckout = () => {
         if (totalTickets === 0) {
             console.log("No tickets selected for checkout.");
-            return; // Prevent checkout if no tickets are selected
+            return; 
         }
         console.log(eventDetails);
         navigate(`/checkout/${eventId}`, { state: { selectedTickets, eventDetails } });
-        // Here, you'd implement the logic for proceeding to the checkout page
-        // After successful checkout, you'd deduct the tickets from the total count.
+        
     };
 
     const handleAttendeeCountChange = (increment) => {
@@ -71,8 +68,9 @@ const EventDetails = () => {
     const handleAttendClick = () => {
         if (!isEventInPast) {
             eventDetails.numberAttendees += attendeeCount;
+            eventDetails.tickets[0].count -= attendeeCount;
+            eventDetails.tickets[0].bought += attendeeCount;
             editEvent(eventDetails);
-            console.log(`Added ${attendeeCount} attendees to the event.`);
         }
     };
 
@@ -112,7 +110,7 @@ const EventDetails = () => {
                 title={eventDetails.title}
                 placement="right"
                 onClose={() => setIsDrawerVisible(false)}
-                visible={isDrawerVisible}
+                open={isDrawerVisible}
                 width={350}
             >
                 <h2>{eventDetails.title}</h2>
@@ -121,7 +119,6 @@ const EventDetails = () => {
                 <p>{eventDetails.additionalInfo}</p>
             </Drawer>
 
-            {/* Main Body Section */}
             <div className="event-body">
                 <div className="venue-info">
                     {eventDetails.eventTicketType === 'free' ? (

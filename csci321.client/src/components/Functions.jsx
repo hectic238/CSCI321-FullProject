@@ -102,7 +102,6 @@ export const editEvent = async (updatedEventDetails) => {
             body: JSON.stringify(updatedEventDetails),
         });
         
-        console.log(response);
 
         if (!response.ok) {
             const errorData = await response.json();

@@ -110,8 +110,9 @@ function Navbar() {
 
 
                             <div className="attendee-actions">
-                                <Link to="/explore">Explore Events</Link>
-                                <Link to="/about">Contact Us</Link>
+                                <nav>
+                                    <a href="/home#exploreEvents" className="cta-button">Explore Events</a>
+                                </nav>                                <Link to="/about">Contact Us</Link>
 
                                 <Link to="/myTickets" className="attendee-btn">
                                     <img src={ticketIcon} alt="Tickets" className="attendee-icon" />
@@ -139,7 +140,9 @@ function Navbar() {
                         )}
                         {userType === 'organiser' && (
                             <div className="attendee-actions">
-                                <Link to="/explore">Explore Events</Link>
+                                <nav>
+                                    <a href="/home#exploreEvents" className="cta-button">Explore Events</a>
+                                </nav>
                                 <Link to="/host">Host Events</Link>
                                 <Link to="/about">Contact Us</Link>
 
@@ -168,8 +171,9 @@ function Navbar() {
                 ) : (
                     <>
                         {/* Show login buttons if not logged in */}
-                        <Link to="/explore">Explore Events</Link>
-                        <Link to="/host">Host Events</Link>
+                        <nav>
+                            <a href="/home#exploreEvents" className="cta-button">Explore Events</a>
+                        </nav>
                         <Link to="/about">Contact Us</Link>
                         <Link to="/attendeeLogin" className="login-btn-attendee">Attendee Login</Link>
                         <Link to="/organiserLogin" className="login-btn">Organizer Login</Link>

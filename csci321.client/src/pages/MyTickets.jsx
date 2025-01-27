@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import Navbar from "../components/Navbar.jsx"; // Add necessary styles here
 import banner from '../assets/exploreEvent.png'; // Assuming your image is in src/assets
 import './MyTickets.css';
-import mockEvents from "../mockEvents.jsx";
 import {getUserIdFromToken, enrichOrdersWithEventDetails} from "@/components/Functions.jsx";
 import OrdersList from "@/components/OrdersList.jsx"; // Create a CSS file for styles
 
@@ -38,6 +37,10 @@ const MyTickets = () => {
         };
         fetchOrders();
     }, [userId]);
+    
+    useEffect(()=> {
+        document.title = "My Tickets | PLANIT"
+    })
 
     return (
         <div>
