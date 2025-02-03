@@ -2,15 +2,15 @@
 import {Link, useNavigate} from "react-router-dom";
 import './Navbar.css';
 import logoSmall from '../assets/logo_small.png';
-import ticketIcon from '../assets/ticketicon.png'; // Add your ticket image here
-import starIcon from '../assets/staricon.png'; // Add your star image here
-import profileIcon from '../assets/profileicon.png'; // Add your profile image here
+import ticketIcon from '../assets/ticketicon.png'; 
+import starIcon from '../assets/staricon.png'; 
+import profileIcon from '../assets/profileicon.png'; 
 import {useEffect, useRef, useState} from "react";
-import ProfileDropdown from "./ProfileDropdown.jsx"; // Assuming your image is in src/assets
+import ProfileDropdown from "./ProfileDropdown.jsx"; 
 import { AudioOutlined } from '@ant-design/icons';
 import { Input, Space } from 'antd';
 const { Search } = Input;
-import {getUserTypeFromToken} from "@/components/Functions.jsx"; // Import the jwt-decode library
+import {getUserTypeFromToken, fetchEventSummaries} from "@/components/Functions.jsx"; 
 
 
 
@@ -23,7 +23,6 @@ const suffix = (
     />
 );
 
-const onSearch = (value, _e, info) => console.log(info?.source, value);
 
 
 function Navbar() {
@@ -33,6 +32,14 @@ function Navbar() {
     const dropdownRef = useRef(null); // Ref for the dropdown
 
     const navigate = useNavigate();
+
+    const onSearch = async (value, _e, info) => {
+        console.log(value);
+        navigate('/explore/search/popular')
+        let events = await fetchEventSummaries(value, 10);
+        console.log(events);
+    };
+
 
     useEffect(() => {
         const token = localStorage.getItem('accessToken');

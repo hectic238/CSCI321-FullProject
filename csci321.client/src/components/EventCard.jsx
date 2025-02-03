@@ -41,7 +41,7 @@ function EventCard({ event }) {
                 <div className="event-Card-Column-details">
 
                     <img src={event.image} alt={event.title} className="event-image"/>
-                    <Link to={`/${event.title.replace(/\s+/g, '-')}/${event.id}`}><h3>{event.title}</h3></Link>
+                    <Link to={`/event/${event.title.replace(/\s+/g, '-')}/${event.id}`}><h3>{event.title}</h3></Link>
                     <p><strong>Date:</strong> {formatDate(event.startDate)}</p>
                     <p><strong>Time:</strong> {formatTime(event.startTime) + " - " + formatTime(event.endTime)}</p>
                     <p><strong>Location:</strong> {event.location}</p>
@@ -71,7 +71,7 @@ function EventCard({ event }) {
                 <div className="event-card">
                     <div className="event-Card-Column-details">
                         <img src={event.images[0].url} alt={event.name} className="event-image"/>
-                        <Link to={`/${event.id}`}><h3>{event.name}</h3></Link>
+                        <Link to={`/event/${event.id}`}><h3>{event.name}</h3></Link>
                         <p><strong>Date:</strong> {formatDate(event.dates.start.localDate)}</p>
                         <p><strong>Time:</strong> {formatTime(event.dates.start.localTime)}</p>
                         <p><strong>Location:</strong> {event._embedded.venues[0].address.line1 + ", " + event._embedded.venues[0].city.name + ", " + event._embedded.venues[0].state.stateCode }</p>

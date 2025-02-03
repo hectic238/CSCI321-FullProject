@@ -40,8 +40,8 @@ const ProfileDetails = () => {
         let url = `${baseUrl}/api/User/get`;
 
         let response =  await APIWithToken(url, 'Get');
-        
-        console.log(response);
+
+        document.title = response.name + " | PLANIT";
         
         setUserDetails(response);
     };
@@ -132,7 +132,6 @@ const ProfileDetails = () => {
     
     useEffect(() => {
         fetchUserDetails();
-        document.title = "Profile Page | PLANIT"
     }, []); 
 
     if (!userDetails) {

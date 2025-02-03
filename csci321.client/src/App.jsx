@@ -127,7 +127,9 @@ const App = () => {
                     </PrivateRoute>
                     }
                     />
-                    <Route path="/explore/:categoryName" element={<ExploreEventPages/>} />
+                    <Route path="/explore/category/:categoryName" element={<ExploreEventPages/>} />
+
+                    <Route path="/explore/search/:searchTerm" element={<ExploreEventPages/>} />
 
                     <Route path="/interested" element={
                         <PrivateRoute allowedUserType="attendee">
@@ -136,11 +138,11 @@ const App = () => {
                     }
                     />
 
-                    <Route path="/:eventName/:eventId" element={
+                    <Route path="/event/:eventName/:eventId" element={
                         <PrivateRoute allowedUserType="attendee">
                         <EventDetails />
                     </PrivateRoute>} />
-                    <Route path="/:eventId" element={
+                    <Route path="/event/:eventId" element={
                         <PrivateRoute allowedUserType="attendee">
                             <ExternalEventDetails />
                         </PrivateRoute>} />

@@ -1,4 +1,4 @@
-import {useNavigate, useParams} from "react-router-dom";
+import { useLocation, useParams } from 'react-router-dom';
 import React, {useEffect, useState} from "react";
 import Navbar from "@/components/Navbar.jsx";
 import {fetchEventsByCategory, fetchEventSummaries} from "@/components/Functions.jsx";
@@ -6,7 +6,8 @@ import banner from "@/assets/exploreEvent.png";
 import EventCard from "@/components/EventCard.jsx";
 import EventPageCard from "@/components/EventPageCard.jsx";
 const ExploreEventPages = () => {
-    const category = useParams(); // Extract eventName and eventId from the URL
+    const category = useParams();
+    const location = useLocation();
     const [events, setEvents] = useState([]);
     const [currentWebsiteEventCount, setCurrentWebsiteEventCount] = useState(5);
     const [totalPages, setTotalPages] = useState(null);
@@ -16,8 +17,11 @@ const ExploreEventPages = () => {
     const API_KEY = "bGImLf75hE3oDCJaWIGTpjjH1TuizHnA";
     const [noMoreWebsiteEvents, setNoMoreWebsiteEvents] = useState(false);
     const [ticketMasterEventsFetched, setTicketMasterEventsFetched] = useState(null);
+
+    const isCategory = location.pathname.includes('/explore/category/');
+    const isSearch = location.pathname.includes('/explore/search/');
     
- 
+    
     const fetchTicketMasterEvents = async (size = 10, page = 0) => {
         setTicketMasterEventsFetched(true);
 
@@ -32,7 +36,7 @@ const ExploreEventPages = () => {
         }
         
         const url = `${API_URL}${params}`;
-        // DMAID only shows Events from NSW and ACT
+        
         try {
             const response = await fetch(url);
             if (!response.ok) {
@@ -136,7 +140,7 @@ const ExploreEventPages = () => {
         }
     }
 
-    const loadEvents = async () => {
+    const loadEvents = async (searchTerm, category) => {
         try {
             const popularEvents = await fetchEvent("popular","popular", 0, "");
             setEvents(popularEvents);
@@ -215,8 +219,25 @@ const ExploreEventPages = () => {
     
     
     useEffect( () => {
+        
+        if(isSearch) {
+            let searchTerm = category.searchTerm;
+            let category2 = "";
 
-        loadEvents();
+            console.log("Search Term " + searchTerm + " Category " + category2);
+
+            loadEvents(searchTerm, category2);
+
+        }
+
+        if(isCategory) {
+            let searchTerm = "";
+            let category2 = category.categoryName;
+
+            console.log("Search Term " + searchTerm + " Category " + category2);
+            loadEvents(searchTerm, category2);
+        }
+        
     }, [])
 
     return (

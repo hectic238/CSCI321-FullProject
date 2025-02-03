@@ -43,7 +43,7 @@ function EventPageCard({ event }) {
                         <img src={event.image} alt={event.title} className="event-image"/>
                     </div>
                     <div className="event-page-Card-Column-details" style={{"width": "500px", "marginLeft":"20px"}}>
-                        <Link to={`/${event.title.replace(/\s+/g, '-')}/${event.id}`}><h3>{event.title}</h3></Link>
+                        <Link to={`/event/${event.title.replace(/\s+/g, '-')}/${event.id}`}><h3>{event.title}</h3></Link>
                         <p><strong>Date:</strong> {formatDate(event.startDate)}</p>
                         <p><strong>Time:</strong> {formatTime(event.startTime) + " - " + formatTime(event.endTime)}</p>
                         <p><strong>Location:</strong> {event.location}</p>
@@ -81,7 +81,7 @@ function EventPageCard({ event }) {
                         </div>
 
                         <div className="event-page-Card-Column-details" style={{"width": "500px", "marginLeft":"20px"}}>
-                            <Link to={`/${event.id}`}><h3>{event.name}</h3></Link>
+                            <Link to={`/event/${event.id}`}><h3>{event.name}</h3></Link>
                             <p><strong>Date:</strong> {formatDate(event.dates.start.localDate)}</p>
                             <p><strong>Time:</strong> {formatTime(event.dates.start.localTime)}</p>
                             <p>

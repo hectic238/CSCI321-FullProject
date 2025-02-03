@@ -1,5 +1,6 @@
 ﻿using Amazon;
 using Amazon.DynamoDBv2;
+using Amazon.DynamoDBv2.DocumentModel;
 using Amazon.DynamoDBv2.Model;
 using Amazon.S3;
 using Amazon.Runtime;
@@ -19,7 +20,7 @@ public class EventService
     
     private readonly AmazonDynamoDBClient dynamoClient;
         
-    private const string TableName = "Events";  // Replace with your table name
+    private const string TableName = "Events"; 
 
     private readonly IConfiguration _configuration;
     private readonly AmazonS3Client _s3Client;
@@ -153,20 +154,28 @@ public class EventService
         
         var scanFilter = new Dictionary<string, Condition>();
 
+        var scanRequest = new ScanRequest();
+        scanRequest.TableName = TableName;
+
         if (!string.IsNullOrEmpty(searchTerm))
         {
+            Console.WriteLine(searchTerm + " 2");
             // Searching by title or location
-            scanFilter.Add("title", new Condition
-            {
-                ComparisonOperator = ComparisonOperator.CONTAINS,
-                AttributeValueList = new List<AttributeValue> { new AttributeValue { S = searchTerm } }
-            });
+            var searchFilter = new ScanFilter();
+            searchFilter.AddCondition("title", ScanOperator.Contains, searchTerm);
+            searchFilter.AddCondition("location", ScanOperator.Contains, searchTerm);
 
-            scanFilter.Add("location", new Condition
+            scanRequest.FilterExpression = "contains(title, :searchTerm) OR contains(#location, :searchTerm)";
+            scanRequest.ExpressionAttributeNames = new Dictionary<string, string>
             {
-                ComparisonOperator = ComparisonOperator.CONTAINS,
-                AttributeValueList = new List<AttributeValue> { new AttributeValue { S = searchTerm } }
-            });
+                { "#location", "location" } 
+            };
+            scanRequest.ExpressionAttributeValues = new Dictionary<string, AttributeValue>
+            {
+                { ":searchTerm", new AttributeValue { S = searchTerm } }
+            };
+            
+
         }
 
         if (!string.IsNullOrEmpty(category))
@@ -177,14 +186,10 @@ public class EventService
                 ComparisonOperator = ComparisonOperator.EQ,
                 AttributeValueList = new List<AttributeValue> { new AttributeValue { S = category } }
             });
+            
+            scanRequest.ScanFilter = scanFilter;
         }
-
-        // Scan request to DynamoDB
-        var scanRequest = new ScanRequest
-        {
-            TableName = TableName,
-            ScanFilter = scanFilter
-        };
+        
 
         // Execute the scan
         var scanResponse = await dynamoClient.ScanAsync(scanRequest);
