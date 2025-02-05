@@ -10,34 +10,18 @@ import ProfileDropdown from "./ProfileDropdown.jsx";
 import { AudioOutlined } from '@ant-design/icons';
 import { Input, Space } from 'antd';
 const { Search } = Input;
-import {getUserTypeFromToken, fetchEventSummaries} from "@/components/Functions.jsx"; 
-
-
-
-const suffix = (
-    <AudioOutlined
-        style={{
-            fontSize: 16,
-            color: '#1677ff',
-        }}
-    />
-);
-
-
-
+import {getUserTypeFromToken, fetchEventSummaries} from "@/components/Functions.jsx";
 function Navbar() {
 
     const [userType, setUserType] = useState(null);
-    const [dropdownOpen, setDropdownOpen] = useState(false); // State to manage dropdown visibility
-    const dropdownRef = useRef(null); // Ref for the dropdown
+    const [dropdownOpen, setDropdownOpen] = useState(false); 
+    const dropdownRef = useRef(null); 
 
     const navigate = useNavigate();
 
     const onSearch = async (value, _e, info) => {
         console.log(value);
-        navigate('/explore/search/popular')
-        let events = await fetchEventSummaries(value, 10);
-        console.log(events);
+        navigate(`/explore/search/${value}`);
     };
 
 
@@ -79,7 +63,7 @@ function Navbar() {
     return (
         <div className="navbar">
 
-            {/* Logo */}
+            
 
 
             {/* Left Container with Logo and Search Bar */}
@@ -94,13 +78,13 @@ function Navbar() {
                         placeholder="Search for events here"
                         onSearch={onSearch}
                         style={{
-                            flex: 1, /* Makes the search bar expand to fill available space */
+                            flex: 1, 
                             margin: 0,
                             padding: 8,
                             borderradius: 30,
-                            border: 1, /* Black border for the search bar */
-                            width: 100, /* Makes the search bar take full width */
-                            maxWidth: 300, /* Set your desired max width here */
+                            border: 1, 
+                            width: 100, 
+                            maxWidth: 300, 
                         }}
                     />
             </div>
@@ -134,7 +118,7 @@ function Navbar() {
                                     <img src={profileIcon} alt="Profile" className="attendee-icon"/>
                                     <span>Profile</span> {/* Class for consistent styling */}
                                 </Link>
-                                {/* Add ref here */}
+                                
                                 {dropdownOpen && (
                                     <div ref={dropdownRef}>
                                         <ProfileDropdown onLogout={handleLogout}/>
@@ -160,9 +144,9 @@ function Navbar() {
 
                                 <Link className="attendee-btn" onClick={toggleDropdown}>
                                     <img src={profileIcon} alt="Profile" className="attendee-icon"/>
-                                    <span>Profile</span> {/* Class for consistent styling */}
+                                    <span>Profile</span> 
                                 </Link>
-                                {/* Add ref here */}
+                                
                                 {dropdownOpen && (
                                     <div ref={dropdownRef}>
                                         <ProfileDropdown onLogout={handleLogout}/>

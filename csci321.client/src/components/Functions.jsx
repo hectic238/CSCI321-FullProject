@@ -43,9 +43,9 @@ export const generateObjectId = () =>  {
     return timestamp + randomHex;
 }
 
-export const fetchEventSummaries = async (searchTerm, count = 10) => {
+export const fetchEventSummaries = async (searchTerm, websiteEventCount = 10) => {
     var baseUrl = getURL();
-    const response = await fetch(`${baseUrl}/api/Event/search?searchTerm=${searchTerm || ''}&count=${count}`);
+    const response = await fetch(`${baseUrl}/api/Event/search?searchTerm=${searchTerm || ''}&count=${websiteEventCount}`);
     if (!response.ok) {
         throw new Error('Failed to fetch event summaries');
     }

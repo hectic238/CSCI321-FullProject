@@ -7,6 +7,7 @@ import EventCard from "@/components/EventCard.jsx";
 import EventPageCard from "@/components/EventPageCard.jsx";
 const ExploreEventPages = () => {
     const category = useParams();
+    const [loading, setLoading] = useState(false);
     const location = useLocation();
     const [events, setEvents] = useState([]);
     const [currentWebsiteEventCount, setCurrentWebsiteEventCount] = useState(5);
@@ -29,6 +30,9 @@ const ExploreEventPages = () => {
         
         if(category.categoryName === "popular") {
             params = `?dmaId=702&size=${size}&page=${page}&apikey=${API_KEY}`;
+        }
+        else if (isSearch) {
+            params = `?dmaId=702&keyword=${category.searchTerm}&page=${page}&size=${size}&apikey=${API_KEY}`;
         }
         else {
             console.log(category.categoryName);
@@ -55,11 +59,14 @@ const ExploreEventPages = () => {
     };
     
     
-    const calculateTotalPage = async (size) => {
+    const calculateTotalPage = async (size, searchTerm) => {
         let params;
 
         if(category.categoryName === "popular") {
             params = `?dmaId=702&size=${size}&apikey=${API_KEY}`;
+        }
+        else if (isSearch) {
+            params = `?dmaId=702&keyword=${searchTerm}&size=${size}&apikey=${API_KEY}`;
         }
         else {
             console.log(category.categoryName);
@@ -68,12 +75,15 @@ const ExploreEventPages = () => {
 
         const url = `${API_URL}${params}`;
         
+        console.log(url);
+        
         const response = await fetch(url);
         if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`);
         }
         const data = await response.json();
 
+        console.log(data)
         setTotalPages(data.page.totalPages);
         
 
@@ -81,13 +91,14 @@ const ExploreEventPages = () => {
 
     const fetchEvent = async (type, category, page = 0, searchTerm, websiteEventCount = 5) => {
         
-        await calculateTotalPage(5)
+        await calculateTotalPage(5, searchTerm);
         let events;
 
         let websiteEvents;
         let modifiedWebsiteEvents;
         let modifiedTicketmasterEventsData;
-
+        
+        
         if (type === "popular") {
             websiteEvents = await fetchEventSummaries(searchTerm, websiteEventCount);
             modifiedWebsiteEvents = websiteEvents.map(event => ({
@@ -142,6 +153,13 @@ const ExploreEventPages = () => {
 
     const loadEvents = async (searchTerm, category) => {
         try {
+            
+            if(isSearch) {
+                const searchedEvents = await fetchEvent("popular","popular", 0, searchTerm);
+                console.log(searchedEvents);
+                setEvents(searchedEvents);
+                return;
+            }
             const popularEvents = await fetchEvent("popular","popular", 0, "");
             setEvents(popularEvents);
             
@@ -168,6 +186,8 @@ const ExploreEventPages = () => {
     };
     
     const handleViewMore = async () => {
+        if(loading) return;
+        setLoading(true);
         try {
             if(page >= totalPages) {
                 console.log("No more pages");
@@ -183,26 +203,35 @@ const ExploreEventPages = () => {
             
 
             try {
+                if(isSearch) {
+                    const searchedEvents = await fetchEvent("popular","popular", nextPage, category.searchTerm);
+                    
+                    setEvents(prevEvents => [...prevEvents, ...searchedEvents]);
+                    setLoading(false);
+                    return;
+                    
+                }
+                
                 if(category.categoryName === "popular") {
                     const newEvents = await fetchEvent("popular", "popular", nextPage, "", updatedCount);
-                    setEvents(prevEvents => [...prevEvents, ...newEvents]); // Append new events
+                    setEvents(prevEvents => [...prevEvents, ...newEvents]); 
                 }
                 if(category.categoryName === "music") {
                     const newEvents = await fetchEvent("category",'music', nextPage, "", updatedCount);
                     console.log(newEvents);
-                    setEvents(prevEvents => [...prevEvents, ...newEvents]); // Append new events
+                    setEvents(prevEvents => [...prevEvents, ...newEvents]); 
                 }
                 else if(category.categoryName === "theatre") {
                     const newEvents = await fetchEvent("category",'theatre', nextPage, "", updatedCount);
-                    setEvents(prevEvents => [...prevEvents, ...newEvents]); // Append new events
+                    setEvents(prevEvents => [...prevEvents, ...newEvents]); 
                 }
                 else if(category.categoryName === "family") {
                     const newEvents = await fetchEvent("category",'family', nextPage, "", updatedCount);
-                    setEvents(prevEvents => [...prevEvents, ...newEvents]); // Append new events
+                    setEvents(prevEvents => [...prevEvents, ...newEvents]); 
                 }
                 else if(category.categoryName === "comedy") {
                     const newEvents = await fetchEvent("category",'comedy', nextPage, "", updatedCount);
-                    setEvents(prevEvents => [...prevEvents, ...newEvents]); // Append new events
+                    setEvents(prevEvents => [...prevEvents, ...newEvents]); 
                 }
 
             } catch (error) {
@@ -210,11 +239,12 @@ const ExploreEventPages = () => {
                 console.error('Error fetching events:', error);
             }
 
-            // const newEvents = await fetchEvent("category", category, nextPage,"", updatedCount );
-            // setEvents(prevEvents => [...prevEvents, ...newEvents]); // Append new events
+            
         } catch (error) {
             console.error("Error loading more events:", error);
         }
+        
+        setLoading(false);
     }
     
     
@@ -255,7 +285,7 @@ const ExploreEventPages = () => {
                             ))}
 
                             <div style={{"margin":"10px", "justifyContent":"center","display":"flex" }}>
-                                <button onClick={handleViewMore} style={{"backgroundColor":"red","width":"200px"}}>View More</button>
+                                <button onClick={handleViewMore} disabled={loading} style={{"backgroundColor":"red","width":"200px"}}>{loading ? "Loading..." : "View More"}</button>
                             </div>
                         </div>
                     </div>

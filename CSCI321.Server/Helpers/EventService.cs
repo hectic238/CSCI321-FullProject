@@ -149,18 +149,22 @@ public class EventService
             await dynamoClient.PutItemAsync(request);
     }
     
-    public async Task<List<EventSummary>> GetEventSummariesAsync(string searchTerm = null, string category = null)
+    public async Task<(List<EventSummary> Events, string LastEvaluatedKey)> GetEventSummariesAsync(
+        string searchTerm = null,
+        string category = null,
+        int pageSize = 10,
+        string lastEvaluatedKey = null
+        )
     {
         
         var scanFilter = new Dictionary<string, Condition>();
 
         var scanRequest = new ScanRequest();
         scanRequest.TableName = TableName;
+        scanRequest.Limit = pageSize;
 
         if (!string.IsNullOrEmpty(searchTerm))
         {
-            Console.WriteLine(searchTerm + " 2");
-            // Searching by title or location
             var searchFilter = new ScanFilter();
             searchFilter.AddCondition("title", ScanOperator.Contains, searchTerm);
             searchFilter.AddCondition("location", ScanOperator.Contains, searchTerm);
@@ -190,8 +194,14 @@ public class EventService
             scanRequest.ScanFilter = scanFilter;
         }
         
-
-        // Execute the scan
+        if (!string.IsNullOrEmpty(lastEvaluatedKey))
+        {
+            scanRequest.ExclusiveStartKey = new Dictionary<string, AttributeValue>
+            {
+                { "eventId", new AttributeValue { S = lastEvaluatedKey } }
+            };
+        }
+        
         var scanResponse = await dynamoClient.ScanAsync(scanRequest);
 
         // Convert the result to EventSummary
@@ -200,14 +210,13 @@ public class EventService
 
         foreach (var item in scanResponse.Items)
         {
-            // Parse event date and time
+            
             var eventStartDate = DateTime.ParseExact(
                 $"{item["startDate"].S} {item["startTime"].S}",
                 "yyyy-MM-dd HH:mm",
                 System.Globalization.CultureInfo.InvariantCulture
             );
-
-            // Include only future events
+            
             if (eventStartDate >= now)
             {
                 var eventSummary = new EventSummary
@@ -225,8 +234,12 @@ public class EventService
                 eventSummaries.Add(eventSummary);
             }
         }
-        ;
-        return eventSummaries;
+        
+        string newLastEvaluatedKey = scanResponse.LastEvaluatedKey.ContainsKey("eventId") 
+            ? scanResponse.LastEvaluatedKey["eventId"].S 
+            : null;
+        
+        return (eventSummaries, newLastEvaluatedKey);
     }
 
     
