@@ -1,12 +1,9 @@
-﻿using MongoDB.Bson;
-using MongoDB.Bson.Serialization.Attributes;
+﻿
 
 namespace CSCI321.Server.Models
 {
     public class Event
     {
-        [BsonId]
-        [BsonRepresentation(BsonType.ObjectId)]
         public string eventId { get; set; }
         public string title { get; set; }
         public string userId { get; set; }

@@ -108,11 +108,12 @@ const ExploreEventPages = () => {
 
 
         if (type === "popular") {
+
             let data = await fetchEventSummaries(searchTerm, 5, lastEvaluatedKey);
             websiteEvents = data.events;
+            
             setLastEvaluatedKey(data.lastEvaluatedKey);
-            console.log(websiteEvents);
-            console.log(data.lastEvaluatedKey);
+            
             modifiedWebsiteEvents = websiteEvents.map(event => ({
                 ...event,
                 source: 'local'  // Mark these events as 'local'
@@ -121,18 +122,18 @@ const ExploreEventPages = () => {
         else if (type === "category") {
             let data = await fetchEventsByCategory(category, 5, lastEvaluatedKey);
             websiteEvents = data.events;
+            
+
             setLastEvaluatedKey(data.lastEvaluatedKey);
-            console.log(websiteEvents);
-            console.log(data.lastEvaluatedKey);
+
             modifiedWebsiteEvents = websiteEvents.map(event => ({
                 ...event,
                 source: 'local'  // Mark these events as 'local'
             }));
         }
-        console.log(modifiedWebsiteEvents );
-        
         const numberWebsiteEvents = websiteEvents.length;
         let newTicketMasterEvents = [];
+        let splicedTicketMasterEvents = [];
         
         if(numberWebsiteEvents !== 5) {
             
@@ -146,12 +147,14 @@ const ExploreEventPages = () => {
                     source: 'ticketmaster'  // Mark these events as 'ticketmaster'
                 }));
                 
+                const allAvailableEvents = [...splicedTicketMasterEvents, ...newTicketMasterEvents];
                 // Splice the newTicketMasterEvents array based on the first (PAGE_SIZE - numberWebsiteEvents) events leaving the extra 2 inside that array
                 
-                let splicedTicketMasterEvents = newTicketMasterEvents.splice(0, PAGE_SIZE - numberWebsiteEvents);
+                splicedTicketMasterEvents = newTicketMasterEvents.splice(0, PAGE_SIZE - numberWebsiteEvents);
                 
-                
-                
+                console.log(allAvailableEvents);
+                console.log(ticketmasterTickets);
+                console.log(splicedTicketMasterEvents);
                 
                 
     
@@ -226,10 +229,11 @@ const ExploreEventPages = () => {
                 setPage(nextPage);
             }
             
+            console.log(page);
 
             try {
                 if(isSearch) {
-                    const searchedEvents = await fetchEvent("popular","popular", nextPage, category.searchTerm);
+                    const searchedEvents = await fetchEvent("popular","popular", page, category.searchTerm);
                     
                     setEvents(prevEvents => [...prevEvents, ...searchedEvents]);
                     setLoading(false);
@@ -239,7 +243,6 @@ const ExploreEventPages = () => {
                 
                 if(category.categoryName === "popular") {
                     const newEvents = await fetchEvent("popular", "popular", nextPage, "", updatedCount);
-                    console.log(newEvents);
                     setEvents(prevEvents => [...prevEvents, ...newEvents]); 
                     
                 }
@@ -262,7 +265,6 @@ const ExploreEventPages = () => {
                 }
 
             } catch (error) {
-                console.log(category);
                 console.error('Error fetching events:', error);
             }
 
@@ -270,6 +272,7 @@ const ExploreEventPages = () => {
         } catch (error) {
             console.error("Error loading more events:", error);
         }
+        setPage(page + 1);
         
         setLoading(false);
     }

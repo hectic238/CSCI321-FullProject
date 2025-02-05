@@ -1,7 +1,6 @@
 ﻿using System.Text;
 using CSCI321.Server.DBSettings;
 using Microsoft.Extensions.Options;
-using MongoDB.Driver;
 using CSCI321.Server.Models;
 using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.Model;
@@ -18,7 +17,6 @@ namespace CSCI321.Server.Helpers
 {
     public class UserService
     {
-        private readonly IMongoCollection<User> _UserCollection;
         
         private readonly AmazonDynamoDBClient dynamoClient;
         
@@ -46,14 +44,6 @@ namespace CSCI321.Server.Helpers
                     awsAccessKeyId,awsSecretAccessKey
                 ),
                 config);
-            var mongoClient = new MongoClient(
-                UserDatabaseSettings.Value.ConnectionString);
-
-            var mongoDatabase = mongoClient.GetDatabase(
-                UserDatabaseSettings.Value.DatabaseName);
-
-            _UserCollection = mongoDatabase.GetCollection<User>(
-                UserDatabaseSettings.Value.UserCollectionName);
         }
         
         
@@ -167,9 +157,7 @@ namespace CSCI321.Server.Helpers
             }
 
         }
-
-        public async Task<List<User>> GetAsync() =>
-            await _UserCollection.Find(_ => true).ToListAsync();
+        
         
         public async Task<User?> GetPasswordByIdAsync(string userId)
         {

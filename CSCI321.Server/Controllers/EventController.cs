@@ -1,11 +1,12 @@
-﻿using System.Security.Claims;
+﻿
 using CSCI321.Server.Helpers;
 using CSCI321.Server.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Cryptography;
-using System.Text;
-using MongoDB.Bson.IO;
+
+using Amazon.DynamoDBv2.Model;
+
+using Newtonsoft.Json;
 
 namespace CSCI321.Server.Controllers;
 
@@ -20,9 +21,6 @@ public class EventController : ControllerBase
         _eventService = service;
     }
     
-    [HttpGet]
-    public async Task<List<Event>> Get() =>
-        await _eventService.GetAsync();
 
     [Authorize]
     [HttpPost("createEvent")]
@@ -32,7 +30,7 @@ public class EventController : ControllerBase
             Console.WriteLine("Event Received: " + newEvent);
 
             await _eventService.CreateAsync(newEvent);
-            return CreatedAtAction(nameof(Get), new { id = newEvent.eventId }, newEvent);
+            return CreatedAtAction("Event", new { id = newEvent.eventId }, newEvent);
         }
         catch (Exception ex)
         {
@@ -42,28 +40,43 @@ public class EventController : ControllerBase
     }
     
     [HttpGet("search")]
-    public async Task<IActionResult> GetEventSummaries( [FromQuery] string searchTerm = null,  [FromQuery] int pageSize = 10, [FromQuery] string lastEvaluatedKey = null)
+    public async Task<IActionResult> GetEventSummaries( [FromQuery] string searchTerm = null,  [FromQuery] int pageSize = 10, [FromQuery] string lastKey = null)
     {
         string category = null;
-        Console.WriteLine(pageSize);
-        var (events, newLastEvaluatedKey) = await _eventService.GetEventSummariesAsync(
+        
+        Dictionary<string, AttributeValue> lastEvaluatedKey = null;
+    
+        if (!string.IsNullOrEmpty(lastKey))
+        {
+            lastEvaluatedKey = JsonConvert.DeserializeObject<Dictionary<string, AttributeValue>>(lastKey);
+        }
+        
+        var (events, nextKey) = await _eventService.GetEventSummariesAsync(
             searchTerm,category, pageSize, lastEvaluatedKey);
         return Ok(new {
             events,
-            lastEvaluatedKey = newLastEvaluatedKey
+            lastEvaluatedKey = nextKey != null ? JsonConvert.SerializeObject(nextKey) : null
             
         });
     }
 
     [HttpGet("category/{category}")]
-    public async Task<IActionResult> GetEventsByCategory( string searchTerm = null, [FromQuery] string category = null, int pageSize = 10, string lastEvaluatedKey = null)
+    public async Task<IActionResult> GetEventsByCategory( string searchTerm = null, [FromQuery] string category = null, int pageSize = 10, string lastKey = null)
     {
-        var (events, newLastEvaluatedKey) = await _eventService.GetEventSummariesAsync(
+        
+        Dictionary<string, AttributeValue> lastEvaluatedKey = null;
+    
+        if (!string.IsNullOrEmpty(lastKey))
+        {
+            lastEvaluatedKey = JsonConvert.DeserializeObject<Dictionary<string, AttributeValue>>(lastKey);
+        }
+        
+        var (events, nextKey) = await _eventService.GetEventSummariesAsync(
             searchTerm,category: category , pageSize, lastEvaluatedKey);
         
         return Ok(new {
             events,
-            lastEvaluatedKey = newLastEvaluatedKey
+            lastEvaluatedKey = nextKey != null ? JsonConvert.SerializeObject(nextKey) : null
             
         });
     }

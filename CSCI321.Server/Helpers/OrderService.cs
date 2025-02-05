@@ -7,7 +7,7 @@ using Amazon.S3;
 using CSCI321.Server.DBSettings;
 using CSCI321.Server.Models;
 using Microsoft.Extensions.Options;
-using MongoDB.Driver;
+
 using Newtonsoft.Json;
 
 namespace CSCI321.Server.Helpers;

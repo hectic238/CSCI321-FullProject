@@ -7,7 +7,6 @@ using Amazon.Runtime;
 using Amazon.S3.Model;
 using CSCI321.Server.DBSettings;
 using Microsoft.Extensions.Options;
-using MongoDB.Driver;
 using CSCI321.Server.Models;
 using Newtonsoft.Json;
 
@@ -16,7 +15,6 @@ namespace CSCI321.Server.Helpers;
 
 public class EventService
 {
-    private readonly IMongoCollection<Event> _EventCollection;
     
     private readonly AmazonDynamoDBClient dynamoClient;
         
@@ -55,14 +53,6 @@ public class EventService
                 awsAccessKeyId, awsSecretAccessKey),
             s3Config);
         
-        var mongoClient = new MongoClient(
-            EventDatabaseSettings.Value.ConnectionString);
-
-        var mongoDatabase = mongoClient.GetDatabase(
-            EventDatabaseSettings.Value.DatabaseName);
-
-        _EventCollection = mongoDatabase.GetCollection<Event>(
-            EventDatabaseSettings.Value.EventCollectionName);
     }
     
     public async Task<string> UploadImageAsync( string key, byte[] imageBytes)
@@ -97,9 +87,6 @@ public class EventService
 
     
     
-    public async Task<List<Event>> GetAsync() =>
-        await _EventCollection.Find(_ => true).ToListAsync();
-
     public async Task CreateAsync(Event newEvent)
     {
         
@@ -195,13 +182,6 @@ public class EventService
             scanRequest.ScanFilter = scanFilter;
         }
         
-        if (!string.IsNullOrEmpty(lastEvaluatedKey))
-        {
-            scanRequest.ExclusiveStartKey = new Dictionary<string, AttributeValue>
-            {
-                { "eventId", new AttributeValue { S = lastEvaluatedKey } }
-            };
-        }
         
         var scanResponse = await dynamoClient.ScanAsync(scanRequest);
 

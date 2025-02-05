@@ -45,7 +45,7 @@ export const generateObjectId = () =>  {
 
 export const fetchEventSummaries = async (searchTerm, pageSize = 10, lastEvaluatedKey) => {
     var baseUrl = getURL();
-    const response = await fetch(`${baseUrl}/api/Event/search?searchTerm=${searchTerm || ''}&pageSize=${pageSize}&lastEvaluatedKey=${lastEvaluatedKey || ""}`);
+    const response = await fetch(`${baseUrl}/api/Event/search?searchTerm=${searchTerm || ''}&pageSize=${pageSize}&lastKey=${lastEvaluatedKey || ""}`);
     if (!response.ok) {
         throw new Error('Failed to fetch event summaries');
     }
