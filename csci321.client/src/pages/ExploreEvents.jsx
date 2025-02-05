@@ -57,14 +57,16 @@ function ExploreEvents() {
         let modifiedTicketmasterEventsData;
 
         if (type === "popular") {
-            websiteEvents = await fetchEventSummaries(searchTerm, 5);
+            let data = await fetchEventSummaries(searchTerm, 5);
+            websiteEvents = data.events;
             modifiedWebsiteEvents = websiteEvents.map(event => ({
                 ...event,
                 source: 'local'  // Mark these events as 'local'
             }));
         }
         else if (type === "category") {
-            websiteEvents = await fetchEventsByCategory(category, 5);
+            let data = await fetchEventsByCategory(category, 5);
+            websiteEvents = data.events;
             modifiedWebsiteEvents = websiteEvents.map(event => ({
                 ...event,
                 source: 'local'  // Mark these events as 'local'

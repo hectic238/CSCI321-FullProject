@@ -42,9 +42,10 @@ public class EventController : ControllerBase
     }
     
     [HttpGet("search")]
-    public async Task<IActionResult> GetEventSummaries([FromQuery] string searchTerm = null, int pageSize = 10, string lastEvaluatedKey = null)
+    public async Task<IActionResult> GetEventSummaries( [FromQuery] string searchTerm = null,  [FromQuery] int pageSize = 10, [FromQuery] string lastEvaluatedKey = null)
     {
         string category = null;
+        Console.WriteLine(pageSize);
         var (events, newLastEvaluatedKey) = await _eventService.GetEventSummariesAsync(
             searchTerm,category, pageSize, lastEvaluatedKey);
         return Ok(new {
@@ -55,7 +56,7 @@ public class EventController : ControllerBase
     }
 
     [HttpGet("category/{category}")]
-    public async Task<IActionResult> GetEventsByCategory( string searchTerm = null, string category = null, [FromQuery] int pageSize = 10, string lastEvaluatedKey = null)
+    public async Task<IActionResult> GetEventsByCategory( string searchTerm = null, [FromQuery] string category = null, int pageSize = 10, string lastEvaluatedKey = null)
     {
         var (events, newLastEvaluatedKey) = await _eventService.GetEventSummariesAsync(
             searchTerm,category: category , pageSize, lastEvaluatedKey);

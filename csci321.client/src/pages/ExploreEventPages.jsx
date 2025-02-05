@@ -18,9 +18,13 @@ const ExploreEventPages = () => {
     const API_KEY = "bGImLf75hE3oDCJaWIGTpjjH1TuizHnA";
     const [noMoreWebsiteEvents, setNoMoreWebsiteEvents] = useState(false);
     const [ticketMasterEventsFetched, setTicketMasterEventsFetched] = useState(null);
-
+    const PAGE_SIZE = 5;
     const isCategory = location.pathname.includes('/explore/category/');
     const isSearch = location.pathname.includes('/explore/search/');
+    
+    const [lastEvaluatedKey, setLastEvaluatedKey] = useState(null);
+    const [ticketmasterEvents, setTicketmasterEvents] = useState([]);
+    const [storedTicketmasterEvents, setStoredTicketmasterEvents] = useState([]);
     
     
     const fetchTicketMasterEvents = async (size = 10, page = 0) => {
@@ -98,57 +102,76 @@ const ExploreEventPages = () => {
         let modifiedWebsiteEvents;
         let modifiedTicketmasterEventsData;
         
-        
+        let startIndex = page * PAGE_SIZE;
+        //let myEventsToShow = myEvents.slice(startIndex, startIndex + PAGE_SIZE);
+        //let remainingSlots = PAGE_SIZE - myEventsToShow.length;
+
+
         if (type === "popular") {
-            websiteEvents = await fetchEventSummaries(searchTerm, websiteEventCount);
+            let data = await fetchEventSummaries(searchTerm, 5, lastEvaluatedKey);
+            websiteEvents = data.events;
+            setLastEvaluatedKey(data.lastEvaluatedKey);
+            console.log(websiteEvents);
+            console.log(data.lastEvaluatedKey);
             modifiedWebsiteEvents = websiteEvents.map(event => ({
                 ...event,
                 source: 'local'  // Mark these events as 'local'
             }));
         }
         else if (type === "category") {
-            websiteEvents = await fetchEventsByCategory(category, websiteEventCount);
+            let data = await fetchEventsByCategory(category, 5, lastEvaluatedKey);
+            websiteEvents = data.events;
+            setLastEvaluatedKey(data.lastEvaluatedKey);
+            console.log(websiteEvents);
+            console.log(data.lastEvaluatedKey);
             modifiedWebsiteEvents = websiteEvents.map(event => ({
                 ...event,
                 source: 'local'  // Mark these events as 'local'
             }));
         }
-
+        console.log(modifiedWebsiteEvents );
         
         const numberWebsiteEvents = websiteEvents.length;
-        if(numberWebsiteEvents === 5) {
-            return modifiedWebsiteEvents;
-        }
-        let numberEventsNeeded = 5 - numberWebsiteEvents % 5;
+        let newTicketMasterEvents = [];
         
-        if(noMoreWebsiteEvents) {
-            numberEventsNeeded = 5;
-        }
-        // If no external events are needed then skip this
-        if(numberEventsNeeded === 0) {
-            return modifiedWebsiteEvents;
-        }
-
-        const ticketmasterTickets = await fetchTicketMasterEvents(numberEventsNeeded, page);
-        if (Array.isArray(ticketmasterTickets)) {
-            modifiedTicketmasterEventsData = ticketmasterTickets.map(event => ({
-                ...event,
-                source: 'ticketmaster'  // Mark these events as 'ticketmaster'
-            }));
-
-            events = [
-                ...modifiedWebsiteEvents, // Local events first
-                ...modifiedTicketmasterEventsData, // Ticketmaster events next
-            ];
+        if(numberWebsiteEvents !== 5) {
             
-            if(numberEventsNeeded > 0){
-                setNoMoreWebsiteEvents(true);
+            console.log(PAGE_SIZE - numberWebsiteEvents);
+            
+            const ticketmasterTickets = await fetchTicketMasterEvents(5, page);
+            if (Array.isArray(ticketmasterTickets)) {
+                // Store all 5 new ticketmaster events inside the newTicketMasterEvents array 
+                newTicketMasterEvents = ticketmasterTickets.map(event => ({
+                    ...event,
+                    source: 'ticketmaster'  // Mark these events as 'ticketmaster'
+                }));
+                
+                // Splice the newTicketMasterEvents array based on the first (PAGE_SIZE - numberWebsiteEvents) events leaving the extra 2 inside that array
+                
+                let splicedTicketMasterEvents = newTicketMasterEvents.splice(0, PAGE_SIZE - numberWebsiteEvents);
+                
+                
+                
+                
+                
+    
+                events = [
+                    ...modifiedWebsiteEvents, // Local events first
+                    ...splicedTicketMasterEvents, // Ticketmaster events next
+                ];
+                
+                console.log(events);
+                return events;
+    
+            }else {
+                console.error('Ticketmaster events data is not an array:', ticketmasterTickets);
             }
-            return events.slice(-5);
-
-        }else {
-            console.error('Ticketmaster events data is not an array:', ticketmasterTickets);
+        
         }
+        
+        return modifiedWebsiteEvents;
+        
+        
     }
 
     const loadEvents = async (searchTerm, category) => {
@@ -193,6 +216,8 @@ const ExploreEventPages = () => {
                 console.log("No more pages");
                 return;
             }
+            
+            
             const updatedCount = currentWebsiteEventCount + 5;
             setCurrentWebsiteEventCount(updatedCount);
             let nextPage = 0;
@@ -214,7 +239,9 @@ const ExploreEventPages = () => {
                 
                 if(category.categoryName === "popular") {
                     const newEvents = await fetchEvent("popular", "popular", nextPage, "", updatedCount);
+                    console.log(newEvents);
                     setEvents(prevEvents => [...prevEvents, ...newEvents]); 
+                    
                 }
                 if(category.categoryName === "music") {
                     const newEvents = await fetchEvent("category",'music', nextPage, "", updatedCount);

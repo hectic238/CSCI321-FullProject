@@ -149,11 +149,11 @@ public class EventService
             await dynamoClient.PutItemAsync(request);
     }
     
-    public async Task<(List<EventSummary> Events, string LastEvaluatedKey)> GetEventSummariesAsync(
+    public async Task<(List<EventSummary> Events, Dictionary<String, AttributeValue>)> GetEventSummariesAsync(
         string searchTerm = null,
         string category = null,
         int pageSize = 10,
-        string lastEvaluatedKey = null
+        Dictionary<string, AttributeValue> lastEvaluatedKey = null
         )
     {
         
@@ -162,7 +162,8 @@ public class EventService
         var scanRequest = new ScanRequest();
         scanRequest.TableName = TableName;
         scanRequest.Limit = pageSize;
-
+        scanRequest.ExclusiveStartKey = lastEvaluatedKey;
+        
         if (!string.IsNullOrEmpty(searchTerm))
         {
             var searchFilter = new ScanFilter();
@@ -235,11 +236,11 @@ public class EventService
             }
         }
         
-        string newLastEvaluatedKey = scanResponse.LastEvaluatedKey.ContainsKey("eventId") 
-            ? scanResponse.LastEvaluatedKey["eventId"].S 
+        var nextKey = scanResponse.LastEvaluatedKey != null && scanResponse.LastEvaluatedKey.Count > 0
+            ? scanResponse.LastEvaluatedKey
             : null;
         
-        return (eventSummaries, newLastEvaluatedKey);
+        return (eventSummaries, nextKey);
     }
 
     
