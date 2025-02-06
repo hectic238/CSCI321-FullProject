@@ -1,10 +1,10 @@
-import { useLocation, useParams } from 'react-router-dom';
+import {useLocation, useParams} from 'react-router-dom';
 import React, {useEffect, useState} from "react";
 import Navbar from "@/components/Navbar.jsx";
 import {fetchEventsByCategory, fetchEventSummaries} from "@/components/Functions.jsx";
 import banner from "@/assets/exploreEvent.png";
-import EventCard from "@/components/EventCard.jsx";
 import EventPageCard from "@/components/EventPageCard.jsx";
+
 const ExploreEventPages = () => {
     const category = useParams();
     const [loading, setLoading] = useState(false);
@@ -21,10 +21,13 @@ const ExploreEventPages = () => {
     const PAGE_SIZE = 5;
     const isCategory = location.pathname.includes('/explore/category/');
     const isSearch = location.pathname.includes('/explore/search/');
-    
+    const [allAvailableEvents, setAllAvailableEvents] = useState([]);
+    const [modifiedWebsiteEvents, setModifiedWebsiteEvents] = useState([]);
     const [lastEvaluatedKey, setLastEvaluatedKey] = useState(null);
     const [ticketmasterEvents, setTicketmasterEvents] = useState([]);
     const [storedTicketmasterEvents, setStoredTicketmasterEvents] = useState([]);
+    
+    let noMoreLocalEvents = false;
     
     
     const fetchTicketMasterEvents = async (size = 10, page = 0) => {
@@ -92,53 +95,67 @@ const ExploreEventPages = () => {
         
 
     }
+    
+    useEffect(() => {
+        
+        if(modifiedWebsiteEvents.length > 0) {
+            // Splice the allavailableevents array based on the first (PAGE_SIZE - numberWebsiteEvents) events leaving the extra items inside that array
+            const splicedTicketMasterEvents = allAvailableEvents.splice(0, PAGE_SIZE - modifiedWebsiteEvents.length);
+            console.log(splicedTicketMasterEvents);
+            console.log(modifiedWebsiteEvents)
+            console.log(allAvailableEvents)
+            console.log(events);
+            setEvents((prevEvents) => [
+                
+                ...modifiedWebsiteEvents, // Local events first
+                ...splicedTicketMasterEvents, // Ticketmaster events next
+            ]);
+        }
+    }, [allAvailableEvents, modifiedWebsiteEvents])
 
     const fetchEvent = async (type, category, page = 0, searchTerm, websiteEventCount = 5) => {
         
-        await calculateTotalPage(5, searchTerm);
-        let events;
-
-        let websiteEvents;
-        let modifiedWebsiteEvents;
-        let modifiedTicketmasterEventsData;
+        await calculateTotalPage(PAGE_SIZE, searchTerm);
+        let websiteEvents = [];
         
-        let startIndex = page * PAGE_SIZE;
-        //let myEventsToShow = myEvents.slice(startIndex, startIndex + PAGE_SIZE);
-        //let remainingSlots = PAGE_SIZE - myEventsToShow.length;
+        
+        if(!noMoreLocalEvents) {
+            
 
+            let data;
+            if (type === "popular") {
+                data = await fetchEventSummaries(searchTerm, PAGE_SIZE, lastEvaluatedKey);
+            } else if (type === "category") {
+                data = await fetchEventsByCategory(category, PAGE_SIZE, lastEvaluatedKey);
+            }
 
-        if (type === "popular") {
-
-            let data = await fetchEventSummaries(searchTerm, 5, lastEvaluatedKey);
             websiteEvents = data.events;
-            
-            setLastEvaluatedKey(data.lastEvaluatedKey);
-            
-            modifiedWebsiteEvents = websiteEvents.map(event => ({
-                ...event,
-                source: 'local'  // Mark these events as 'local'
-            }));
-        }
-        else if (type === "category") {
-            let data = await fetchEventsByCategory(category, 5, lastEvaluatedKey);
-            websiteEvents = data.events;
-            
 
             setLastEvaluatedKey(data.lastEvaluatedKey);
 
-            modifiedWebsiteEvents = websiteEvents.map(event => ({
+            setModifiedWebsiteEvents(websiteEvents.map(event => ({
                 ...event,
                 source: 'local'  // Mark these events as 'local'
-            }));
+            })));
         }
+        
         const numberWebsiteEvents = websiteEvents.length;
         let newTicketMasterEvents = [];
         let splicedTicketMasterEvents = [];
         
+        
+        console.log(numberWebsiteEvents);
+        
+        // If local websites doesnt equal 5, then change a variable to then skip fetching local events for the rest 
         if(numberWebsiteEvents !== 5) {
+            
+            noMoreLocalEvents = true;
+
+            console.log(noMoreLocalEvents);
             
             console.log(PAGE_SIZE - numberWebsiteEvents);
             
+            // Fetch next 5 events
             const ticketmasterTickets = await fetchTicketMasterEvents(5, page);
             if (Array.isArray(ticketmasterTickets)) {
                 // Store all 5 new ticketmaster events inside the newTicketMasterEvents array 
@@ -147,24 +164,34 @@ const ExploreEventPages = () => {
                     source: 'ticketmaster'  // Mark these events as 'ticketmaster'
                 }));
                 
-                const allAvailableEvents = [...splicedTicketMasterEvents, ...newTicketMasterEvents];
-                // Splice the newTicketMasterEvents array based on the first (PAGE_SIZE - numberWebsiteEvents) events leaving the extra 2 inside that array
+                // Store these new events into allAvailableEvents which holds the new 5 and old events
+                setAllAvailableEvents((prevItems) => {
+                    return [...prevItems, ...newTicketMasterEvents];
                 
-                splicedTicketMasterEvents = newTicketMasterEvents.splice(0, PAGE_SIZE - numberWebsiteEvents);
+                });
+                
+                
+                
                 
                 console.log(allAvailableEvents);
                 console.log(ticketmasterTickets);
                 console.log(splicedTicketMasterEvents);
                 
                 
-    
-                events = [
-                    ...modifiedWebsiteEvents, // Local events first
-                    ...splicedTicketMasterEvents, // Ticketmaster events next
-                ];
+                // Get all 5 new events, and store in array with either empty or prior leftover events array
                 
-                console.log(events);
-                return events;
+                // Retrieve the first 5 of these events in this array and add to splicedEvents array
+                
+                // Then combine these new spliced events with the rest of the websites events
+
+                // events = [
+                //     ...modifiedWebsiteEvents, // Local events first
+                //     ...splicedTicketMasterEvents, // Ticketmaster events next
+                // ];
+
+
+                // console.log(events);
+                // return events;
     
             }else {
                 console.error('Ticketmaster events data is not an array:', ticketmasterTickets);
