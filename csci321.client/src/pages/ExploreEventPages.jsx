@@ -112,8 +112,50 @@ const ExploreEventPages = () => {
             ]);
         }
     }, [allAvailableEvents, modifiedWebsiteEvents])
+    
+    const fetchEvent = async (type, category, searchTerm) => {
+        // Fetch local events, 
+        
+        await calculateTotalPage(PAGE_SIZE, searchTerm);
+        
+        let websiteEvents = [];
+        
+        let newWebsiteEvents = [];
+        
+        if(!noMoreWebsiteEvents) {
+            console.log("Fetching Events " + noMoreWebsiteEvents);
+            let data;
+            if (type === "popular") {
+                data = await fetchEventSummaries(searchTerm, PAGE_SIZE, lastEvaluatedKey);
+            } else if (type === "category") {
+                data = await fetchEventsByCategory(category, PAGE_SIZE, lastEvaluatedKey);
+            }
 
-    const fetchEvent = async (type, category, page = 0, searchTerm, websiteEventCount = 5) => {
+            websiteEvents = data.events;
+
+            setLastEvaluatedKey(data.lastEvaluatedKey);
+
+            newWebsiteEvents = websiteEvents.map(event => ({
+                ...event,
+                source: 'local'  // Mark these events as 'local'
+            }));
+
+            setModifiedWebsiteEvents(websiteEvents.map(event => ({
+                ...event,
+                source: 'local'  // Mark these events as 'local'
+            })));
+
+            if(websiteEvents.length === 0) {
+                setNoMoreWebsiteEvents(true)
+            }
+        }
+        
+        // Fetch PAGE_SIZE amount of ticketmaster events, then splice the remainder from the front of the ticketmaster array
+
+        return newWebsiteEvents;
+    }
+
+    const fetchEvent2 = async (type, category, page = 0, searchTerm, websiteEventCount = 5) => {
         
         await calculateTotalPage(PAGE_SIZE, searchTerm);
         let websiteEvents = [];
