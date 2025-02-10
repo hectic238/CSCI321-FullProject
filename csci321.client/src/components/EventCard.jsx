@@ -35,23 +35,22 @@ function EventCard({ event }) {
     }
     
     return (
-        <div key={event.id} className="event-card">
+        <div key={event.id} style={{"position":"relative","padding":"20px","borderRadius":"10px","boxShadow":"0 4px 8px rgba(0, 0, 0, 0.1)","width":"300px","margin":"10px"}}>
 
             {event.source === 'local' ? (
-                <div className="event-Card-Column-details">
+                <div >
 
-                    <img src={event.image} alt={event.title} className="event-image"/>
+                    {isFreeEvent && 
+                        <div style={{"position":"absolute","top":"10px","right":"10px","backgroundColor":"red","color":"white","fontSize":"0.8rem","fontWeight":"bold","padding":"5px 10px","borderRadius":"5px"}}>
+                            Free Attendance
+                        </div>
+                    }
+
+                    <img src={event.image} alt={event.title} style={{"width":"250px", "height":"141px"}}/>
                     <Link to={`/event/${event.title.replace(/\s+/g, '-')}/${event.id}`}><h3>{event.title}</h3></Link>
                     <p><strong>Date:</strong> {formatDate(event.startDate)}</p>
                     <p><strong>Time:</strong> {formatTime(event.startTime) + " - " + formatTime(event.endTime)}</p>
                     <p><strong>Location:</strong> {event.location}</p>
-
-
-                    {isFreeEvent && (
-                        <div className="free-event-tag">
-                            <p><strong>Free Event</strong></p>
-                        </div>
-                    )}
 
 
                     {isSoldOut && (
@@ -69,14 +68,29 @@ function EventCard({ event }) {
                 </div>
             ) : (
                 <div className="event-card">
+                    <div style={{
+                        "position": "absolute",
+                        "top": "10px",
+                        "right": "10px",
+                        "backgroundColor": "red",
+                        "color": "white",
+                        "fontSize": "0.8rem",
+                        "fontWeight": "bold",
+                        "padding": "5px 10px",
+                        "borderRadius": "5px"
+                    }}>
+                        Hosted By Ticketmaster
+                    </div>
                     <div className="event-Card-Column-details">
                         <img src={event.images[0].url} alt={event.name} className="event-image"/>
                         <Link to={`/event/${event.id}`}><h3>{event.name}</h3></Link>
                         <p><strong>Date:</strong> {formatDate(event.dates.start.localDate)}</p>
                         <p><strong>Time:</strong> {formatTime(event.dates.start.localTime)}</p>
-                        <p><strong>Location:</strong> {event._embedded.venues[0].address.line1 + ", " + event._embedded.venues[0].city.name + ", " + event._embedded.venues[0].state.stateCode }</p>
+                        <p>
+                            <strong>Location:</strong> {event._embedded.venues[0].address.line1 + ", " + event._embedded.venues[0].city.name + ", " + event._embedded.venues[0].state.stateCode}
+                        </p>
 
-                        
+
                         <p><strong>Hosted By Ticketmaster</strong></p>
                     </div>
                 </div>
