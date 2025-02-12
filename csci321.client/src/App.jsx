@@ -3,7 +3,7 @@ import { BrowserRouter, Routes, Route, useLocation, useNavigate } from "react-ro
 import Home from './pages/Home';
 import About from './pages/About';
 import ExploreEvents from "./pages/ExploreEvents.jsx";
-import Layout from "./components/Layout.jsx";
+import {Footer} from "./components/Footer.jsx";
 import AttendeeLogin from "./pages/AttendeeLogin.jsx";
 import { useEffect, useState } from 'react';
 import OrganiserLogin from "./pages/OrganiserLogin.jsx";
@@ -24,6 +24,7 @@ import { RefreshToken, logoutUser } from './components/refreshToken';
 import InterestedPage from './pages/InterestedPage.jsx';
 import ExternalEventDetails from "./pages/ExternalEventDetails.jsx";
 import ExploreEventPages from "@/pages/ExploreEventPages.jsx";
+
 
 const App = () => {
     const [accessToken, setAccessToken] = useState(localStorage.getItem("accessToken"));
@@ -154,6 +155,7 @@ const App = () => {
                     }
                     />
                 </Routes>
+            <Footer />
             </main>
         </div>
     )

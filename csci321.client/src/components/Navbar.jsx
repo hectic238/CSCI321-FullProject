@@ -61,7 +61,12 @@ function Navbar() {
     }, [dropdownRef]);
 
     return (
-        <div className="navbar">
+        <div className="navbar" style={{
+            backgroundColor: "#f5f5f5",
+            color: "black",
+            borderBottom: "1px solid #ccc"
+
+        }}>
 
             
 

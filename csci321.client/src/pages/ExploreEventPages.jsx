@@ -12,9 +12,10 @@ const ExploreEventPages = () => {
     const [events, setEvents] = useState([]);
     const [currentWebsiteEventCount, setCurrentWebsiteEventCount] = useState(5);
     const [totalPages, setTotalPages] = useState(null);
-    const [totalElements, setTotalElements] = useState( null);
     const [page, setPage] = useState(0);
     const API_URL = "https://app.ticketmaster.com/discovery/v2/events.json";
+    
+    //TODO - Place this API KEY as a get request from the backend
     const API_KEY = "bGImLf75hE3oDCJaWIGTpjjH1TuizHnA";
     const [noMoreWebsiteEvents, setNoMoreWebsiteEvents] = useState(false);
     const [ticketMasterEventsFetched, setTicketMasterEventsFetched] = useState(null);
@@ -24,10 +25,11 @@ const ExploreEventPages = () => {
     const [allAvailableEvents, setAllAvailableEvents] = useState([]);
     const [modifiedWebsiteEvents, setModifiedWebsiteEvents] = useState([]);
     const [lastEvaluatedKey, setLastEvaluatedKey] = useState(null);
-    const [ticketmasterEvents, setTicketmasterEvents] = useState([]);
-    const [storedTicketmasterEvents, setStoredTicketmasterEvents] = useState([]);
+    const [noMorePages, setNoMorePages] = useState(false);
+
     
-    let noMoreLocalEvents = false;
+    const [ticketmasterEventsPage, setTicketmasterEventsPage] = useState(0);
+    
     
     
     const fetchTicketMasterEvents = async (size = 10, page = 0) => {
@@ -42,7 +44,6 @@ const ExploreEventPages = () => {
             params = `?dmaId=702&keyword=${category.searchTerm}&page=${page}&size=${size}&apikey=${API_KEY}`;
         }
         else {
-            console.log(category.categoryName);
             params = `?dmaId=702&classificationName=${category.categoryName}&size=${size}&page=${page}&apikey=${API_KEY}`;
         }
         
@@ -76,13 +77,11 @@ const ExploreEventPages = () => {
             params = `?dmaId=702&keyword=${searchTerm}&size=${size}&apikey=${API_KEY}`;
         }
         else {
-            console.log(category.categoryName);
             params = `?dmaId=702&classificationName=${category.categoryName}&size=${size}&apikey=${API_KEY}`;
         }
 
         const url = `${API_URL}${params}`;
         
-        console.log(url);
         
         const response = await fetch(url);
         if (!response.ok) {
@@ -90,28 +89,10 @@ const ExploreEventPages = () => {
         }
         const data = await response.json();
 
-        console.log(data)
         setTotalPages(data.page.totalPages);
         
 
     }
-    
-    useEffect(() => {
-        
-        if(modifiedWebsiteEvents.length > 0) {
-            // Splice the allavailableevents array based on the first (PAGE_SIZE - numberWebsiteEvents) events leaving the extra items inside that array
-            const splicedTicketMasterEvents = allAvailableEvents.splice(0, PAGE_SIZE - modifiedWebsiteEvents.length);
-            console.log(splicedTicketMasterEvents);
-            console.log(modifiedWebsiteEvents)
-            console.log(allAvailableEvents)
-            console.log(events);
-            setEvents((prevEvents) => [
-                
-                ...modifiedWebsiteEvents, // Local events first
-                ...splicedTicketMasterEvents, // Ticketmaster events next
-            ]);
-        }
-    }, [allAvailableEvents, modifiedWebsiteEvents])
     
     const fetchEvent = async (type, category, searchTerm) => {
         // Fetch local events, 
@@ -123,7 +104,6 @@ const ExploreEventPages = () => {
         let newWebsiteEvents = [];
         
         if(!noMoreWebsiteEvents) {
-            console.log("Fetching Events " + noMoreWebsiteEvents);
             let data;
             if (type === "popular") {
                 data = await fetchEventSummaries(searchTerm, PAGE_SIZE, lastEvaluatedKey);
@@ -132,6 +112,7 @@ const ExploreEventPages = () => {
             }
 
             websiteEvents = data.events;
+            
 
             setLastEvaluatedKey(data.lastEvaluatedKey);
 
@@ -144,133 +125,82 @@ const ExploreEventPages = () => {
                 ...event,
                 source: 'local'  // Mark these events as 'local'
             })));
-
-            if(websiteEvents.length === 0) {
-                setNoMoreWebsiteEvents(true)
-            }
+            
         }
         
         // Fetch PAGE_SIZE amount of ticketmaster events, then splice the remainder from the front of the ticketmaster array
-
-        return newWebsiteEvents;
-    }
-
-    const fetchEvent2 = async (type, category, page = 0, searchTerm, websiteEventCount = 5) => {
         
-        await calculateTotalPage(PAGE_SIZE, searchTerm);
-        let websiteEvents = [];
+        const numberWebsiteEvents = newWebsiteEvents.length;
         
+        let ticketMasterEvents = [];
         
-        if(!noMoreLocalEvents) {
-            
-
-            let data;
-            if (type === "popular") {
-                data = await fetchEventSummaries(searchTerm, PAGE_SIZE, lastEvaluatedKey);
-            } else if (type === "category") {
-                data = await fetchEventsByCategory(category, PAGE_SIZE, lastEvaluatedKey);
-            }
-
-            websiteEvents = data.events;
-
-            setLastEvaluatedKey(data.lastEvaluatedKey);
-
-            setModifiedWebsiteEvents(websiteEvents.map(event => ({
-                ...event,
-                source: 'local'  // Mark these events as 'local'
-            })));
-        }
-        
-        const numberWebsiteEvents = websiteEvents.length;
         let newTicketMasterEvents = [];
-        let splicedTicketMasterEvents = [];
         
+        // If the website events doesnt equal 5 then fetch ticketmasterEvents
         
-        console.log(numberWebsiteEvents);
-        
-        // If local websites doesnt equal 5, then change a variable to then skip fetching local events for the rest 
         if(numberWebsiteEvents !== 5) {
-            
-            noMoreLocalEvents = true;
 
-            console.log(noMoreLocalEvents);
+            setNoMoreWebsiteEvents(true)
+            // fetch 5 ticketmaster events and store in array
+            ticketMasterEvents = await fetchTicketMasterEvents(5, ticketmasterEventsPage);
             
-            console.log(PAGE_SIZE - numberWebsiteEvents);
-            
-            // Fetch next 5 events
-            const ticketmasterTickets = await fetchTicketMasterEvents(5, page);
-            if (Array.isArray(ticketmasterTickets)) {
-                // Store all 5 new ticketmaster events inside the newTicketMasterEvents array 
-                newTicketMasterEvents = ticketmasterTickets.map(event => ({
+            setTicketmasterEventsPage(ticketmasterEventsPage + 1);
+
+            if (Array.isArray(ticketMasterEvents)) {
+
+                // change ticketmasterEvents into new format with the source variable
+                newTicketMasterEvents = ticketMasterEvents.map(event => ({
                     ...event,
                     source: 'ticketmaster'  // Mark these events as 'ticketmaster'
                 }));
                 
-                // Store these new events into allAvailableEvents which holds the new 5 and old events
-                setAllAvailableEvents((prevItems) => {
-                    return [...prevItems, ...newTicketMasterEvents];
+                // store these new events at the end of the allTicketMasterEvents array to get ready to splice
                 
-                });
+                const availableEvents = [...allAvailableEvents, ...newTicketMasterEvents];
                 
-                
-                
-                
-                console.log(allAvailableEvents);
-                console.log(ticketmasterTickets);
-                console.log(splicedTicketMasterEvents);
+                // splice the availableEvents array with the neccessary amount of events to fill the page
+                const ticketmasterEventsNeeded = PAGE_SIZE - numberWebsiteEvents;
                 
                 
-                // Get all 5 new events, and store in array with either empty or prior leftover events array
+                const splicedTicketmasterEvents = availableEvents.splice(0, ticketmasterEventsNeeded);
                 
-                // Retrieve the first 5 of these events in this array and add to splicedEvents array
+                setAllAvailableEvents(availableEvents);
                 
-                // Then combine these new spliced events with the rest of the websites events
-
-                // events = [
-                //     ...modifiedWebsiteEvents, // Local events first
-                //     ...splicedTicketMasterEvents, // Ticketmaster events next
-                // ];
-
-
-                // console.log(events);
-                // return events;
-    
-            }else {
-                console.error('Ticketmaster events data is not an array:', ticketmasterTickets);
+                return [...newWebsiteEvents, ...splicedTicketmasterEvents];
+                
             }
-        
         }
-        
-        return modifiedWebsiteEvents;
-        
-        
-    }
 
+        return [...events, ...newWebsiteEvents];
+    }
+    
     const loadEvents = async (searchTerm, category) => {
         try {
             
             if(isSearch) {
                 const searchedEvents = await fetchEvent("popular","popular", 0, searchTerm);
-                console.log(searchedEvents);
                 setEvents(searchedEvents);
                 return;
             }
-            const popularEvents = await fetchEvent("popular","popular", 0, "");
-            setEvents(popularEvents);
             
-            if(category.categoryName === "music") {
+            if(category === "popular") {
+                const popularEvents = await fetchEvent("popular","popular", 0, "");
+                setEvents(popularEvents);
+            }
+            
+            if(category === "music") {
                 const concertsData = await fetchEvent("category",'music');
                 setEvents(concertsData);
             }
-            else if(category.categoryName === "theatre") {
+            else if(category === "theatre") {
                 const theatreEventsData = await fetchEvent("category",'theatre');
                 setEvents(theatreEventsData);
             }
-            else if(category.categoryName === "family") {
+            else if(category === "family") {
                 const familyEventsData = await fetchEvent("category",'family');
                 setEvents(familyEventsData);
             }
-            else if(category.categoryName === "comedy") {
+            else if(category === "comedy") {
                 const comedyEventsData = await fetchEvent("category",'comedy');
                 setEvents(comedyEventsData);
             }
@@ -285,7 +215,7 @@ const ExploreEventPages = () => {
         setLoading(true);
         try {
             if(page >= totalPages) {
-                console.log("No more pages");
+                setNoMorePages(true);
                 return;
             }
             
@@ -298,7 +228,6 @@ const ExploreEventPages = () => {
                 setPage(nextPage);
             }
             
-            console.log(page);
 
             try {
                 if(isSearch) {
@@ -317,7 +246,6 @@ const ExploreEventPages = () => {
                 }
                 if(category.categoryName === "music") {
                     const newEvents = await fetchEvent("category",'music', nextPage, "", updatedCount);
-                    console.log(newEvents);
                     setEvents(prevEvents => [...prevEvents, ...newEvents]); 
                 }
                 else if(category.categoryName === "theatre") {
@@ -353,7 +281,6 @@ const ExploreEventPages = () => {
             let searchTerm = category.searchTerm;
             let category2 = "";
 
-            console.log("Search Term " + searchTerm + " Category " + category2);
 
             loadEvents(searchTerm, category2);
 
@@ -363,7 +290,6 @@ const ExploreEventPages = () => {
             let searchTerm = "";
             let category2 = category.categoryName;
 
-            console.log("Search Term " + searchTerm + " Category " + category2);
             loadEvents(searchTerm, category2);
         }
         
@@ -384,7 +310,23 @@ const ExploreEventPages = () => {
                             ))}
 
                             <div style={{"margin":"10px", "justifyContent":"center","display":"flex" }}>
-                                <button onClick={handleViewMore} disabled={loading} style={{"backgroundColor":"red","width":"200px"}}>{loading ? "Loading..." : "View More"}</button>
+
+                                {noMorePages ? (
+                                    <div>
+                                        No More Pages
+                                    </div>
+                                ) : (
+                                    <button onClick={handleViewMore} disabled={loading || noMorePages}
+                                            style={{
+                                                "backgroundColor": loading ? "gray" : noMorePages ? "gray" : "red",
+                                                "width": "200px"
+                                            }}>
+                                        {loading ? "Loading..." : "View More"}
+                                    </button>
+                                )
+                                }
+
+
                             </div>
                         </div>
                     </div>

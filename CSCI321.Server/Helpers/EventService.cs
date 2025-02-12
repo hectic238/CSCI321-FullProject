@@ -144,6 +144,8 @@ public class EventService
         )
     {
         
+        
+
         var scanFilter = new Dictionary<string, Condition>();
 
         var scanRequest = new ScanRequest();

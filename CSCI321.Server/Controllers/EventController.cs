@@ -44,6 +44,10 @@ public class EventController : ControllerBase
     {
         string category = null;
         
+        Console.WriteLine("Search Term: " + searchTerm);
+        Console.WriteLine("Category: " + category);
+        Console.WriteLine("Page Size: " + pageSize);
+        
         Dictionary<string, AttributeValue> lastEvaluatedKey = null;
     
         if (!string.IsNullOrEmpty(lastKey))
@@ -61,8 +65,12 @@ public class EventController : ControllerBase
     }
 
     [HttpGet("category/{category}")]
-    public async Task<IActionResult> GetEventsByCategory( string searchTerm = null, [FromQuery] string category = null, int pageSize = 10, string lastKey = null)
+    public async Task<IActionResult> GetEventsByCategory([FromQuery] string searchTerm = null, string category = null, [FromQuery] int pageSize = 10, [FromQuery] string lastKey = null)
     {
+        
+        Console.WriteLine("Search Term2: " + searchTerm);
+        Console.WriteLine("Category2: " + category);
+        Console.WriteLine("Page Size2: " + pageSize);
         
         Dictionary<string, AttributeValue> lastEvaluatedKey = null;
     
