@@ -1,17 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import Navbar from "../components/Navbar.jsx"; // Add necessary styles here
-import { Drawer, Button } from 'antd'; // Ant Design imports
+import Navbar from "../components/Navbar.jsx"; 
+import { Drawer, Button } from 'antd'; 
 import './EventDetails.css';
-import {fetchEvent, getUserIdFromToken, editEvent} from "@/components/Functions.jsx"; // Assuming you will style with this CSS file
+import {fetchEvent, getUserIdFromToken, editEvent} from "@/components/Functions.jsx"; 
+import {loadStripe} from "@stripe/stripe-js";
+import {getURL} from "@/components/URL.jsx";
 
 const EventDetails = () => {
-    const { eventName, eventId } = useParams(); // Extract eventName and eventId from the URL
+    const { eventName, eventId } = useParams(); 
     const [eventDetails, setEventDetails] = useState(null);
     const [selectedTickets, setSelectedTickets] = useState([]);
     const [totalTickets, setTotalTickets] = useState(0);
     const [totalPrice, setTotalPrice] = useState(0);
-    const [attendeeCount, setAttendeeCount] = useState(0); // State for free event attendees
+    const [attendeeCount, setAttendeeCount] = useState(0); 
     const [isEventInPast, setIsEventInPast] = useState(false);
 
     const [isDrawerVisible, setIsDrawerVisible] = useState(false);
@@ -21,7 +23,7 @@ const EventDetails = () => {
     const handleAddTicket = (ticket) => {
         if (ticket.soldOut) {
             console.log(`${ticket.name} is sold out.`);
-            return; // Prevent adding if the ticket is sold out
+            return; 
         }
         const newSelectedTickets = [...selectedTickets];
         const ticketIndex = newSelectedTickets.findIndex(t => t.name === ticket.name);
@@ -51,12 +53,37 @@ const EventDetails = () => {
 
     const navigate = useNavigate();
     
-    const handleCheckout = () => {
+    const handleCheckout =  async () => {
         if (totalTickets === 0) {
             console.log("No tickets selected for checkout.");
-            return; 
+            return;
         }
-        console.log(eventDetails);
+        //console.log(import.meta.env.VITE_STRIPE_KEY);
+        //const stripe = await loadStripe(import.meta.env.VITE_STRIPE_KEY);
+        //
+        //const body = {
+        //    products: selectedTickets,
+        //    eventId: eventId,
+        //}
+        //
+        //const headers = {
+        //    'Content-Type': 'application/json',
+        //}
+        //var baseUrl = getURL();
+        //const response = await fetch(`${baseUrl}/create-checkout-session`,{
+         //   method: 'POST',
+        //    headers: headers,
+        //    body: JSON.stringify(body)
+        //})
+        //const session = await response.json();
+        
+        //const result = await stripe.redirectToCheckout({sessionId: session.id});
+        
+        //if(result.error) {
+         //   console.error(result.error);
+        //}
+        
+        //console.log(selectedTickets);
         navigate(`/checkout/${eventId}`, { state: { selectedTickets, eventDetails } });
         
     };

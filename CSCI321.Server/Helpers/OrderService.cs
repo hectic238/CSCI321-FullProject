@@ -46,8 +46,7 @@ public class OrderService
     if (newOrder == null)
         throw new ArgumentNullException(nameof(newOrder), "Order cannot be null.");
 
-    if (newOrder.billingInfo == null)
-        throw new ArgumentNullException(nameof(newOrder.billingInfo), "BillingInfo cannot be null.");
+
 
     if (newOrder.tickets == null || !newOrder.tickets.Any())
         throw new ArgumentException("Order must have at least one ticket.");
@@ -63,21 +62,7 @@ public class OrderService
         { "userId", new AttributeValue { S = newOrder.userId } },
         { "eventId", new AttributeValue { S = newOrder.eventId } },
         { "totalPrice", new AttributeValue { N = newOrder.totalPrice.ToString() } },
-        { "paymentMethod", new AttributeValue { S = newOrder.paymentMethod } },
         { "refundable", new AttributeValue { BOOL = newOrder.refundable } },
-        { "billingInfo", new AttributeValue 
-            { 
-                M = new Dictionary<string, AttributeValue>
-                {
-                    { "name", new AttributeValue { S = newOrder.billingInfo.name } },
-                    { "email", new AttributeValue { S = newOrder.billingInfo.email } },
-                    { "address", new AttributeValue { S = newOrder.billingInfo.address } },
-                    { "city", new AttributeValue { S = newOrder.billingInfo.city } },
-                    { "postalCode", new AttributeValue { S = newOrder.billingInfo.postalCode } },
-                    { "country", new AttributeValue { S = newOrder.billingInfo.country } }
-                } 
-            }
-        },
         { "tickets", new AttributeValue
             {
                 L = newOrder.tickets.Select(t => 
@@ -142,17 +127,8 @@ public class OrderService
             userId = item["userId"].S,
             eventId = item["eventId"].S,
             totalPrice = double.Parse(item["totalPrice"].N),
-            paymentMethod = item["paymentMethod"].S,
             refundable = item.ContainsKey("refundable") ? item["refundable"].BOOL ?? false : false,
-            billingInfo = new BillingInfo
-            {
-                name = item["billingInfo"].M["name"].S,
-                email = item["billingInfo"].M["email"].S,
-                address = item["billingInfo"].M["address"].S,
-                city = item["billingInfo"].M["city"].S,
-                postalCode = item["billingInfo"].M["postalCode"].S,
-                country = item["billingInfo"].M["country"].S
-            },
+
             tickets = item["tickets"].L.Select(t => new Ticket
             {
                 name = t.M["name"].S,

@@ -24,6 +24,7 @@ import { RefreshToken, logoutUser } from './components/refreshToken';
 import InterestedPage from './pages/InterestedPage.jsx';
 import ExternalEventDetails from "./pages/ExternalEventDetails.jsx";
 import ExploreEventPages from "@/pages/ExploreEventPages.jsx";
+import CheckoutReturn from "@/pages/CheckoutReturn.jsx";
 
 
 const App = () => {
@@ -148,6 +149,7 @@ const App = () => {
                             <ExternalEventDetails />
                         </PrivateRoute>} />
                     <Route path="/checkout/:eventId" element={<Checkout />} />
+                    <Route path="/checkoutReturn" element={<CheckoutReturn />} />
                     <Route path="/events/:eventId/statistics" element={
                         <PrivateRoute allowedUserType="organiser">
                             <EventStatistics />

@@ -12,8 +12,6 @@ public class Order
     public string userId { get; set; }
     public string eventId { get; set; }
     public double totalPrice { get; set; }
-    public string paymentMethod { get; set; }
-    public BillingInfo billingInfo { get; set; }
     public List<Ticket> tickets { get; set; }
     public bool refundable { get; set; }
     
