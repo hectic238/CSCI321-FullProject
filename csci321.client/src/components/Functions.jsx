@@ -243,6 +243,7 @@ export const handlePublishOrder = async (orderDetails) => {
 
 export const fetchOrdersByUserId = async (userId) => {
     const baseUrl = getURL();
+    tryRefreshToken();
     
     let url = `${baseUrl}/api/Order/getOrdersByUserId/${userId}`;
     

@@ -16,14 +16,21 @@ const CheckoutReturn = () => {
     
     
     useEffect(() => {
+        
+        console.log("UseEffect");
 
         const orderCompleted = sessionStorage.getItem("orderCompleted");
-
-
-        if (orderCompleted) {
+        console.log(orderCompleted)
+        if(orderCompleted === "true") {
+            sessionStorage.clear();
             window.location.href = "/home";
         }
+        
         const getSessionStatus = async () => {
+
+            
+            
+            
             const params = new URLSearchParams(location.search);
             const sessionId = params.get('session_id');
 
@@ -53,10 +60,12 @@ const CheckoutReturn = () => {
             }
             
         };
-        console.log(alreadyLoaded);
-        if(!alreadyLoaded) {
+        if(orderCompleted === "false" || orderCompleted === null) {
+            console.log("getting session status")
             getSessionStatus();
         }
+        
+        
         
     }, [location]);
 
@@ -104,7 +113,7 @@ const CheckoutReturn = () => {
                                 <strong>{item.description}</strong><br />
                                 Quantity: {item.quantity}<br />
                                 Unit Price: ${item.price}<br />
-                                Total: ${item.amountTotal}
+                                Total: ${item.quantity * item.price}
                             </li>
                         ))}
                     </ul>

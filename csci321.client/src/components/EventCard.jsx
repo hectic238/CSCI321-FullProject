@@ -1,7 +1,6 @@
 import React from "react";
 import { Link } from 'react-router-dom';
 import './EventPageCard.css';
-import {useNavigate, useParams} from "react-router-dom";
 
 const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -28,11 +27,19 @@ function EventCard({ event }) {
     let totalTicketsLeft;
     let isLimitedSpace;
     let isFreeEvent;
-    const navigate = useNavigate();
 
     if(event.source === 'local') {
         isFreeEvent = event.eventTicketType === 'free'; 
     }
+    
+    if (event.tickets && event.eventTicketType !== 'free') {
+        totalTicketsLeft = event.tickets.reduce((total, ticket) => {
+            return total + ticket.count;
+        }, 0);
+        isLimitedSpace = totalTicketsLeft > 0 && totalTicketsLeft < 50;
+        isSoldOut = totalTicketsLeft <= 0;
+    }
+    
     
     return (
         <div key={event.id} style={{"position":"relative","padding":"20px","borderRadius":"10px","boxShadow":"0 4px 8px rgba(0, 0, 0, 0.1)","width":"300px","margin":"10px"}}>

@@ -12,11 +12,15 @@ public class SessionStatusController : Controller
 {
     
     private readonly OrderService _orderService;
+    private readonly EventService _eventService;
 
-    public SessionStatusController(OrderService orderService)
+    public SessionStatusController(OrderService orderService, EventService eventService)
     {
         _orderService = orderService;
+        _eventService = eventService;
     }
+    
+    
     [HttpGet]
     public ActionResult SessionStatus([FromQuery] string session_id)
     {
@@ -43,6 +47,7 @@ public class SessionStatusController : Controller
         var eventId = session.Metadata["event_id"];
         var totalCost = session.AmountTotal / 100;
         
+        modifyEvent(eventId, ticketList);
         createOrder(userId, eventId, (double)totalCost, ticketList);
         
         return Json(new {status = session.Status,  customer_email = session.CustomerDetails.Email, eventId = session.Metadata["event_id"],userId = session.Metadata["user_id"], lineItems = ticketList });
@@ -62,5 +67,28 @@ public class SessionStatusController : Controller
         newOrder.tickets = ticketList;
         
         await _orderService.CreateAsync(newOrder);
+    }
+
+    private async void modifyEvent(String eventId, List<Ticket> ticketList)
+    {
+        var eventDetails = await _eventService.GetEventByIdAsync(eventId);
+
+        
+        foreach (var purchasedTicket in ticketList)
+        {
+            var ticket = eventDetails.tickets.FirstOrDefault(t => t.name == purchasedTicket.name);
+            if (ticket != null)
+            {
+                ticket.bought += purchasedTicket.quantity;
+                ticket.count -= purchasedTicket.quantity;
+
+                // If ticket count reaches 0, mark it as sold out
+                ticket.soldOut = ticket.count <= 0;
+            }
+        }
+
+        await _eventService.UpdateAsync(eventId, eventDetails);
+            
+
     }
 }

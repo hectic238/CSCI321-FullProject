@@ -58,32 +58,6 @@ const EventDetails = () => {
             console.log("No tickets selected for checkout.");
             return;
         }
-        //console.log(import.meta.env.VITE_STRIPE_KEY);
-        //const stripe = await loadStripe(import.meta.env.VITE_STRIPE_KEY);
-        //
-        //const body = {
-        //    products: selectedTickets,
-        //    eventId: eventId,
-        //}
-        //
-        //const headers = {
-        //    'Content-Type': 'application/json',
-        //}
-        //var baseUrl = getURL();
-        //const response = await fetch(`${baseUrl}/create-checkout-session`,{
-         //   method: 'POST',
-        //    headers: headers,
-        //    body: JSON.stringify(body)
-        //})
-        //const session = await response.json();
-        
-        //const result = await stripe.redirectToCheckout({sessionId: session.id});
-        
-        //if(result.error) {
-         //   console.error(result.error);
-        //}
-        
-        //console.log(selectedTickets);
         navigate(`/checkout/${eventId}`, { state: { selectedTickets, eventDetails } });
         
     };
@@ -107,12 +81,15 @@ const EventDetails = () => {
         fetchEvent(eventId).then(event => {
             if (event) {
                 setEventDetails(event);
+                console.log(event);
                 const now = new Date();
                 const eventDateTime = new Date(`${event.startDate}T${event.startTime}`);
                 setIsEventInPast(eventDateTime < now);
                 document.title = event.title + " | PLANIT";
             }
         });
+        
+        
         
     }, [eventId]);
     
@@ -131,7 +108,7 @@ const EventDetails = () => {
                     <p className="event-date-time">{eventDetails.startDate} | {eventDetails.startTime} - {eventDetails.endTime}</p>
                     <p className="event-location">{eventDetails.location}</p>
                 </div>
-                <Button onClick={() => setIsDrawerVisible(true)}>More Info</Button>
+                <Button onClick={() => setIsDrawerVisible(true)} style={{width: "100px"}}>More Info</Button>
 
             </div>
             
@@ -191,7 +168,7 @@ const EventDetails = () => {
                                     <button
                                         className="quantity-btn"
                                         onClick={() => handleRemoveTicket(ticket)}
-                                        disabled={ticket.count < 1 || isEventInPast} // Disable if sold out or event passed
+                                        disabled={ticket.count < 1 || isEventInPast}
                                     >
                                         -
                                     </button>
@@ -200,7 +177,7 @@ const EventDetails = () => {
                                     <button
                                         className="quantity-btn"
                                         onClick={() => handleAddTicket(ticket)}
-                                        disabled={ticket.count < 1 || isEventInPast} // Disable if sold out or event passed
+                                        disabled={ticket.count < 1 || isEventInPast}
                                     >
                                         +
                                     </button>
@@ -212,7 +189,8 @@ const EventDetails = () => {
                                 <p>Total Price: ${totalPrice}</p>
                                 <Button
                                     onClick={handleCheckout}
-                                    disabled={totalTickets === 0 || isEventInPast} // Disable checkout if event passed
+                                    disabled={totalTickets === 0 || isEventInPast}
+                                    style={{width: "100px"}}
                                 >
                                     Checkout
                                 </Button>

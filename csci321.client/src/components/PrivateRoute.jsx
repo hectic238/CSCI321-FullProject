@@ -1,13 +1,13 @@
 import { Navigate } from 'react-router-dom';
-import {jwtDecode} from 'jwt-decode'; // Import the jwt-decode library
+import {jwtDecode} from 'jwt-decode'; 
 
 const PrivateRoute = ({ children, allowedUserType }) => {
-    let userType = null; // Retrieve the user from local storage
+    let userType = null; 
 
     const token = localStorage.getItem('accessToken');
     if (token) {
         const decodedToken = jwtDecode(token);
-        userType = decodedToken['userType']; // Set userType from decoded token
+        userType = decodedToken['userType'];
     }
     // Check if the user is logged in and if their userType matches the allowed type
     if (!userType || userType !== allowedUserType) {

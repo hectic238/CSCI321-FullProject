@@ -213,6 +213,8 @@ public class EventService
                     category = item["category"].S,
                     image = item.ContainsKey("image") ? item["image"].S : null,
                     eventTicketType = item["eventTicketType"].S,
+                    tickets = JsonConvert.DeserializeObject<List<Ticket>>(item["tickets"].S)  // Assuming tickets are stored as JSON
+
                 };
                 eventSummaries.Add(eventSummary);
             }
@@ -230,29 +232,28 @@ public class EventService
 {
     try
     {
-        // Define the key for the query (assuming 'eventId' is the partition key in DynamoDB)
         var key = new Dictionary<string, AttributeValue>
         {
-            { "eventId", new AttributeValue { S = id } }  // 'eventId' is your partition key
+            { "eventId", new AttributeValue { S = id } }  
         };
 
-        // Prepare the GetItem request for DynamoDB
+        
         var request = new GetItemRequest
         {
-            TableName = "Events",  // Replace with your DynamoDB table name
+            TableName = "Events",  
             Key = key
         };
 
-        // Fetch the event data from DynamoDB
+        
         var response = await dynamoClient.GetItemAsync(request);
 
         if (response.Item == null || !response.IsItemSet)
         {
-            // If no event is found, return null
+            
             return null;
         }
 
-        // Map the DynamoDB response to your Event model
+        
         var eventDetails = new Event
         {
             eventId = response.Item["eventId"].S,
@@ -278,7 +279,7 @@ public class EventService
     }
     catch (Exception ex)
     {
-        // Handle any errors (e.g., connection issues, invalid data)
+        
         throw new Exception("Error retrieving event from DynamoDB", ex);
     }
 }
@@ -288,19 +289,19 @@ public class EventService
 {
     try
     {
-        // Define the key for the update (using the eventId as partition key)
+        
         var key = new Dictionary<string, AttributeValue>
         {
-            { "eventId", new AttributeValue { S = eventId } }  // 'eventId' is the partition key in DynamoDB
+            { "eventId", new AttributeValue { S = eventId } }  
         };
 
-        // Define the update expression and attribute values for the update
+        
         var updateExpression = "SET #title = :title, #userId = :userId, #eventTicketType = :eventTicketType, " +
                                "#eventType = :eventType, #category = :category, #startDate = :startDate, " +
                                "#startTime = :startTime, #endTime = :endTime, #location = :location, " +
                                "#additionalInfo = :additionalInfo, #recurrenceFrequency = :recurrenceFrequency, " +
                                "#recurrenceEndDate = :recurrenceEndDate, #numberAttendees = :numberAttendees, " +
-                               "#isDraft = :isDraft, #tickets = :tickets, #image = :image";  // Update expression for multiple attributes
+                               "#isDraft = :isDraft, #tickets = :tickets, #image = :image";  
 
         var attributeValues = new Dictionary<string, AttributeValue>
         {
@@ -319,12 +320,12 @@ public class EventService
             { ":numberAttendees", new AttributeValue { N = updatedEvent.numberAttendees.ToString() } },
             { ":isDraft", new AttributeValue { BOOL = updatedEvent.isDraft } },
             { ":image", new AttributeValue { S = updatedEvent.image } },
-            { ":tickets", new AttributeValue { S = JsonConvert.SerializeObject(updatedEvent.tickets) } }  // Assuming tickets are serialized to JSON
+            { ":tickets", new AttributeValue { S = JsonConvert.SerializeObject(updatedEvent.tickets) } }  
         };
 
         var request = new UpdateItemRequest
         {
-            TableName = "Events",  // Replace with your DynamoDB table name
+            TableName = "Events",  
             Key = key,
             UpdateExpression = updateExpression,
             ExpressionAttributeNames = new Dictionary<string, string>
@@ -349,12 +350,12 @@ public class EventService
             ExpressionAttributeValues = attributeValues
         };
 
-        // Perform the update operation
+        
         var response = await dynamoClient.UpdateItemAsync(request);
 
         if (response.HttpStatusCode == System.Net.HttpStatusCode.OK)
         {
-            // Successfully updated the event
+            
             return;
         }
 
@@ -372,7 +373,7 @@ public class EventService
         var request = new QueryRequest
         {
             TableName = "Events",
-            IndexName = "UserIdIndex",  // Replace with your GSI name if using one
+            IndexName = "UserIdIndex", 
             KeyConditionExpression = "userId = :userId",
             ExpressionAttributeValues = new Dictionary<string, AttributeValue>
             {
@@ -390,7 +391,7 @@ public class EventService
         var request = new QueryRequest
         {
             TableName = "Events",
-            IndexName = "UserIdIndex",  // Replace with your GSI name if using one
+            IndexName = "UserIdIndex",   
             KeyConditionExpression = "userId = :userId",
             FilterExpression = "isDraft = :isDraft",
             ExpressionAttributeValues = new Dictionary<string, AttributeValue>
