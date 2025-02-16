@@ -1,17 +1,16 @@
 ﻿import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import Navbar from "@/components/Navbar.jsx"; // Assuming this updates the event in mock backend
+import Navbar from "@/components/Navbar.jsx"; 
 import {editEvent, generateObjectId, getUserIdFromToken, handlePublishOrder} from "@/components/Functions.jsx";
 import eventDetails from "@/pages/EventDetails.jsx";
 import {EmbeddedCheckout, Elements, EmbeddedCheckoutProvider} from "@stripe/react-stripe-js";
 import {loadStripe} from "@stripe/stripe-js";
 import {getURL} from "@/components/URL.jsx";
-import {Button} from "antd"; // Assuming you will style with this CSS file
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_KEY);
 
 const Checkout = () => {
-    const location = useLocation(); // Get event and selected tickets from state
+    const location = useLocation(); 
     const selectedTickets = location.state?.selectedTickets;
     const event = location.state?.eventDetails;
     

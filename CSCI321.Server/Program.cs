@@ -3,6 +3,8 @@ using CSCI321.Server.DBSettings;
 using CSCI321.Server.Helpers;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Auth0.AspNetCore.Authentication;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,9 +30,34 @@ builder.Services.AddSingleton<EventService>();
 builder.Services.AddSingleton<OrderService>();
 builder.Services.AddSingleton<MessageService>();
 
+builder.Services.AddAuth0WebAppAuthentication(options =>
+{
+    options.Domain = builder.Configuration["Auth0:Domain"];
+    options.ClientId = builder.Configuration["Auth0:ClientId"];
+});
+
+builder.Services.AddHttpClient();
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.Authority = $"https://{builder.Configuration["Auth0:Domain"]}";
+        options.Audience = builder.Configuration["Auth0:Audience"];
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidIssuer = $"https://{builder.Configuration["Auth0:Domain"]}",
+            ValidAudience = builder.Configuration["Auth0:Audience"],
+        };
+    });
+
+builder.Services.AddControllers();
 
 // JWT Authentication setup
 
+/*}
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -50,7 +77,7 @@ builder.Services.AddAuthentication(options =>
     };
     
 });
-
+*/
 builder.Services.AddAuthorization();
 
 // Add CORS policy

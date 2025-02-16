@@ -8,14 +8,41 @@ import profileIcon from '../assets/profileicon.png';
 import {useEffect, useRef, useState} from "react";
 import ProfileDropdown from "./ProfileDropdown.jsx"; 
 import { AudioOutlined } from '@ant-design/icons';
-import { Input, Space } from 'antd';
+import {Button, Input, Space} from 'antd';
 const { Search } = Input;
 import {getUserTypeFromToken, fetchEventSummaries} from "@/components/Functions.jsx";
+
+import {useAuth0} from "@auth0/auth0-react";
+
+import {createAuth0Client} from '@auth0/auth0-spa-js';
 function Navbar() {
+    const {
+        user,
+        isAuthenticated,
+        loginWithRedirect,
+        logout,
+        getAccessTokenSilently,
+    } = useAuth0();
+    
+    useEffect(() => {
+        if (isAuthenticated && user) {
+
+            console.log(user);
+            //updateUserMetadata(user.sub, 'attendee');
+
+        }
+    }, [isAuthenticated, user, getAccessTokenSilently]);
+
+    const logoutWithRedirect = () =>
+        logout({
+            logoutParams: {
+                returnTo: window.location.origin,
+            }
+        });
 
     const [userType, setUserType] = useState(null);
-    const [dropdownOpen, setDropdownOpen] = useState(false); 
-    const dropdownRef = useRef(null); 
+    const [dropdownOpen, setDropdownOpen] = useState(false);
+    const dropdownRef = useRef(null);
 
     const navigate = useNavigate();
 
@@ -25,13 +52,16 @@ function Navbar() {
     };
 
 
-    useEffect(() => {
+    useEffect( () => {
         const token = localStorage.getItem('accessToken');
         if (token) {
             setUserType(getUserTypeFromToken(token)); // Set userType from decoded token
         }
+        
+        
+
     }, []);
-    
+
 
     const handleLogout = () => {
         // Clear user data from localStorage and update state
@@ -68,35 +98,31 @@ function Navbar() {
 
         }}>
 
-            
-
 
             {/* Left Container with Logo and Search Bar */}
             <div className="navbar-left">
                 {/* Logo */}
                 <Link to="/home">
-                    <img src={logoSmall} alt="Logo" className="nav-logo" />
+                    <img src={logoSmall} alt="Logo" className="nav-logo"/>
                 </Link>
 
                 {/* Search Bar */}
-                    <Search
-                        placeholder="Search for events here"
-                        onSearch={onSearch}
-                        style={{
-                            flex: 1, 
-                            margin: 0,
-                            padding: 8,
-                            borderradius: 30,
-                            border: 1, 
-                            width: 100, 
-                            maxWidth: 300, 
-                        }}
-                    />
+                <Search
+                    placeholder="Search for events here"
+                    onSearch={onSearch}
+                    style={{
+                        flex: 1,
+                        margin: 0,
+                        padding: 8,
+                        borderradius: 30,
+                        border: 1,
+                        width: 100,
+                        maxWidth: 300,
+                    }}
+                />
             </div>
             {/* Buttons */}
             <div className="nav-links">
-
-
 
 
                 {userType ? (
@@ -108,22 +134,23 @@ function Navbar() {
                             <div className="attendee-actions">
                                 <nav>
                                     <a href="/home#exploreEvents" className="cta-button">Explore Events</a>
-                                </nav>                                <Link to="/about">Contact Us</Link>
+                                </nav>
+                                <Link to="/about">Contact Us</Link>
 
                                 <Link to="/myTickets" className="attendee-btn">
-                                    <img src={ticketIcon} alt="Tickets" className="attendee-icon" />
+                                    <img src={ticketIcon} alt="Tickets" className="attendee-icon"/>
                                     <span>Tickets</span>
                                 </Link>
                                 <Link to="/interested" className="attendee-btn">
-                                    <img src={starIcon} alt="Interested" className="attendee-icon" />
+                                    <img src={starIcon} alt="Interested" className="attendee-icon"/>
                                     <span>Interested</span>
                                 </Link>
 
                                 <Link className="attendee-btn" onClick={toggleDropdown}>
                                     <img src={profileIcon} alt="Profile" className="attendee-icon"/>
-                                    <span>Profile</span> {/* Class for consistent styling */}
+                                    <span>Profile</span>
                                 </Link>
-                                
+
                                 {dropdownOpen && (
                                     <div ref={dropdownRef}>
                                         <ProfileDropdown onLogout={handleLogout}/>
@@ -149,15 +176,14 @@ function Navbar() {
 
                                 <Link className="attendee-btn" onClick={toggleDropdown}>
                                     <img src={profileIcon} alt="Profile" className="attendee-icon"/>
-                                    <span>Profile</span> 
+                                    <span>Profile</span>
                                 </Link>
-                                
+
                                 {dropdownOpen && (
                                     <div ref={dropdownRef}>
                                         <ProfileDropdown onLogout={handleLogout}/>
                                     </div>
                                 )}
-
 
 
                             </div>
@@ -166,13 +192,47 @@ function Navbar() {
                     </>
                 ) : (
                     <>
-                        {/* Show login buttons if not logged in */}
+
                         <nav>
                             <a href="/home#exploreEvents" className="cta-button">Explore Events</a>
                         </nav>
                         <Link to="/about">Contact Us</Link>
-                        <Link to="/attendeeLogin" className="login-btn-attendee">Attendee Login</Link>
-                        <Link to="/organiserLogin" className="login-btn">Organizer Login</Link>
+                        {!isAuthenticated && (
+                            <div style={{display: "flex", justifyContent: "space-between"}}>
+                                <Button
+                                    id="qsLoginBtn"
+
+                                    color="primary"
+                                    block
+                                    onClick={() => loginWithRedirect()}
+                                >
+                                    Attendee Log in
+                                </Button>
+
+                                <Link to="/Login" className="login-btn-attendee">Attendee Login</Link>
+
+                                <Link to="/organiserLogin" className="login-btn">Organizer Login</Link>
+                            </div>
+                        )}
+
+                        {isAuthenticated && (
+                            <div>
+
+                                <Link className="attendee-btn" onClick={toggleDropdown}>
+                                    <img src={profileIcon} alt="Profile" className="attendee-icon"/>
+                                    <span>Profile</span>
+                                </Link>
+
+
+                                {dropdownOpen && (
+                                    <div ref={dropdownRef}>
+                                        <ProfileDropdown onLogout={() => logoutWithRedirect()}/>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+
                     </>
                 )}
 

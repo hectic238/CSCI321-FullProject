@@ -25,6 +25,8 @@ import InterestedPage from './pages/InterestedPage.jsx';
 import ExternalEventDetails from "./pages/ExternalEventDetails.jsx";
 import ExploreEventPages from "@/pages/ExploreEventPages.jsx";
 import CheckoutReturn from "@/pages/CheckoutReturn.jsx";
+import Login from "@/pages/Login.jsx";
+import RedirectPage from "@/pages/RedirectPage.jsx";
 
 
 const App = () => {
@@ -156,6 +158,9 @@ const App = () => {
                         </PrivateRoute>
                     }
                     />
+                    
+                    <Route path="/login" element={<Login />} />
+                    <Route path="/redirect" element={<RedirectPage />} />
                 </Routes>
             <Footer />
             </main>
