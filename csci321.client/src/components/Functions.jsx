@@ -2,6 +2,7 @@
 import {getURL} from "@/components/URL.jsx"; // Import the jwt-decode library
 import {accessTokenIsExpired, RefreshToken} from "@/components/RefreshToken.jsx"
 import {APIWithToken} from "@/components/API.js";
+import {useAuth0} from "@auth0/auth0-react";
 
 export const getUserIdFromToken = () => {
     const token = localStorage.getItem("accessToken");
@@ -22,6 +23,30 @@ export const getUserTypeFromToken = () => {
     if (token) {
         const decodedToken = jwtDecode(token);
         return decodedToken['userType'];
+    }
+    
+    
+}
+export const  getUserTypeByUserId =  async (userId, token) => {
+
+    try {
+        
+        var baseUrl = getURL();
+
+        const response = await fetch(`${baseUrl}/api/User/getUserType/${userId}`, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+            }}
+        );
+
+        if (!response.ok) {
+            throw new Error("Failed to fetch userType");
+        }
+        const data = await response.json();
+        return data.userType;  // This will return the userType
+    } catch (error) {
+        console.error("Error:", error);
     }
 }
 

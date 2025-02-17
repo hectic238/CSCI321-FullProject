@@ -38,20 +38,15 @@ builder.Services.AddAuth0WebAppAuthentication(options =>
 
 builder.Services.AddHttpClient();
 
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
-    {
-        options.Authority = $"https://{builder.Configuration["Auth0:Domain"]}";
-        options.Audience = builder.Configuration["Auth0:Audience"];
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuer = true,
-            ValidateAudience = true,
-            ValidateLifetime = true,
-            ValidIssuer = $"https://{builder.Configuration["Auth0:Domain"]}",
-            ValidAudience = builder.Configuration["Auth0:Audience"],
-        };
-    });
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+}).AddJwtBearer(options =>
+{
+    options.Authority = "https://dev-6iygpn0kdurcf4mw.us.auth0.com/";
+    options.Audience = "https://dev-6iygpn0kdurcf4mw.us.auth0.com/api/v2/";
+});
 
 builder.Services.AddControllers();
 

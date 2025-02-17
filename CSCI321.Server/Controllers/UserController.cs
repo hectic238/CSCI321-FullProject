@@ -24,21 +24,24 @@ public class UserController : ControllerBase
     }
 
     [HttpPost("signUp")]
-    public async Task<IActionResult> Post(User newUser)
+    public async Task<IActionResult> Post(User2 newUser)
     {
+        Console.WriteLine(newUser.userType);
         try
         {
-            var existingUser = await _userService.CheckDuplicateEmailAsync(newUser.email);
+            var existingUser = await _userService.CheckDuplicateUserIdAsync(newUser.userId);
 
             if (existingUser)
             {
-                return BadRequest(new { message = "Email already exists!" });
+                return BadRequest(new { message = "User Already Exists!" });
             }
             
-            newUser.password = HashPassword(newUser.password);
+            //newUser.password = HashPassword(newUser.password);
             newUser.refreshTokenExpiry = DateTime.UtcNow.AddDays(30);
+            newUser.dateOfBirth = DateTime.UtcNow.AddDays(1);
+            
             await _userService.CreateAsync(newUser);
-            return CreatedAtAction(nameof(Get), new { id = newUser.userId }, newUser);
+            return CreatedAtAction("Post", new { id = newUser.userId }, newUser);
         }
         catch (Exception ex)
         { 
@@ -161,10 +164,10 @@ public class UserController : ControllerBase
     }
     
     [Authorize]
-    [HttpGet("getUserType")]
-    public async Task<IActionResult> GetUserTypeByToken()
+    [HttpGet("getUserType/{userId}")]
+    public async Task<IActionResult> GetUserTypeByToken(string userId)
     {
-        var userId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
+        //var userId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
         if (userId == null)
         {
             return Unauthorized("Invalid token.");
@@ -178,7 +181,8 @@ public class UserController : ControllerBase
             return NotFound("User not found.");
         }
 
-        return Ok(user.userType); // Return the user details
+        return Ok(new { user.userType });
+        
     }
     
     [Authorize]

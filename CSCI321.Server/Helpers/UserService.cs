@@ -84,7 +84,7 @@ namespace CSCI321.Server.Helpers
             return null; // Return null if user is not found
         }
 
-        public async Task CreateAsync(User newUser)
+        public async Task CreateAsync(User2 newUser)
         {
 
             
@@ -92,23 +92,41 @@ namespace CSCI321.Server.Helpers
 
             var item = new Document
             {
-                ["userId"] = Guid.NewGuid().ToString(),
+                ["userId"] = newUser.userId,
+                ["phoneNumber"] = newUser.phoneNumber,
                 ["name"] = newUser.name,
-                ["email"] = newUser.email,
-                ["password"] = newUser.password,
+                ["title"] = newUser.title,
                 ["userType"] = newUser.userType,
                 ["company"] = newUser.company,
                 ["preferences"] = newUser.preferences,
                 ["refreshToken"] = newUser.refreshToken,
                 ["refreshTokenExpiry"] = newUser.refreshTokenExpiry,
                 ["tickets"] = JsonSerializer.Serialize(newUser.tickets),  
+                ["dateOfBirth"] = newUser.dateOfBirth.ToString("yyyy-MM-ddTHH:mm:ssZ"),
                 ["createdDate"] = DateTime.UtcNow.ToString()
             };
+            
+            
 
             await table.PutItemAsync(item);
             Console.WriteLine("Item inserted successfully!");
         }
         
+        public async Task<bool> CheckDuplicateUserIdAsync(string userId)
+        {
+            var request = new QueryRequest
+            {
+                TableName = TableName,
+                KeyConditionExpression = "userId = :userId",
+                ExpressionAttributeValues = new Dictionary<string, AttributeValue>
+                {
+                    { ":userId", new AttributeValue { S = userId } }
+                }
+            };
+
+            var response = await dynamoClient.QueryAsync(request);
+            return response.Count > 0;
+        }
         public async Task<bool> CheckDuplicateEmailAsync(string email)
         {
             var request = new QueryRequest
@@ -210,8 +228,7 @@ namespace CSCI321.Server.Helpers
             {
                 userId = response.Item["userId"].S,
                 name = response.Item["name"].S,
-                email = response.Item["email"].S,
-                
+                userType = response.Item["userType"].S,
                 // refreshToken = response.Item["refreshToken"].S,
                 // refreshTokenExpiry = DateTime.Parse(response.Item["refreshTokenExpiry"].S),
                 title = response.Item["title"].S,
@@ -220,7 +237,6 @@ namespace CSCI321.Server.Helpers
                 phoneNumber = response.Item["phoneNumber"].S,
                 
             };
-
             return user;
         }
 

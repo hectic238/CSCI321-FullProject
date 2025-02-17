@@ -27,7 +27,7 @@ dayjs.extend(timezone);
 
 
 const ProfileDetails = () => {
-    const { user, isAuthenticated, isLoading } = useAuth0();
+    const { user, isAuthenticated, isLoading, getAccessTokenSilently } = useAuth0();
     
     const [userDetails, setUserDetails] = useState(null);
     const [error, setError] = useState(null);
@@ -40,9 +40,11 @@ const ProfileDetails = () => {
     const fetchUserDetails = async () => {
         var baseUrl = getURL();
 
+        const token = await getAccessTokenSilently({});
+        
         let url = `${baseUrl}/api/User/get`;
 
-        let response =  await APIWithToken(url, 'Get');
+        let response =  await APIWithToken(token, url, 'Get');
 
         document.title = response.name + " | PLANIT";
         
@@ -134,12 +136,12 @@ const ProfileDetails = () => {
     
     
     useEffect(() => {
-        //fetchUserDetails();
+        fetchUserDetails();
     }, []); 
 
-    //if (!userDetails) {
-    //    return <div>Loading...</div>; 
-    //}
+    if (!userDetails) {
+       return <div>Loading...</div>; 
+    }
 
     return (
          isAuthenticated &&  (<div>
@@ -149,7 +151,7 @@ const ProfileDetails = () => {
                     <div className="sidebar-header">
                         <h2>{user.name}</h2>
                     </div>
-                    {/* 
+                     
                     <div className="tabs">
                         <div className={`tab ${tab === "profile" ? "active" : ""}`} onClick={() => setTab("profile")}>
                             Profile Details
@@ -178,7 +180,7 @@ const ProfileDetails = () => {
                                         type="email"
                                         name="email"
                                         defaultValue="Email"
-                                        value={userDetails.email}
+                                        value={user.email}
                                         onChange={(e) => handleChange(e.target.name, e.target.value)}
                                     />
                                 </div>
@@ -300,7 +302,7 @@ const ProfileDetails = () => {
                         </div>
                         
                     )}
-                    */}
+                    
                 </div>
                 
             </div>

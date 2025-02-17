@@ -1,11 +1,8 @@
-﻿
-using CSCI321.Server.Helpers;
+﻿using CSCI321.Server.Helpers;
 using CSCI321.Server.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-
 using Amazon.DynamoDBv2.Model;
-
 using Newtonsoft.Json;
 
 namespace CSCI321.Server.Controllers;

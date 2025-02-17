@@ -7,14 +7,12 @@ import starIcon from '../assets/staricon.png';
 import profileIcon from '../assets/profileicon.png'; 
 import {useEffect, useRef, useState} from "react";
 import ProfileDropdown from "./ProfileDropdown.jsx"; 
-import { AudioOutlined } from '@ant-design/icons';
 import {Button, Input, Space} from 'antd';
 const { Search } = Input;
-import {getUserTypeFromToken, fetchEventSummaries} from "@/components/Functions.jsx";
-
 import {useAuth0} from "@auth0/auth0-react";
 
-import {createAuth0Client} from '@auth0/auth0-spa-js';
+import {deleteCookie, getCookie, setCookie} from "@/components/Cookie.jsx";
+import {getUserTypeByUserId} from "@/components/Functions.jsx";
 function Navbar() {
     const {
         user,
@@ -25,21 +23,56 @@ function Navbar() {
     } = useAuth0();
     
     useEffect(() => {
-        if (isAuthenticated && user) {
+        
 
-            console.log(user);
-            //updateUserMetadata(user.sub, 'attendee');
+        const getUserType = async () => {
+            if (isAuthenticated) {
+                try {
+                    const token = await getAccessTokenSilently({
+                    });
+                    const userType = await getUserTypeByUserId(user.sub, token);
+                    setUserType(userType);
+                    setCookie("userType",userType);
+                    
+                    
+                } catch (error) {
+                    console.error("Failed to get user type:", error);
+                }
+            } else {
+                deleteCookie("userType");
+            }
+        };
+
+        getUserType();
+
+        if (isAuthenticated && user) {
+            setUserType(getCookie("userType"));
 
         }
+        
+        
     }, [isAuthenticated, user, getAccessTokenSilently]);
 
-    const logoutWithRedirect = () =>
-        logout({
+    
+    const logoutWithRedirect = () => {
+        
+        deleteCookie("userType");
+        setUserType(null);
+        
+        return logout({
             logoutParams: {
                 returnTo: window.location.origin,
             }
         });
+    }
+    
+    useEffect(() => {
+        if (isAuthenticated && user) {
+            setUserType(getCookie("userType"));
 
+        }
+    }, []);
+    
     const [userType, setUserType] = useState(null);
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const dropdownRef = useRef(null);
@@ -49,27 +82,6 @@ function Navbar() {
     const onSearch = async (value, _e, info) => {
         console.log(value);
         navigate(`/explore/search/${value}`);
-    };
-
-
-    useEffect( () => {
-        const token = localStorage.getItem('accessToken');
-        if (token) {
-            setUserType(getUserTypeFromToken(token)); // Set userType from decoded token
-        }
-        
-        
-
-    }, []);
-
-
-    const handleLogout = () => {
-        // Clear user data from localStorage and update state
-        localStorage.removeItem('userType');
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
-        setUserType(null);
-        navigate('/home'); // Redirect to home after logout
     };
 
     const toggleDropdown = () => {
@@ -123,6 +135,12 @@ function Navbar() {
             </div>
             {/* Buttons */}
             <div className="nav-links">
+                <div className="attendee-actions">
+                    <nav>
+                        <a href="/home#exploreEvents" className="cta-button">Explore Events</a>
+                    </nav>
+                    <Link to="/about">Contact Us</Link>
+                </div>
 
 
                 {userType ? (
@@ -132,11 +150,7 @@ function Navbar() {
 
 
                             <div className="attendee-actions">
-                                <nav>
-                                    <a href="/home#exploreEvents" className="cta-button">Explore Events</a>
-                                </nav>
-                                <Link to="/about">Contact Us</Link>
-
+                                
                                 <Link to="/myTickets" className="attendee-btn">
                                     <img src={ticketIcon} alt="Tickets" className="attendee-icon"/>
                                     <span>Tickets</span>
@@ -146,44 +160,20 @@ function Navbar() {
                                     <span>Interested</span>
                                 </Link>
 
-                                <Link className="attendee-btn" onClick={toggleDropdown}>
-                                    <img src={profileIcon} alt="Profile" className="attendee-icon"/>
-                                    <span>Profile</span>
-                                </Link>
-
-                                {dropdownOpen && (
-                                    <div ref={dropdownRef}>
-                                        <ProfileDropdown onLogout={handleLogout}/>
-                                    </div>
-                                )}
-
-
                             </div>
 
                         )}
                         {userType === 'organiser' && (
                             <div className="attendee-actions">
-                                <nav>
-                                    <a href="/home#exploreEvents" className="cta-button">Explore Events</a>
-                                </nav>
                                 <Link to="/host">Host Events</Link>
-                                <Link to="/about">Contact Us</Link>
+                                
 
                                 <Link to="/myEvents" className="attendee-btn">
                                     <img src={starIcon} alt="My Events" className="attendee-icon"/>
                                     <span>My Events</span>
                                 </Link>
 
-                                <Link className="attendee-btn" onClick={toggleDropdown}>
-                                    <img src={profileIcon} alt="Profile" className="attendee-icon"/>
-                                    <span>Profile</span>
-                                </Link>
-
-                                {dropdownOpen && (
-                                    <div ref={dropdownRef}>
-                                        <ProfileDropdown onLogout={handleLogout}/>
-                                    </div>
-                                )}
+                                
 
 
                             </div>
@@ -192,11 +182,6 @@ function Navbar() {
                     </>
                 ) : (
                     <>
-
-                        <nav>
-                            <a href="/home#exploreEvents" className="cta-button">Explore Events</a>
-                        </nav>
-                        <Link to="/about">Contact Us</Link>
                         {!isAuthenticated && (
                             <div style={{display: "flex", justifyContent: "space-between"}}>
                                 <Button
@@ -206,36 +191,34 @@ function Navbar() {
                                     block
                                     onClick={() => loginWithRedirect()}
                                 >
-                                    Attendee Log in
+                                    Log in / Sign Up
                                 </Button>
 
-                                <Link to="/Login" className="login-btn-attendee">Attendee Login</Link>
-
-                                <Link to="/organiserLogin" className="login-btn">Organizer Login</Link>
-                            </div>
-                        )}
-
-                        {isAuthenticated && (
-                            <div>
-
-                                <Link className="attendee-btn" onClick={toggleDropdown}>
-                                    <img src={profileIcon} alt="Profile" className="attendee-icon"/>
-                                    <span>Profile</span>
-                                </Link>
-
-
-                                {dropdownOpen && (
-                                    <div ref={dropdownRef}>
-                                        <ProfileDropdown onLogout={() => logoutWithRedirect()}/>
-                                    </div>
-                                )}
+                                {/*<Link to="/Login" className="login-btn-attendee">Attendee Login</Link>*/}
+                                
+                                {/*<Link to="/organiserLogin" className="login-btn">Organizer Login</Link>*/}
                             </div>
                         )}
 
 
                     </>
                 )}
+                {isAuthenticated && (
+                    <div>
 
+                        <Link className="attendee-btn" onClick={toggleDropdown}>
+                            <img src={profileIcon} alt="Profile" className="attendee-icon"/>
+                            <span>Profile</span>
+                        </Link>
+
+
+                        {dropdownOpen && (
+                            <div ref={dropdownRef}>
+                                <ProfileDropdown onLogout={() => logoutWithRedirect()}/>
+                            </div>
+                        )}
+                    </div>
+                )}
 
             </div>
         </div>
