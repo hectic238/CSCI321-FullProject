@@ -31,7 +31,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="src\pages\Checkout\" />
     <Folder Include="src\pages\Events\" />
     <Folder Include="src\pages\Organiser\" />
   </ItemGroup>

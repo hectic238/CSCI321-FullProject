@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import Navbar from "../components/Navbar.jsx";
-import {RefreshToken} from "../components/RefreshToken.jsx";
+import Navbar from "@/components/Navbar.jsx";
+import {RefreshToken} from "@/components/RefreshToken.jsx";
 import { Link } from 'react-router-dom';
 
 import './ProfileDetails.css'
@@ -14,7 +14,7 @@ import {enrichOrdersWithEventDetails} from "@/components/Functions.jsx";
 import OrdersList from "@/components/OrdersList.jsx";
 import {getURL} from "@/components/URL.jsx";
 import dayjs from "dayjs";
-import {APIWithToken} from "../components/API.js";
+import {APIWithToken} from "@/components/API.js";
 import timezone from 'dayjs/plugin/timezone';
 import utc from 'dayjs/plugin/utc';
 import Alert from '@mui/material/Alert';
