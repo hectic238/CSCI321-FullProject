@@ -2,7 +2,6 @@
 import {getURL} from "@/components/URL.jsx"; // Import the jwt-decode library
 import {accessTokenIsExpired, RefreshToken} from "@/components/RefreshToken.jsx"
 import {APIWithToken} from "@/components/API.js";
-import {useAuth0} from "@auth0/auth0-react";
 
 export const getUserIdFromToken = () => {
     const token = localStorage.getItem("accessToken");
@@ -216,14 +215,7 @@ export const updateUser = async (updatedUser) => {
     
 };
 
-export const handlePublishOrder = async (orderDetails) => {
-    // const accessToken = localStorage.getItem('accessToken');
-    //
-    // if (!accessToken) {
-    //     console.error('No access token found. Please log in.');
-    //     alert('No access token found. Please log in.');
-    //     return;
-    // }
+export const handlePublishOrder = async (orderDetails, token) => {
 
     var baseUrl = getURL();
     
@@ -232,57 +224,30 @@ export const handlePublishOrder = async (orderDetails) => {
     let response = APIWithToken(url, 'Get');
     
     alert('Order successfully published!');
-
-
-    // tryRefreshToken();
-    //
-    // try {
-    //     const response = await fetch(`${baseUrl}/api/Order/publish`, {
-    //         method: 'POST',
-    //         headers: {
-    //             'Authorization': `Bearer ${accessToken}`,
-    //             'Content-Type': 'application/json',
-    //         },
-    //         body: JSON.stringify(orderDetails),
-    //     });
-    //    
-    //
-    //     if (!response.ok) {
-    //         let errorData;
-    //         try {
-    //             errorData = await response.json();
-    //         } catch (error) {
-    //             throw new Error('Failed to parse error response');
-    //         }
-    //         throw new Error(errorData.message || 'Order publish failed!');
-    //     }
-    //
-    //     await response.json();
-    // } catch (error) {
-    //     console.error('Error publishing order:', error);
-    //     alert(`Error: ${error.message}`);
-    // }
-    //
     
 };
 
-export const fetchOrdersByUserId = async (userId) => {
+export const fetchOrdersByUserId = async (userId, token) => {
     const baseUrl = getURL();
-    tryRefreshToken();
     
     let url = `${baseUrl}/api/Order/getOrdersByUserId/${userId}`;
     
-    let response = APIWithToken(url, 'Get');
-
+    let response = APIWithToken(token, url, 'Get');
+    
     return await response;
 };
 
-export const enrichOrdersWithEventDetails = async (includePastOrders = true) => {
+export const enrichOrdersWithEventDetails = async (includePastOrders = true, accessToken, userId) => {
     try {
-        const userId = getUserIdFromToken()
-        const orders = await fetchOrdersByUserId(userId);
+        const orders = await fetchOrdersByUserId(userId, accessToken);
 
+        if (!orders || orders.length === 0) {
+            return [];
+        }
+        
         const now = new Date();
+        
+        
 
         const enrichedOrders = await Promise.all(
             orders.map(async (order) => {
@@ -302,14 +267,12 @@ export const enrichOrdersWithEventDetails = async (includePastOrders = true) => 
 
 
         // Filter orders based on event date and time
-        const filteredOrders = enrichedOrders.filter((order) => {
+        return enrichedOrders.filter((order) => {
             const startDate = order.startDate;
             const startTime = order.startTime;
             const eventDate = new Date(`${startDate}T${startTime}`);
             return includePastOrders ? true : eventDate >= now;
-        });
-        
-        return filteredOrders
+        })
         
         
     } catch (error) {

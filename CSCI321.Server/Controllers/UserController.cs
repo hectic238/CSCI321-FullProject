@@ -276,25 +276,12 @@ public class UserController : ControllerBase
             return BadRequest("Invalid user data.");
         }
         
-        
-        
-        
         var existingUser = await _userService.GetByIdAsync(updatedUser.userId);
         if (existingUser == null)
         {
             return NotFound("User not found.");
         }
         
-        if (!string.IsNullOrEmpty(updatedUser.email) && updatedUser.email != existingUser.email)
-        {
-            var emailAlreadyExists = await _userService.CheckDuplicateEmailAsync(updatedUser.email);
-
-            if (emailAlreadyExists)
-            {
-                return BadRequest(new { message = "Email Address Already In Use" });
-            }
-            existingUser.email = updatedUser.email;
-        }
         
         // Update fields only if they are not null or empty
         if (!string.IsNullOrEmpty(updatedUser.name))

@@ -5,11 +5,13 @@ import banner from '../assets/exploreEvent.png'; // Assuming your image is in sr
 import './MyTickets.css';
 import {getUserIdFromToken, enrichOrdersWithEventDetails} from "@/components/Functions.jsx";
 import OrdersList from "@/components/OrdersList.jsx"; // Create a CSS file for styles
+import {useAuth0} from "@auth0/auth0-react";
 
 const MyTickets = () => {
     const [orders, setOrders] = useState([]);
-    
-    const userId = getUserIdFromToken();
+    const { user, isAuthenticated, isLoading, getAccessTokenSilently } = useAuth0();
+
+
 
     const formatDate = (dateString) => {
         const date = new Date(dateString);
@@ -31,12 +33,15 @@ const MyTickets = () => {
         return `${formattedHours}:${minutes} ${ampm}`; // Return formatted time
     };
 
-    useEffect(() => {const fetchOrders = async () => {
-            const enrichedOrders = await enrichOrdersWithEventDetails(false);
-            setOrders(enrichedOrders || []);
-        };
-        fetchOrders();
-    }, [userId]);
+    useEffect(() => {
+        if(isAuthenticated) {
+            const fetchOrders = async () => {
+                const enrichedOrders = await enrichOrdersWithEventDetails(false, await getAccessTokenSilently(), user.sub);
+                setOrders(enrichedOrders || []);
+            };
+            fetchOrders();
+        }
+    }, [user]);
     
     useEffect(()=> {
         document.title = "My Tickets | PLANIT"

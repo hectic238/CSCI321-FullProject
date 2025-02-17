@@ -1,15 +1,17 @@
 ﻿import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Navbar from "@/components/Navbar.jsx"; 
-import {editEvent, generateObjectId, getUserIdFromToken, handlePublishOrder} from "@/components/Functions.jsx";
+import {editEvent, generateObjectId, getUserIdFromToken} from "@/components/Functions.jsx";
 import eventDetails from "@/pages/EventDetails.jsx";
 import {EmbeddedCheckout, Elements, EmbeddedCheckoutProvider} from "@stripe/react-stripe-js";
 import {loadStripe} from "@stripe/stripe-js";
 import {getURL} from "@/components/URL.jsx";
-
+import {useAuth0} from "@auth0/auth0-react";
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_KEY);
 
 const Checkout = () => {
+    
+    const {user, isAuthenticated} = useAuth0();
     const location = useLocation(); 
     const selectedTickets = location.state?.selectedTickets;
     const event = location.state?.eventDetails;
@@ -21,23 +23,28 @@ const Checkout = () => {
     useEffect(() => {
         
         const fetchCheckoutSession = async () => {
-            try {
-                const response = await fetch(`${getURL()}/create-checkout-session`, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({ 
-                        products: selectedTickets,
-                        eventId: event.eventId,
-                        userId: getUserIdFromToken(),
-                        }), 
-                });
+            console.log(user)
+            sessionStorage.clear();
+            if(isAuthenticated) {
+                
+                try {
+                    const response = await fetch(`${getURL()}/create-checkout-session`, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({
+                            products: selectedTickets,
+                            eventId: event.eventId,
+                            userId: user.sub,
+                        }),
+                    });
 
-                const data = await response.json();
-                setClientSecret(data.clientSecret); 
-            } catch (error) {
-                console.error("Error fetching checkout session:", error);
+                    const data = await response.json();
+                    setClientSecret(data.clientSecret);
+                } catch (error) {
+                    console.error("Error fetching checkout session:", error);
+                }
             }
         };
 

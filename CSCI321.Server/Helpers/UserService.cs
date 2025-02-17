@@ -294,11 +294,10 @@ namespace CSCI321.Server.Helpers
                 {
                     { "userId", new AttributeValue { S = updatedUser.userId } }
                 },
-                UpdateExpression = "SET #name = :name, #email = :email, #dateOfBirth = :dateOfBirth,#phoneNumber = :phoneNumber ,#title = :title ",
+                UpdateExpression = "SET #name = :name, #dateOfBirth = :dateOfBirth,#phoneNumber = :phoneNumber ,#title = :title ",
                 ExpressionAttributeNames = new Dictionary<string, string>
                 {
                     { "#name", "name" },   
-                    { "#email", "email" },
                     { "#dateOfBirth", "dateOfBirth" },
                     { "#phoneNumber", "phoneNumber" },
                     { "#title", "title" }
@@ -306,7 +305,6 @@ namespace CSCI321.Server.Helpers
                 ExpressionAttributeValues = new Dictionary<string, AttributeValue>
                 {
                     { ":name", new AttributeValue { S = updatedUser.name ?? string.Empty } },
-                    { ":email", new AttributeValue { S = updatedUser.email ?? string.Empty } },
                     { ":dateOfBirth", new AttributeValue { S = updatedUser.dateOfBirth.ToString("o") } },
                     { ":phoneNumber", new AttributeValue { S = updatedUser.phoneNumber ?? string.Empty } },
                     { ":title", new AttributeValue { S = updatedUser.title ?? string.Empty } },

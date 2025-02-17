@@ -30,4 +30,9 @@
       <HintPath>..\packages\System.Threading.Tasks.Extensions.4.5.2\lib\netstandard2.0\System.Threading.Tasks.Extensions.dll</HintPath>
     </Reference>
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="src\pages\Checkout\" />
+    <Folder Include="src\pages\Events\" />
+    <Folder Include="src\pages\Organiser\" />
+  </ItemGroup>
 </Project>

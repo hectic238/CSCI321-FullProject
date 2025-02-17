@@ -66,11 +66,15 @@ const ProfileDetails = () => {
         setUserDetails({ ...userDetails, [name]: value });
     };
 
-    useEffect(() => {const fetchOrders = async () => {
-        const enrichedOrders = await enrichOrdersWithEventDetails(true);
-        setOrders(enrichedOrders || []);
+    useEffect(() => {
+        if(isAuthenticated) {
+        const fetchOrders = async () => {
+            const enrichedOrders = await enrichOrdersWithEventDetails(true, await getAccessTokenSilently(), user.sub);
+            setOrders(enrichedOrders || []);
+        }
+            fetchOrders();
     };
-        fetchOrders();
+        
     }, []);
 
     const formatDate = (dateString) => {
@@ -107,7 +111,7 @@ const ProfileDetails = () => {
             Object.entries(userDetails).filter(([_, value]) => value !== null)
         );
 
-        await APIWithToken(url, 'Put', sanitizedDetails);
+        await APIWithToken(await getAccessTokenSilently({}), url, 'Put', sanitizedDetails);
         alert("User updated successfully.");
     };
 
@@ -179,9 +183,8 @@ const ProfileDetails = () => {
                                         label="Email Address"
                                         type="email"
                                         name="email"
-                                        defaultValue="Email"
+                                        disabled={true}
                                         value={user.email}
-                                        onChange={(e) => handleChange(e.target.name, e.target.value)}
                                     />
                                 </div>
     
@@ -209,7 +212,7 @@ const ProfileDetails = () => {
                                         label="Full Name" 
                                         type="input"
                                         name="name"
-                                        defaultValue="Name"
+                                        
                                         value={userDetails.name}
                                         onChange={(e) => handleChange(e.target.name, e.target.value)}
                                     />
@@ -242,7 +245,7 @@ const ProfileDetails = () => {
                         <div className="order-history">
                             <h2>Order History</h2>
                             <div className="tickets-container">
-    
+
                                 {orders.length === 0 ? (
                                     <div className="no-tickets">
                                         <p>No current tickets to display.</p>
@@ -252,22 +255,24 @@ const ProfileDetails = () => {
                                     <OrdersList orders={orders} formatDate={formatDate} formatTime={formatTime}/>
                                 )}
                             </div>
+                            
+                            
                         </div>
                     )}
-    
+
                     {tab === "notifications" && (
                         <div className="notifications">
                             <h2>Notifications</h2>
                             <p>Manage your notification preferences.</p>
                         </div>
                     )}
-    
+
                     {tab === "password" && (
                         <div className="change-password">
                             <h2>Change Password</h2>
                             <form onSubmit={handlePasswordFormSubmit}>
                                 <div className="form-group">
-                                    <label htmlFor="oldPassword">Old Password</label>
+                                <label htmlFor="oldPassword">Old Password</label>
                                     <input
                                         type="password"
                                         id="oldPassword"
