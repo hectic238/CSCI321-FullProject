@@ -22,6 +22,10 @@ export const APIWithToken = async (accessToken, url, method, body = null) => {
         if(response.status === 404) {
             return null;
         }
+        // If user tries to update an object thats not related to them
+        if(response.status === 403) {
+            return null;
+        }
 
         if (!response.ok) {
             let errorData;

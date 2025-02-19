@@ -10,15 +10,20 @@ import Navbar from "../../components/Navbar.jsx";
 import Home from "@/pages/Home.jsx"; // Import your CSS file
 import {generateObjectId} from "@/components/Functions.jsx";
 import {RefreshToken} from "@/components/RefreshToken.jsx";
+import {useAuth0} from "@auth0/auth0-react";
+
 const HostEvent = () => {
-    
+
+    const { user, isAuthenticated, isLoading, getAccessTokenSilently } = useAuth0();
+
+
     const location = useLocation();
     const passedEvent = location.state || {};
 
     const navigate = useNavigate();
     const { token } = theme.useToken();
     const [current, setCurrent] = useState(0);
-    const [formErrors, setFormErrors] = useState({});  // Track form errors
+    const [formErrors, setFormErrors] = useState({});  
     const [freeTicket, setFreeTicket] = useState([{}]);
     const [eventDetails, setEventDetails] = useState({
         eventTicketType: '',
@@ -48,42 +53,31 @@ const HostEvent = () => {
     const handleFormChange = (newDetails) => {
         setEventDetails((prevDetails) => ({
             ...prevDetails,
-            ...newDetails, // Spread the new details to update the state
+            ...newDetails, 
         }));
     };
 
     const handleImageChange = (image) => {
         setEventDetails((prevDetails) => ({
             ...prevDetails,
-            image: image, // Add image to eventDetails
+            image: image, 
         }));
     };
 
     const handleTicketFormChange = (field, value) => {
         setEventDetails((prevDetails) => ({
             ...prevDetails,
-            [field]: value, // Correctly assign the field as a key and the value as its value
+            [field]: value, 
         }));
     };
 
-    // Logic to handle publishing or saving the event
     const handlePublishEvent = async () => {
-        
-        await RefreshToken();
-        
-        
-        const accessToken = localStorage.getItem('accessToken');
-
-        if (!accessToken) {
-            console.error('No access token found. Please log in.');
-            return;
-        }
         
         try {
             const response = await fetch('https://localhost:5144/api/Event/createEvent', {
                 method: 'POST',
                 headers: {
-                    'Authorization': `Bearer ${accessToken}`,
+                    'Authorization': `Bearer ${await getAccessTokenSilently({})}`,
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify(eventDetails),
@@ -116,18 +110,7 @@ const HostEvent = () => {
     };
 
     const handleSaveDraft =  async () => {
-        // Add save draft logic here
-        // console.log('Event Saved as Draft', eventDetails);
-        // try {
-        //     const response = await addDraftEvent(eventDetails);
-        //
-        //     if (response.success) {
-        //         console.log('Event draft successfully added!', response);
-        //         navigate("/home"); // Navigate to home on success
-        //     }
-        // } catch (error) {
-        //     console.error('Error adding event:', error);
-        // }
+        
         
     };
     
@@ -159,6 +142,8 @@ const HostEvent = () => {
             title: 'Review',
             content: <Review
                 eventDetails={eventDetails}
+                isAuthenticated={isAuthenticated}
+                user={user}
             />,
         },
     ];

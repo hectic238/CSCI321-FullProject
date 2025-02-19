@@ -46,33 +46,17 @@ builder.Services.AddAuthentication(options =>
 {
     options.Authority = "https://dev-6iygpn0kdurcf4mw.us.auth0.com/";
     options.Audience = "https://dev-6iygpn0kdurcf4mw.us.auth0.com/api/v2/";
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true
+    };
 });
 
 builder.Services.AddControllers();
 
-// JWT Authentication setup
-
-/*}
-builder.Services.AddAuthentication(options =>
-{
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-}).AddJwtBearer(options =>
-{
-    
-    options.TokenValidationParameters = new TokenValidationParameters
-    {
-        ValidateIssuerSigningKey = true,
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(builder.Configuration["Jwt:Key"])),
-        ValidIssuer = builder.Configuration["Jwt:Issuer"],
-        ValidateIssuer = false,
-        ValidAudience = builder.Configuration["Jwt:Audience"],
-        ValidateAudience = false,
-        ClockSkew = TimeSpan.Zero
-    };
-    
-});
-*/
 builder.Services.AddAuthorization();
 
 // Add CORS policy
@@ -119,7 +103,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.UseAuthentication(); // This ensures JWT authentication is enabled before authorization
+app.UseAuthentication();
 
 app.UseAuthorization();
 

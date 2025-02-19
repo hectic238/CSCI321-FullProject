@@ -1,4 +1,5 @@
-﻿using CSCI321.Server.Helpers;
+﻿using System.Security.Claims;
+using CSCI321.Server.Helpers;
 using CSCI321.Server.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -22,12 +23,21 @@ public class EventController : ControllerBase
     [Authorize]
     [HttpPost("createEvent")]
     public async Task<IActionResult> Post(Event newEvent) {
+        
+        var userIdFromToken = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (userIdFromToken != newEvent.userId)
+        {
+            return Forbid();
+        }
+        
+        
         try
         {
             Console.WriteLine("Event Received: " + newEvent);
 
             await _eventService.CreateAsync(newEvent);
-            return CreatedAtAction("Event", new { id = newEvent.eventId }, newEvent);
+            return Created("", newEvent);        
         }
         catch (Exception ex)
         {
@@ -106,6 +116,13 @@ public class EventController : ControllerBase
     public async Task<IActionResult> UpdateEvent(string id, [FromBody] Event updatedEvent)
     {
         
+        var userIdFromToken = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (userIdFromToken != updatedEvent.userId)
+        {
+            return Forbid();
+        }
+        
         Console.WriteLine("ID: " + id);
         
         Console.WriteLine("UpdatedEvent: " + updatedEvent.eventId);
@@ -125,9 +142,17 @@ public class EventController : ControllerBase
         return NoContent(); // Return 204 on successful update
     }
     
+    [Authorize]
     [HttpGet("byUser/{userId}")]
     public async Task<ActionResult<List<Event>>> GetEventsByUserId(string userId)
     {
+        
+        var userIdFromToken = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (userIdFromToken != userId)
+        {
+            return Forbid();
+        }
         var events = await _eventService.GetEventsByUserIdAsync(userId);
     
         // if (events == null || events.Count == 0)
@@ -138,9 +163,17 @@ public class EventController : ControllerBase
         return Ok(events);
     }
 
+    
+    [Authorize]
     [HttpGet("byUser/{userId}/drafts")]
     public async Task<ActionResult<List<Event>>> GetDraftEventsByUserId(string userId)
     {
+        var userIdFromToken = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (userIdFromToken != userId)
+        {
+            return Forbid();
+        }
         var events = await _eventService.GetDraftEventsByUserIdAsync(userId);
     
         // if (events == null || events.Count == 0)

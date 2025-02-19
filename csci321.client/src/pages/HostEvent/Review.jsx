@@ -3,7 +3,9 @@ import './Review.css';
 import {getUserIdFromToken} from "@/components/Functions.jsx"; // CSS for the Review Page
 
 
-const Review = ({ eventDetails}) => {
+const Review = ({ eventDetails, isAuthenticated, user}) => {
+    
+    
 
     const {
         title,
@@ -23,13 +25,11 @@ const Review = ({ eventDetails}) => {
         userId = '',
     } = eventDetails;
 
-    const [user, setUser] = useState(null);
 
 
     useEffect(() => {
-        const token = localStorage.getItem('accessToken');
-        if (token) {
-            eventDetails.userId = getUserIdFromToken(token)
+        if (isAuthenticated) {
+            eventDetails.userId = user.sub;
         }
     }, [eventDetails])
 
