@@ -105,9 +105,7 @@ const App = () => {
                     />
 
                     <Route path="/event/:eventName/:eventId" element={
-                        <PrivateRoute allowedUserType="attendee">
-                        <EventDetails />
-                    </PrivateRoute>} />
+                        <EventDetails />} />
                     <Route path="/event/:eventId" element={
                         <PrivateRoute allowedUserType="attendee">
                             <ExternalEventDetails />

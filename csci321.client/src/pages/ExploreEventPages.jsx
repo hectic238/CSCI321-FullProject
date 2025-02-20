@@ -293,7 +293,8 @@ const ExploreEventPages = () => {
             loadEvents(searchTerm, category2);
         }
         
-    }, [])
+    }, [
+    ])
 
     return (
         <>

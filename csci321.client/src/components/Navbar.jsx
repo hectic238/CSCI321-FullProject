@@ -81,7 +81,19 @@ function Navbar() {
 
     const onSearch = async (value, _e, info) => {
         console.log(value);
-        navigate(`/explore/search/${value}`);
+        const currentPath = window.location.pathname;
+        const newPath = `/explore/search/${value}`;
+
+        // On search if the current search term equals what is already searched do nothing
+        // If the search term is different to what is searched then reload the page and navigate to the newpath
+        if (currentPath === newPath) {
+            
+        } else {
+            
+            navigate(newPath);
+            window.location.reload();
+        }
+        //navigate(`/explore/search/${value}`);
     };
 
     const toggleDropdown = () => {

@@ -6,6 +6,8 @@ import './EventDetails.css';
 import {fetchEvent, getUserIdFromToken, editEvent} from "@/components/Functions.jsx"; 
 import {loadStripe} from "@stripe/stripe-js";
 import {getURL} from "@/components/URL.jsx";
+import {useAuth0} from "@auth0/auth0-react";
+import {getCookie} from "@/components/Cookie.jsx";
 
 const EventDetails = () => {
     const { eventName, eventId } = useParams(); 
@@ -19,6 +21,14 @@ const EventDetails = () => {
     const [isDrawerVisible, setIsDrawerVisible] = useState(false);
     const [sidebarVisible, setSidebarVisible] = useState(false);
     const [userId, setUserId] = useState(null);
+
+    const {
+        user,
+        isAuthenticated,
+        loginWithRedirect,
+        logout,
+        getAccessTokenSilently,
+    } = useAuth0();
 
     const handleAddTicket = (ticket) => {
         if (ticket.soldOut) {
@@ -54,6 +64,16 @@ const EventDetails = () => {
     const navigate = useNavigate();
     
     const handleCheckout =  async () => {
+        
+        // If user isnt logged in, force them to the login page
+        if(!user && !isAuthenticated) {
+            await loginWithRedirect();
+        }
+        // If the user is not an attendee, alert user is on the wrong account
+        if(getCookie("userType") !== "attendee") {
+            alert("User type not allowed");
+            return;
+        }
         if (totalTickets === 0) {
             console.log("No tickets selected for checkout.");
             return;
