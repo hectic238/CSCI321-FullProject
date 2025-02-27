@@ -13,4 +13,6 @@ public class EventSummary
     public string endTime { get; set; }
     
     public string eventTicketType { get; set; }
+
+    public List<Ticket> tickets { get; set; }
 }

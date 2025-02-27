@@ -1,9 +1,6 @@
-import Header from "../components/Header";
-import Navbar from "../components/Navbar";
-import React, { useState } from 'react';
-import "./about.css";
-import { getURL } from "@/components/URL.jsx";
-import { APIWithToken } from "@/components/API.js"; 
+import Navbar from "../../components/Navbar";
+import React, { useState, useEffect } from 'react';
+import "../about.css";
 import "./interestedPage.css";
 
 
@@ -32,6 +29,10 @@ const InterestedPage = () => {
                     : [...(prev[category] || []), interest],
             }));
         };
+
+    useEffect(() => {
+        document.title = "Interests | PLANIT"
+    }, []);
 
          const renderCategory = (category, interests) => (
     <div className="category" key={category}>

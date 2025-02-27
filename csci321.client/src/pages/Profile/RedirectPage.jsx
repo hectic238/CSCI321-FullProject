@@ -1,6 +1,5 @@
-import React, { useState } from 'react';
-import {useLocation, useNavigate} from "react-router-dom";
-import {generateObjectId} from "@/components/Functions.jsx";
+﻿import React, { useState, useEffect } from 'react';
+import {jwtDecode} from 'jwt-decode';
 import {getURL} from "@/components/URL.jsx";
 import {TextField, FormControl, InputLabel, MenuItem, Select} from '@mui/material';
 import dayjs from 'dayjs';
@@ -9,51 +8,74 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DemoContainer } from '@mui/x-date-pickers/internals/demo';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { MuiTelInput } from 'mui-tel-input'
+import {setCookie} from "@/components/Cookie.jsx";
+const RedirectPage = () => {
+    const [token, setToken] = useState(null);
+    const [userType, setUserType] = useState('');
+    const [loading, setLoading] = useState(true);
+    const [accessToken, setAccessToken] = useState("");
+    const [state, setState] = useState("");
 
 
-const SignUp = () => {
-    const location = useLocation();
-    const userType = location.state?.userType; // Get userType from the passed state
     const [formData, setFormData] = useState({
         name: '',
-        email: '',
-        password: '',
-        company: '', // Only for organizers
-        preferences: '', // Only for attendees
-        userType: location.state?.userType,
-        userId: generateObjectId(),
+        company: '', 
+        preferences: '', 
+        userType: '',
+        userId: '',
         refreshToken: '',
-        refreshTokenExpiry: '',
+        //refreshTokenExpiry: '',
         tickets: [],
         title: '',
         phoneNumber: '',
         dateOfBirth: ''
     });
 
-    const navigate = useNavigate();
-
-    // Handle input changes
     const handleInputChange = (field, value) => {
         if (field === 'dateOfBirth') {
             // Convert value to dayjs object if it's a valid date string
             value = value ? dayjs(value) : null;
         }
-        
+
         setFormData(prevData => ({
             ...prevData,
             [field]: value
         }));
     };
-    
 
-    // Handle form submission
+    useEffect(() => {
+        
+        const urlParams = new URLSearchParams(window.location.search);
+        const sessionToken = urlParams.get('session_token');
+        setState(urlParams.get('state'));
+        if (sessionToken) {
+            setAccessToken(sessionToken);
+            
+            try {
+                const decodedToken = jwtDecode(sessionToken);
+                setToken(decodedToken);
+            } catch (error) {
+                console.error("Token decoding failed:", error);
+            }
+        }
+        setLoading(false);
+    }, []);
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         //
         try {
 
-            var baseUrl = getURL();
             
+
+            var baseUrl = getURL();
+
+            formData.userId = token.sub;
+
+            console.log(formData);
+            
+            setCookie("userType",formData.userType);
+
             const response = await fetch(`${baseUrl}/api/User/signUp`, {
                 method: 'POST',
                 headers: {
@@ -61,34 +83,43 @@ const SignUp = () => {
                 },
                 body: JSON.stringify(formData),
             });
-            // Check if the response is successful
-        if (!response.ok) {
-            // Handle errors based on the status code
-            const errorData = await response.json();
-            throw new Error(errorData.message || 'Sign up failed!');
-        }
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Sign up failed!');
+            }
 
-        // If successful, navigate to home and alert success
-        await response.json(); // Optionally handle the response data if needed
-        navigate('/home');
-        alert("Sign up successful!");
-    } catch (error) {
-        alert("Sign up failed! " + error.message);
-    }};
+            const continueURL = `https://${import.meta.env.VITE_AUTH0_DOMAIN}/continue?state=${state}&userType=${formData.userType}`;
+            console.log(continueURL);
+            window.location.href = continueURL;
+            await response.json(); 
+            alert("Sign up successful!");
+        } catch (error) {
+            alert("Sign up failed! " + error.message);
+        }};
 
+    if (loading) {
+        return <div>Loading...</div>;
+    }
 
     return (
-        <div className="sign-up-container">
-            {/* Toggle between organizer and attendee */}
-            <div>
-                <h1>{userType === 'organiser' ? 'Organizer Sign Up' : 'Attendee Sign Up'}</h1>
-                {/* Add your sign-up form here */}
-                {/* You can use userType for form validation or customization */}
-            </div>
+        <div>
+            <h2>Welcome, {token.name}</h2>
+            <p>We just need a bit more information before you're all set! <br/> Please enter information in the spaces below.</p>
 
-            {/* Form */}
-            <form onSubmit={handleSubmit} className="sign-up-form">
-                
+            <form onSubmit={handleSubmit}>
+                <label>
+                    User Type:
+                    <select
+                        value={formData.userType}
+                        onChange={(e) => handleInputChange("userType",e.target.value)}
+                        required
+                    >
+                        <option value="" disabled>Select an option</option>
+                        <option value="attendee">Attendee</option>
+                        <option value="organiser">Organiser</option>
+                    </select>
+                </label>
+
                 <TextField
                     required
                     fullWidth
@@ -99,30 +130,8 @@ const SignUp = () => {
                     onChange={(e) => handleInputChange('name', e.target.value)}
                 />
 
-                <div className="form-group">
-                    <TextField
-                        required
-                        fullWidth
-                        label="Email Address"
-                        type="email"
-                        defaultValue="Email"
-                        value={formData.email}
-                        onChange={(e) => handleInputChange('email', e.target.value)}
-                    />
-                </div>
-
-                <label>
-                    Password:
-                    <input
-                        type="password"
-                        value={formData.password}
-                        onChange={(e) => handleInputChange('password', e.target.value)}
-                        required
-                    />
-                </label>
-
                 {/* Organizer-specific field */}
-                {userType === 'organiser' && (
+                {formData.userType === 'organiser' && (
                     <label>
                         Company Name:
                         <input
@@ -135,7 +144,7 @@ const SignUp = () => {
                 )}
 
                 {/* Attendee-specific field */}
-                {userType === 'attendee' && (
+                {formData.userType === 'attendee' && (
                     <label>
                         Preferences:
                         <textarea
@@ -162,9 +171,10 @@ const SignUp = () => {
                 </FormControl>
 
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
-                    <DemoContainer components={['DateField']}>
+                    <DemoContainer components={['DateField']} >
                         <DateField
                             label="Date of Birth"
+                            style={{height: "50px"}}
                             value={formData.dateOfBirth ? dayjs(formData.dateOfBirth) : null}
                             onChange={(newValue) => handleInputChange('dateOfBirth', newValue)}
                         />
@@ -176,12 +186,10 @@ const SignUp = () => {
                     defaultCountry="AU"  // Set a default country if needed
                     onChange={(value) => handleInputChange('phoneNumber', value)}  // Use the value directly, not event.target.value
                 />
-
-
-                <button type="submit">Sign Up</button>
+                <button type="submit">Submit</button>
             </form>
         </div>
     );
 };
 
-export default SignUp;
+export default RedirectPage;

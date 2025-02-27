@@ -1,27 +1,39 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import Navbar from "../components/Navbar.jsx"; // Add necessary styles here
-import { Drawer, Button } from 'antd'; // Ant Design imports
+import Navbar from "../components/Navbar.jsx"; 
+import { Drawer, Button } from 'antd'; 
 import './EventDetails.css';
-import {fetchEvent, getUserIdFromToken, editEvent} from "@/components/Functions.jsx"; // Assuming you will style with this CSS file
+import {fetchEvent, getUserIdFromToken, editEvent} from "@/components/Functions.jsx"; 
+import {loadStripe} from "@stripe/stripe-js";
+import {getURL} from "@/components/URL.jsx";
+import {useAuth0} from "@auth0/auth0-react";
+import {getCookie} from "@/components/Cookie.jsx";
 
 const EventDetails = () => {
-    const { eventName, eventId } = useParams(); // Extract eventName and eventId from the URL
+    const { eventName, eventId } = useParams(); 
     const [eventDetails, setEventDetails] = useState(null);
     const [selectedTickets, setSelectedTickets] = useState([]);
     const [totalTickets, setTotalTickets] = useState(0);
     const [totalPrice, setTotalPrice] = useState(0);
-    const [attendeeCount, setAttendeeCount] = useState(0); // State for free event attendees
+    const [attendeeCount, setAttendeeCount] = useState(0); 
     const [isEventInPast, setIsEventInPast] = useState(false);
 
     const [isDrawerVisible, setIsDrawerVisible] = useState(false);
     const [sidebarVisible, setSidebarVisible] = useState(false);
     const [userId, setUserId] = useState(null);
 
+    const {
+        user,
+        isAuthenticated,
+        loginWithRedirect,
+        logout,
+        getAccessTokenSilently,
+    } = useAuth0();
+
     const handleAddTicket = (ticket) => {
         if (ticket.soldOut) {
             console.log(`${ticket.name} is sold out.`);
-            return; // Prevent adding if the ticket is sold out
+            return; 
         }
         const newSelectedTickets = [...selectedTickets];
         const ticketIndex = newSelectedTickets.findIndex(t => t.name === ticket.name);
@@ -32,7 +44,6 @@ const EventDetails = () => {
         }
         setSelectedTickets(newSelectedTickets);
         setTotalTickets(prev => prev + 1);
-        // Ensure the price is a number by using Number(ticket.price)
         setTotalPrice(prev => prev + Number(ticket.price));
     };
 
@@ -46,22 +57,29 @@ const EventDetails = () => {
             }
             setSelectedTickets(newSelectedTickets);
             setTotalTickets(prev => prev - 1);
-            // Ensure the price is a number by using Number(ticket.price)
             setTotalPrice(prev => prev - Number(ticket.price));
         }
     };
 
     const navigate = useNavigate();
     
-    const handleCheckout = () => {
+    const handleCheckout =  async () => {
+        
+        // If user isnt logged in, force them to the login page
+        if(!user && !isAuthenticated) {
+            await loginWithRedirect();
+        }
+        // If the user is not an attendee, alert user is on the wrong account
+        if(getCookie("userType") !== "attendee") {
+            alert("User type not allowed");
+            return;
+        }
         if (totalTickets === 0) {
             console.log("No tickets selected for checkout.");
-            return; // Prevent checkout if no tickets are selected
+            return;
         }
-        console.log(eventDetails);
         navigate(`/checkout/${eventId}`, { state: { selectedTickets, eventDetails } });
-        // Here, you'd implement the logic for proceeding to the checkout page
-        // After successful checkout, you'd deduct the tickets from the total count.
+        
     };
 
     const handleAttendeeCountChange = (increment) => {
@@ -71,8 +89,9 @@ const EventDetails = () => {
     const handleAttendClick = () => {
         if (!isEventInPast) {
             eventDetails.numberAttendees += attendeeCount;
+            eventDetails.tickets[0].count -= attendeeCount;
+            eventDetails.tickets[0].bought += attendeeCount;
             editEvent(eventDetails);
-            console.log(`Added ${attendeeCount} attendees to the event.`);
         }
     };
 
@@ -82,13 +101,18 @@ const EventDetails = () => {
         fetchEvent(eventId).then(event => {
             if (event) {
                 setEventDetails(event);
+                console.log(event);
                 const now = new Date();
                 const eventDateTime = new Date(`${event.startDate}T${event.startTime}`);
                 setIsEventInPast(eventDateTime < now);
+                document.title = event.title + " | PLANIT";
             }
         });
         
+        
+        
     }, [eventId]);
+    
 
     if (!eventDetails) {
         return <p>Loading event details...</p>;
@@ -104,7 +128,7 @@ const EventDetails = () => {
                     <p className="event-date-time">{eventDetails.startDate} | {eventDetails.startTime} - {eventDetails.endTime}</p>
                     <p className="event-location">{eventDetails.location}</p>
                 </div>
-                <Button onClick={() => setIsDrawerVisible(true)}>More Info</Button>
+                <Button onClick={() => setIsDrawerVisible(true)} style={{width: "100px"}}>More Info</Button>
 
             </div>
             
@@ -112,7 +136,7 @@ const EventDetails = () => {
                 title={eventDetails.title}
                 placement="right"
                 onClose={() => setIsDrawerVisible(false)}
-                visible={isDrawerVisible}
+                open={isDrawerVisible}
                 width={350}
             >
                 <h2>{eventDetails.title}</h2>
@@ -121,7 +145,6 @@ const EventDetails = () => {
                 <p>{eventDetails.additionalInfo}</p>
             </Drawer>
 
-            {/* Main Body Section */}
             <div className="event-body">
                 <div className="venue-info">
                     {eventDetails.eventTicketType === 'free' ? (
@@ -165,7 +188,7 @@ const EventDetails = () => {
                                     <button
                                         className="quantity-btn"
                                         onClick={() => handleRemoveTicket(ticket)}
-                                        disabled={ticket.count < 1 || isEventInPast} // Disable if sold out or event passed
+                                        disabled={ticket.count < 1 || isEventInPast}
                                     >
                                         -
                                     </button>
@@ -174,7 +197,7 @@ const EventDetails = () => {
                                     <button
                                         className="quantity-btn"
                                         onClick={() => handleAddTicket(ticket)}
-                                        disabled={ticket.count < 1 || isEventInPast} // Disable if sold out or event passed
+                                        disabled={ticket.count < 1 || isEventInPast}
                                     >
                                         +
                                     </button>
@@ -186,7 +209,8 @@ const EventDetails = () => {
                                 <p>Total Price: ${totalPrice}</p>
                                 <Button
                                     onClick={handleCheckout}
-                                    disabled={totalTickets === 0 || isEventInPast} // Disable checkout if event passed
+                                    disabled={totalTickets === 0 || isEventInPast}
+                                    style={{width: "100px"}}
                                 >
                                     Checkout
                                 </Button>

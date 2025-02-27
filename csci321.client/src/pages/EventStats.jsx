@@ -1,8 +1,6 @@
 ﻿import Navbar from "@/components/Navbar.jsx";
 import { useParams, useNavigate } from 'react-router-dom';
 import React, { useEffect, useState } from 'react';
-import mockEvents, {getEventById} from '../mockEvents';
-import { Drawer, Button } from 'antd';
 import {fetchEvent} from "@/components/Functions.jsx"; // Ant Design imports
 
 

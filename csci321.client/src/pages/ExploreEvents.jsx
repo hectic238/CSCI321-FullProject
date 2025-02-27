@@ -1,13 +1,10 @@
 import Navbar from '../components/Navbar';
-import mockEvents from "../mockEvents.jsx";
 import './ExploreEvents.css';
-import React, { useEffect, useState } from 'react';
-import {useNavigate, useParams} from "react-router-dom";
+import React, {useEffect, useState} from 'react';
+import {useNavigate} from "react-router-dom";
 
 import EventCard from "../components/EventCard.jsx";
-
-import banner from '../assets/exploreEvent.png';
-import {fetchEventSummaries, fetchEventsByCategory} from "../components/Functions.jsx"; // Assuming your image is in src/assets
+import {fetchEventsByCategory, fetchEventSummaries} from "../components/Functions.jsx"; // Assuming your image is in src/assets
 
 function ExploreEvents() {
     const [popularEvents, setPopularEvents] = useState([]); 
@@ -20,17 +17,28 @@ function ExploreEvents() {
     const [error, setError] = useState([]);
     
     const navigate = useNavigate();
-    const fetchTicketMasterEvents = async (size = 10, category = "") => {
+
+    
+    const PAGE_SIZE = 5;
+    const [modifiedWebsiteEvents, setModifiedWebsiteEvents] = useState([]);
+
+    const [lastEvaluatedKey, setLastEvaluatedKey] = useState(null);
+    const [noMoreWebsiteEvents, setNoMoreWebsiteEvents] = useState(false);
+
+
+    const [ticketmasterEventsPage, setTicketmasterEventsPage] = useState(0);
+    const fetchTicketMasterEvents = async (size = 10, page = 0, category = "") => {
         const API_URL = "https://app.ticketmaster.com/discovery/v2/events.json";
+        //TODO - MOVE API KEY TO BACKEND
         const API_KEY = "bGImLf75hE3oDCJaWIGTpjjH1TuizHnA";
         
         let params;
         
         if(category === "popular") {
-            params = `?dmaId=702&size=${size}&apikey=${API_KEY}`;
+            params = `?dmaId=702&size=${size}&page=${page}&apikey=${API_KEY}`;
         }
         else {
-            params = `?dmaId=702&classificationName=${category}&size=${size}&apikey=${API_KEY}`;
+            params = `?dmaId=702&classificationName=${category}&size=${size}&page=${page}&apikey=${API_KEY}`;
         }
         // DMAID only shows Events from NSW and ACT
 
@@ -49,52 +57,78 @@ function ExploreEvents() {
             setError(err.message);
         }
     };
-    
+
     const fetchEvent = async (type, category, searchTerm) => {
-        let events;
+        // Fetch local events, 
 
-        let websiteEvents;
-        let modifiedWebsiteEvents;
-        let modifiedTicketmasterEventsData;
+        
 
-        if (type === "popular") {
-            websiteEvents = await fetchEventSummaries(searchTerm, 5);
-            modifiedWebsiteEvents = websiteEvents.map(event => ({
+        let websiteEvents = [];
+
+        let newWebsiteEvents = [];
+
+        if(!noMoreWebsiteEvents) {
+            let data;
+            if (type === "popular") {
+                data = await fetchEventSummaries(searchTerm, PAGE_SIZE, lastEvaluatedKey);
+            } else if (type === "category") {
+                data = await fetchEventsByCategory(category, PAGE_SIZE, lastEvaluatedKey);
+            }
+
+            websiteEvents = data.events;
+
+            setLastEvaluatedKey(data.lastEvaluatedKey);
+
+            newWebsiteEvents = websiteEvents.map(event => ({
                 ...event,
                 source: 'local'  // Mark these events as 'local'
             }));
-        }
-        else if (type === "category") {
-            websiteEvents = await fetchEventsByCategory(category, 5);
-            modifiedWebsiteEvents = websiteEvents.map(event => ({
+
+            setModifiedWebsiteEvents(websiteEvents.map(event => ({
                 ...event,
                 source: 'local'  // Mark these events as 'local'
-            }));
+            })));
+
+            if(websiteEvents.length === 0) {
+                setNoMoreWebsiteEvents(true)
+            }
         }
+
+        // Fetch PAGE_SIZE amount of ticketmaster events, then splice the remainder from the front of the ticketmaster array
+
+        const numberWebsiteEvents = newWebsiteEvents.length;
         
-        const numberWebsiteEvents = websiteEvents.length;
-        const numberEventsNeeded = 5 - numberWebsiteEvents;
-        
-        if(numberEventsNeeded === 0) {
-            return modifiedWebsiteEvents;
+        let ticketMasterEvents = [];
+
+        let newTicketMasterEvents = [];
+
+        // If the website events doesnt equal 5 then fetch ticketmasterEvents
+
+        if(numberWebsiteEvents !== 5) {
+            
+            // fetch 5 ticketmaster events and store in array
+            ticketMasterEvents = await fetchTicketMasterEvents(5 - numberWebsiteEvents, ticketmasterEventsPage, category);
+            
+            
+            
+            setTicketmasterEventsPage(ticketmasterEventsPage + 1);
+
+            if (Array.isArray(ticketMasterEvents)) {
+
+                // change ticketmasterEvents into new format with the source variable
+                newTicketMasterEvents = ticketMasterEvents.map(event => ({
+                    ...event,
+                    source: 'ticketmaster'  // Mark these events as 'ticketmaster'
+                }));
+
+                // store these new events at the end of the allTicketMasterEvents array to get ready to splice
+                
+                return [...newWebsiteEvents, ...newTicketMasterEvents];
+
+            }
         }
 
-        const ticketmasterTickets = await fetchTicketMasterEvents(numberEventsNeeded, category);
-        if (Array.isArray(ticketmasterTickets)) {
-            modifiedTicketmasterEventsData = ticketmasterTickets.map(event => ({
-                ...event,
-                source: 'ticketmaster'  // Mark these events as 'ticketmaster'
-            }));
-
-            events = [
-                ...modifiedWebsiteEvents, // Local events first
-                ...modifiedTicketmasterEventsData, // Ticketmaster events next
-            ];
-            return events;
-
-        }else {
-            console.error('Ticketmaster events data is not an array:', ticketmasterTickets);
-        }
+        return [...events, ...newWebsiteEvents];
     }
     const loadEvents = async () => {
         try {
@@ -121,6 +155,8 @@ function ExploreEvents() {
     };
 
         useEffect(() => {
+            document.title = "Explore Events | PLANIT";
+
             loadEvents();
         }, []);
 
@@ -131,17 +167,11 @@ function ExploreEvents() {
 
             <Navbar/>
             <div className="explore-events">
-                {/* Photo Bar across the top */}
-                <div className="photo-bar">
-                    <img src={banner} alt="Event Banner" className="top-banner" />
-                </div>
-
-                {/* Four categories with headings and rows of events */}
+                
                 <div className="events-section">
-                    {/* 1. Search by Category */}
-                    <div>
+                    <div style={{"flexDirection": "row","display": "flex","justifyContent": "space-between","alignItems": "center","maxHeight": "75px"}}>
                         <h2>Popular Events</h2>
-                        <button onClick={() => navigate('/explore/popular')}>View More</button>
+                        <button style={{"width": "200px","height":"50px","backgroundColor":"red"}} onClick={() => navigate('/explore/category/popular')}>View More</button>
                     </div>
 
 
@@ -151,9 +181,9 @@ function ExploreEvents() {
                         ))}
                     </div>
 
-                    <div>
+                    <div style={{"flexDirection": "row","display": "flex","justifyContent": "space-between","alignItems": "center","maxHeight": "75px"}}>
                         <h2>Concerts</h2>
-                        <button onClick={() => navigate('/explore/music')}>View More</button>
+                        <button style={{"width": "200px","height":"50px","backgroundColor":"red"}} onClick={() => navigate('/explore/category/music')}>View More</button>
                     </div>
                     <div className="events-grid">
                         {concerts.map(event => (
@@ -161,9 +191,9 @@ function ExploreEvents() {
                         ))}
                     </div>
 
-                    <div>
+                    <div style={{"flexDirection": "row","display": "flex","justifyContent": "space-between","alignItems": "center","maxHeight": "75px"}}>
                         <h2>Family</h2>
-                        <button onClick={() => navigate('/explore/family')}>View More</button>
+                        <button style={{"width": "200px","height":"50px","backgroundColor":"red"}} onClick={() => navigate('/explore/category/family')}>View More</button>
                     </div>
                     <div className="events-grid">
                         {familyEvents.map(event => (
@@ -172,9 +202,9 @@ function ExploreEvents() {
                     </div>
 
 
-                    <div>
+                    <div style={{"flexDirection": "row","display": "flex","justifyContent": "space-between","alignItems": "center","maxHeight": "75px"}}>
                         <h2>Theatre</h2>
-                        <button onClick={() => navigate('/explore/theatre')}>View More</button>
+                        <button style={{"width": "200px","height":"50px","backgroundColor":"red"}} onClick={() => navigate('/explore/category/theatre')}>View More</button>
                     </div>
                     <div className="events-grid">
                         {theatreEvents.map(event => (
@@ -182,9 +212,9 @@ function ExploreEvents() {
                         ))}
                     </div>
                     
-                    <div>
+                    <div style={{"flexDirection": "row","display": "flex","justifyContent": "space-between","alignItems": "center","maxHeight": "75px"}}>
                         <h2>Comedy</h2>
-                        <button onClick={() => navigate('/explore/comedy')}>View More</button>
+                        <button style={{"width": "200px","height":"50px","backgroundColor":"red"}} onClick={() => navigate('/explore/category/comedy')}>View More</button>
                     </div>
                     <div className="events-grid">
                         {comedyEvents.map(event => (

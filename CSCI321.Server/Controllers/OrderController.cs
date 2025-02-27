@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using System.Text.Json;
 using CSCI321.Server.Helpers;
 using CSCI321.Server.Models;
@@ -15,15 +16,19 @@ public class OrderController : ControllerBase
         _orderService = orderService;
     }
 
-    // POST: api/order/publish
     [Authorize]
     [HttpPost("publish")]
     public async Task<IActionResult> PublishOrder(Order order)
     {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (order.userId != userId)
+        {
+            return Forbid();
+        }
+        
         try
         {
-            Console.WriteLine("Order Received " + order.orderId);
-            Console.WriteLine($"Order Received: {JsonSerializer.Serialize(order)}");
 
             var utcDateTime = DateTimeOffset.FromUnixTimeMilliseconds(order.orderDate).UtcDateTime;
             var sydneyTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Australia/Sydney");
@@ -46,6 +51,13 @@ public class OrderController : ControllerBase
     [HttpGet("getOrdersByUserId/{userId}")]
     public async Task<IActionResult> GetOrdersByUserId(string userId)
     {
+        
+        var userIdFromToken = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (userIdFromToken != userId)
+        {
+            return Forbid();
+        }
         try
         {
             var orders = await _orderService.GetOrdersByUserIdAsync(userId);

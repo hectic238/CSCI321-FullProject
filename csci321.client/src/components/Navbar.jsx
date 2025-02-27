@@ -2,53 +2,98 @@
 import {Link, useNavigate} from "react-router-dom";
 import './Navbar.css';
 import logoSmall from '../assets/logo_small.png';
-import ticketIcon from '../assets/ticketicon.png'; // Add your ticket image here
-import starIcon from '../assets/staricon.png'; // Add your star image here
-import profileIcon from '../assets/profileicon.png'; // Add your profile image here
+import ticketIcon from '../assets/ticketicon.png'; 
+import starIcon from '../assets/staricon.png'; 
+import profileIcon from '../assets/profileicon.png'; 
 import {useEffect, useRef, useState} from "react";
-import ProfileDropdown from "./ProfileDropdown.jsx"; // Assuming your image is in src/assets
-import { AudioOutlined } from '@ant-design/icons';
-import { Input, Space } from 'antd';
+import ProfileDropdown from "./ProfileDropdown.jsx"; 
+import {Button, Input, Space} from 'antd';
 const { Search } = Input;
-import {getUserTypeFromToken} from "@/components/Functions.jsx"; // Import the jwt-decode library
+import {useAuth0} from "@auth0/auth0-react";
 
-
-
-const suffix = (
-    <AudioOutlined
-        style={{
-            fontSize: 16,
-            color: '#1677ff',
-        }}
-    />
-);
-
-const onSearch = (value, _e, info) => console.log(info?.source, value);
-
-
+import {deleteCookie, getCookie, setCookie} from "@/components/Cookie.jsx";
+import {getUserTypeByUserId} from "@/components/Functions.jsx";
 function Navbar() {
-
-    const [userType, setUserType] = useState(null);
-    const [dropdownOpen, setDropdownOpen] = useState(false); // State to manage dropdown visibility
-    const dropdownRef = useRef(null); // Ref for the dropdown
-
-    const navigate = useNavigate();
-
+    const {
+        user,
+        isAuthenticated,
+        loginWithRedirect,
+        logout,
+        getAccessTokenSilently,
+    } = useAuth0();
+    
     useEffect(() => {
-        const token = localStorage.getItem('accessToken');
-        if (token) {
-            setUserType(getUserTypeFromToken(token)); // Set userType from decoded token
+        
+
+        const getUserType = async () => {
+            if (isAuthenticated) {
+                try {
+                    const token = await getAccessTokenSilently({
+                    });
+                    const userType = await getUserTypeByUserId(user.sub, token);
+                    setUserType(userType);
+                    setCookie("userType",userType);
+                    
+                    
+                } catch (error) {
+                    console.error("Failed to get user type:", error);
+                }
+            } else {
+                deleteCookie("userType");
+            }
+        };
+
+        getUserType();
+
+        if (isAuthenticated && user) {
+            setUserType(getCookie("userType"));
+
+        }
+        
+        
+    }, [isAuthenticated, user, getAccessTokenSilently]);
+
+    
+    const logoutWithRedirect = () => {
+        
+        deleteCookie("userType");
+        setUserType(null);
+        
+        return logout({
+            logoutParams: {
+                returnTo: window.location.origin,
+            }
+        });
+    }
+    
+    useEffect(() => {
+        if (isAuthenticated && user) {
+            setUserType(getCookie("userType"));
+
         }
     }, []);
     
+    const [userType, setUserType] = useState(null);
+    const [dropdownOpen, setDropdownOpen] = useState(false);
+    const dropdownRef = useRef(null);
 
-    const handleLogout = () => {
-        // Clear user data from localStorage and update state
-        localStorage.removeItem('userType');
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
-        setUserType(null);
-        navigate('/home'); // Redirect to home after logout
+    const navigate = useNavigate();
+
+    const onSearch = async (value, _e, info) => {
+        console.log(value);
+        const currentPath = window.location.pathname;
+        const newPath = `/explore/search/${value}`;
+
+        // On search if the current search term equals what is already searched do nothing
+        // If the search term is different to what is searched then reload the page and navigate to the newpath
+        if (currentPath === newPath) {
+            
+        } else {
+            
+            navigate(newPath);
+            window.location.reload();
+        }
+        //navigate(`/explore/search/${value}`);
     };
 
     const toggleDropdown = () => {
@@ -70,37 +115,44 @@ function Navbar() {
     }, [dropdownRef]);
 
     return (
-        <div className="navbar">
+        <div className="navbar" style={{
+            backgroundColor: "#f5f5f5",
+            color: "black",
+            borderBottom: "1px solid #ccc"
 
-            {/* Logo */}
+        }}>
 
 
             {/* Left Container with Logo and Search Bar */}
             <div className="navbar-left">
                 {/* Logo */}
                 <Link to="/home">
-                    <img src={logoSmall} alt="Logo" className="nav-logo" />
+                    <img src={logoSmall} alt="Logo" className="nav-logo"/>
                 </Link>
 
                 {/* Search Bar */}
-                    <Search
-                        placeholder="Search for events here"
-                        onSearch={onSearch}
-                        style={{
-                            flex: 1, /* Makes the search bar expand to fill available space */
-                            margin: 0,
-                            padding: 8,
-                            borderradius: 30,
-                            border: 1, /* Black border for the search bar */
-                            width: 100, /* Makes the search bar take full width */
-                            maxWidth: 300, /* Set your desired max width here */
-                        }}
-                    />
+                <Search
+                    placeholder="Search for events here"
+                    onSearch={onSearch}
+                    style={{
+                        flex: 1,
+                        margin: 0,
+                        padding: 8,
+                        borderradius: 30,
+                        border: 1,
+                        width: 100,
+                        maxWidth: 300,
+                    }}
+                />
             </div>
             {/* Buttons */}
             <div className="nav-links">
-
-
+                <div className="attendee-actions">
+                    <nav>
+                        <a href="/home#exploreEvents" className="cta-button">Explore Events</a>
+                    </nav>
+                    <Link to="/about">Contact Us</Link>
+                </div>
 
 
                 {userType ? (
@@ -110,55 +162,30 @@ function Navbar() {
 
 
                             <div className="attendee-actions">
-                                <Link to="/explore">Explore Events</Link>
-                                <Link to="/about">Contact Us</Link>
-
+                                
                                 <Link to="/myTickets" className="attendee-btn">
-                                    <img src={ticketIcon} alt="Tickets" className="attendee-icon" />
+                                    <img src={ticketIcon} alt="Tickets" className="attendee-icon"/>
                                     <span>Tickets</span>
                                 </Link>
                                 <Link to="/interested" className="attendee-btn">
-                                    <img src={starIcon} alt="Interested" className="attendee-icon" />
+                                    <img src={starIcon} alt="Interested" className="attendee-icon"/>
                                     <span>Interested</span>
                                 </Link>
-
-                                <Link className="attendee-btn" onClick={toggleDropdown}>
-                                    <img src={profileIcon} alt="Profile" className="attendee-icon"/>
-                                    <span>Profile</span> {/* Class for consistent styling */}
-                                </Link>
-                                {/* Add ref here */}
-                                {dropdownOpen && (
-                                    <div ref={dropdownRef}>
-                                        <ProfileDropdown onLogout={handleLogout}/>
-                                    </div>
-                                )}
-
 
                             </div>
 
                         )}
                         {userType === 'organiser' && (
                             <div className="attendee-actions">
-                                <Link to="/explore">Explore Events</Link>
                                 <Link to="/host">Host Events</Link>
-                                <Link to="/about">Contact Us</Link>
+                                
 
                                 <Link to="/myEvents" className="attendee-btn">
                                     <img src={starIcon} alt="My Events" className="attendee-icon"/>
                                     <span>My Events</span>
                                 </Link>
 
-                                <Link className="attendee-btn" onClick={toggleDropdown}>
-                                    <img src={profileIcon} alt="Profile" className="attendee-icon"/>
-                                    <span>Profile</span> {/* Class for consistent styling */}
-                                </Link>
-                                {/* Add ref here */}
-                                {dropdownOpen && (
-                                    <div ref={dropdownRef}>
-                                        <ProfileDropdown onLogout={handleLogout}/>
-                                    </div>
-                                )}
-
+                                
 
 
                             </div>
@@ -167,15 +194,43 @@ function Navbar() {
                     </>
                 ) : (
                     <>
-                        {/* Show login buttons if not logged in */}
-                        <Link to="/explore">Explore Events</Link>
-                        <Link to="/host">Host Events</Link>
-                        <Link to="/about">Contact Us</Link>
-                        <Link to="/attendeeLogin" className="login-btn-attendee">Attendee Login</Link>
-                        <Link to="/organiserLogin" className="login-btn">Organizer Login</Link>
+                        {!isAuthenticated && (
+                            <div style={{display: "flex", justifyContent: "space-between"}}>
+                                <Button
+                                    id="qsLoginBtn"
+
+                                    color="primary"
+                                    block
+                                    onClick={() => loginWithRedirect()}
+                                >
+                                    Log in / Sign Up
+                                </Button>
+
+                                {/*<Link to="/Login" className="login-btn-attendee">Attendee Login</Link>*/}
+                                
+                                {/*<Link to="/organiserLogin" className="login-btn">Organizer Login</Link>*/}
+                            </div>
+                        )}
+
+
                     </>
                 )}
+                {isAuthenticated && (
+                    <div>
 
+                        <Link className="attendee-btn" onClick={toggleDropdown}>
+                            <img src={profileIcon} alt="Profile" className="attendee-icon"/>
+                            <span>Profile</span>
+                        </Link>
+
+
+                        {dropdownOpen && (
+                            <div ref={dropdownRef}>
+                                <ProfileDropdown onLogout={() => logoutWithRedirect()}/>
+                            </div>
+                        )}
+                    </div>
+                )}
 
             </div>
         </div>

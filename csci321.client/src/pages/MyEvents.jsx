@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './MyEvents.css';
 import Navbar from "../components/Navbar.jsx"; // Add necessary styles here
-import mockEvents, {mockDraftEvents} from "../mockEvents.jsx";
 import EventCardLarge from "../components/EventCardLarge.jsx";
 import {getUserIdFromToken, fetchEventsByUserId, fetchDraftEventsByUserId} from "@/components/Functions.jsx";
 

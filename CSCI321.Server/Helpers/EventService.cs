@@ -1,12 +1,12 @@
 ﻿using Amazon;
 using Amazon.DynamoDBv2;
+using Amazon.DynamoDBv2.DocumentModel;
 using Amazon.DynamoDBv2.Model;
 using Amazon.S3;
 using Amazon.Runtime;
 using Amazon.S3.Model;
 using CSCI321.Server.DBSettings;
 using Microsoft.Extensions.Options;
-using MongoDB.Driver;
 using CSCI321.Server.Models;
 using Newtonsoft.Json;
 
@@ -15,11 +15,10 @@ namespace CSCI321.Server.Helpers;
 
 public class EventService
 {
-    private readonly IMongoCollection<Event> _EventCollection;
     
     private readonly AmazonDynamoDBClient dynamoClient;
         
-    private const string TableName = "Events";  // Replace with your table name
+    private const string TableName = "Events"; 
 
     private readonly IConfiguration _configuration;
     private readonly AmazonS3Client _s3Client;
@@ -54,14 +53,6 @@ public class EventService
                 awsAccessKeyId, awsSecretAccessKey),
             s3Config);
         
-        var mongoClient = new MongoClient(
-            EventDatabaseSettings.Value.ConnectionString);
-
-        var mongoDatabase = mongoClient.GetDatabase(
-            EventDatabaseSettings.Value.DatabaseName);
-
-        _EventCollection = mongoDatabase.GetCollection<Event>(
-            EventDatabaseSettings.Value.EventCollectionName);
     }
     
     public async Task<string> UploadImageAsync( string key, byte[] imageBytes)
@@ -96,9 +87,6 @@ public class EventService
 
     
     
-    public async Task<List<Event>> GetAsync() =>
-        await _EventCollection.Find(_ => true).ToListAsync();
-
     public async Task CreateAsync(Event newEvent)
     {
         
@@ -148,25 +136,40 @@ public class EventService
             await dynamoClient.PutItemAsync(request);
     }
     
-    public async Task<List<EventSummary>> GetEventSummariesAsync(string searchTerm = null, string category = null)
+    public async Task<(List<EventSummary> Events, Dictionary<String, AttributeValue>)> GetEventSummariesAsync(
+        string searchTerm = null,
+        string category = null,
+        int pageSize = 10,
+        Dictionary<string, AttributeValue> lastEvaluatedKey = null
+        )
     {
         
+        
+
         var scanFilter = new Dictionary<string, Condition>();
 
+        var scanRequest = new ScanRequest();
+        scanRequest.TableName = TableName;
+        scanRequest.Limit = pageSize;
+        scanRequest.ExclusiveStartKey = lastEvaluatedKey;
+        
         if (!string.IsNullOrEmpty(searchTerm))
         {
-            // Searching by title or location
-            scanFilter.Add("title", new Condition
-            {
-                ComparisonOperator = ComparisonOperator.CONTAINS,
-                AttributeValueList = new List<AttributeValue> { new AttributeValue { S = searchTerm } }
-            });
+            var searchFilter = new ScanFilter();
+            searchFilter.AddCondition("title", ScanOperator.Contains, searchTerm);
+            searchFilter.AddCondition("location", ScanOperator.Contains, searchTerm);
 
-            scanFilter.Add("location", new Condition
+            scanRequest.FilterExpression = "contains(title, :searchTerm) OR contains(#location, :searchTerm)";
+            scanRequest.ExpressionAttributeNames = new Dictionary<string, string>
             {
-                ComparisonOperator = ComparisonOperator.CONTAINS,
-                AttributeValueList = new List<AttributeValue> { new AttributeValue { S = searchTerm } }
-            });
+                { "#location", "location" } 
+            };
+            scanRequest.ExpressionAttributeValues = new Dictionary<string, AttributeValue>
+            {
+                { ":searchTerm", new AttributeValue { S = searchTerm } }
+            };
+            
+
         }
 
         if (!string.IsNullOrEmpty(category))
@@ -177,16 +180,11 @@ public class EventService
                 ComparisonOperator = ComparisonOperator.EQ,
                 AttributeValueList = new List<AttributeValue> { new AttributeValue { S = category } }
             });
+            
+            scanRequest.ScanFilter = scanFilter;
         }
-
-        // Scan request to DynamoDB
-        var scanRequest = new ScanRequest
-        {
-            TableName = TableName,
-            ScanFilter = scanFilter
-        };
-
-        // Execute the scan
+        
+        
         var scanResponse = await dynamoClient.ScanAsync(scanRequest);
 
         // Convert the result to EventSummary
@@ -195,14 +193,13 @@ public class EventService
 
         foreach (var item in scanResponse.Items)
         {
-            // Parse event date and time
+            
             var eventStartDate = DateTime.ParseExact(
                 $"{item["startDate"].S} {item["startTime"].S}",
                 "yyyy-MM-dd HH:mm",
                 System.Globalization.CultureInfo.InvariantCulture
             );
-
-            // Include only future events
+            
             if (eventStartDate >= now)
             {
                 var eventSummary = new EventSummary
@@ -216,12 +213,18 @@ public class EventService
                     category = item["category"].S,
                     image = item.ContainsKey("image") ? item["image"].S : null,
                     eventTicketType = item["eventTicketType"].S,
+                    tickets = JsonConvert.DeserializeObject<List<Ticket>>(item["tickets"].S)  // Assuming tickets are stored as JSON
+
                 };
                 eventSummaries.Add(eventSummary);
             }
         }
-        ;
-        return eventSummaries;
+        
+        var nextKey = scanResponse.LastEvaluatedKey != null && scanResponse.LastEvaluatedKey.Count > 0
+            ? scanResponse.LastEvaluatedKey
+            : null;
+        
+        return (eventSummaries, nextKey);
     }
 
     
@@ -229,29 +232,28 @@ public class EventService
 {
     try
     {
-        // Define the key for the query (assuming 'eventId' is the partition key in DynamoDB)
         var key = new Dictionary<string, AttributeValue>
         {
-            { "eventId", new AttributeValue { S = id } }  // 'eventId' is your partition key
+            { "eventId", new AttributeValue { S = id } }  
         };
 
-        // Prepare the GetItem request for DynamoDB
+        
         var request = new GetItemRequest
         {
-            TableName = "Events",  // Replace with your DynamoDB table name
+            TableName = "Events",  
             Key = key
         };
 
-        // Fetch the event data from DynamoDB
+        
         var response = await dynamoClient.GetItemAsync(request);
 
         if (response.Item == null || !response.IsItemSet)
         {
-            // If no event is found, return null
+            
             return null;
         }
 
-        // Map the DynamoDB response to your Event model
+        
         var eventDetails = new Event
         {
             eventId = response.Item["eventId"].S,
@@ -277,7 +279,7 @@ public class EventService
     }
     catch (Exception ex)
     {
-        // Handle any errors (e.g., connection issues, invalid data)
+        
         throw new Exception("Error retrieving event from DynamoDB", ex);
     }
 }
@@ -287,19 +289,19 @@ public class EventService
 {
     try
     {
-        // Define the key for the update (using the eventId as partition key)
+        
         var key = new Dictionary<string, AttributeValue>
         {
-            { "eventId", new AttributeValue { S = eventId } }  // 'eventId' is the partition key in DynamoDB
+            { "eventId", new AttributeValue { S = eventId } }  
         };
 
-        // Define the update expression and attribute values for the update
+        
         var updateExpression = "SET #title = :title, #userId = :userId, #eventTicketType = :eventTicketType, " +
                                "#eventType = :eventType, #category = :category, #startDate = :startDate, " +
                                "#startTime = :startTime, #endTime = :endTime, #location = :location, " +
                                "#additionalInfo = :additionalInfo, #recurrenceFrequency = :recurrenceFrequency, " +
                                "#recurrenceEndDate = :recurrenceEndDate, #numberAttendees = :numberAttendees, " +
-                               "#isDraft = :isDraft, #tickets = :tickets, #image = :image";  // Update expression for multiple attributes
+                               "#isDraft = :isDraft, #tickets = :tickets, #image = :image";  
 
         var attributeValues = new Dictionary<string, AttributeValue>
         {
@@ -318,12 +320,12 @@ public class EventService
             { ":numberAttendees", new AttributeValue { N = updatedEvent.numberAttendees.ToString() } },
             { ":isDraft", new AttributeValue { BOOL = updatedEvent.isDraft } },
             { ":image", new AttributeValue { S = updatedEvent.image } },
-            { ":tickets", new AttributeValue { S = JsonConvert.SerializeObject(updatedEvent.tickets) } }  // Assuming tickets are serialized to JSON
+            { ":tickets", new AttributeValue { S = JsonConvert.SerializeObject(updatedEvent.tickets) } }  
         };
 
         var request = new UpdateItemRequest
         {
-            TableName = "Events",  // Replace with your DynamoDB table name
+            TableName = "Events",  
             Key = key,
             UpdateExpression = updateExpression,
             ExpressionAttributeNames = new Dictionary<string, string>
@@ -348,12 +350,12 @@ public class EventService
             ExpressionAttributeValues = attributeValues
         };
 
-        // Perform the update operation
+        
         var response = await dynamoClient.UpdateItemAsync(request);
 
         if (response.HttpStatusCode == System.Net.HttpStatusCode.OK)
         {
-            // Successfully updated the event
+            
             return;
         }
 
@@ -371,7 +373,7 @@ public class EventService
         var request = new QueryRequest
         {
             TableName = "Events",
-            IndexName = "UserIdIndex",  // Replace with your GSI name if using one
+            IndexName = "UserIdIndex", 
             KeyConditionExpression = "userId = :userId",
             ExpressionAttributeValues = new Dictionary<string, AttributeValue>
             {
@@ -389,7 +391,7 @@ public class EventService
         var request = new QueryRequest
         {
             TableName = "Events",
-            IndexName = "UserIdIndex",  // Replace with your GSI name if using one
+            IndexName = "UserIdIndex",   
             KeyConditionExpression = "userId = :userId",
             FilterExpression = "isDraft = :isDraft",
             ExpressionAttributeValues = new Dictionary<string, AttributeValue>

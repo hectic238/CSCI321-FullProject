@@ -3,7 +3,9 @@ import './Review.css';
 import {getUserIdFromToken} from "@/components/Functions.jsx"; // CSS for the Review Page
 
 
-const Review = ({ eventDetails}) => {
+const Review = ({ eventDetails, isAuthenticated, user}) => {
+    
+    
 
     const {
         title,
@@ -23,13 +25,11 @@ const Review = ({ eventDetails}) => {
         userId = '',
     } = eventDetails;
 
-    const [user, setUser] = useState(null);
 
 
     useEffect(() => {
-        const token = localStorage.getItem('accessToken');
-        if (token) {
-            eventDetails.userId = getUserIdFromToken(token)
+        if (isAuthenticated) {
+            eventDetails.userId = user.sub;
         }
     }, [eventDetails])
 
@@ -86,7 +86,20 @@ const Review = ({ eventDetails}) => {
                         ))}
                     </div>
                 ) : (
-                    <p>{eventTicketType === 'ticketed' ? 'No tickets added.' : 'No tickets required for free events.'}</p>
+                    <div className="ticket-section">
+                        <div className="ticket-header">
+                            <div className="ticket-column">Ticket Name</div>
+                            <div className="ticket-column">Price</div>
+                            <div className="ticket-column">Count</div>
+                        </div>
+                        {tickets.map((ticket, index) => (
+                            <div className="ticket-row" key={index}>
+                                <div className="ticket-column">{ticket.name}</div>
+                                <div className="ticket-column">${ticket.price}</div>
+                                <div className="ticket-column">{ticket.count}</div>
+                            </div>
+                        ))}
+                    </div>
                 )}
 
                 <h2>Event Description</h2>

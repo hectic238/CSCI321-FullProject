@@ -24,21 +24,24 @@ public class UserController : ControllerBase
     }
 
     [HttpPost("signUp")]
-    public async Task<IActionResult> Post(User newUser)
+    public async Task<IActionResult> Post(User2 newUser)
     {
+        Console.WriteLine(newUser.userType);
         try
         {
-            var existingUser = await _userService.CheckDuplicateEmailAsync(newUser.email);
+            var existingUser = await _userService.CheckDuplicateUserIdAsync(newUser.userId);
 
             if (existingUser)
             {
-                return BadRequest(new { message = "Email already exists!" });
+                return BadRequest(new { message = "User Already Exists!" });
             }
             
-            newUser.password = HashPassword(newUser.password);
+            //newUser.password = HashPassword(newUser.password);
             newUser.refreshTokenExpiry = DateTime.UtcNow.AddDays(30);
+            newUser.dateOfBirth = DateTime.UtcNow.AddDays(1);
+            
             await _userService.CreateAsync(newUser);
-            return CreatedAtAction(nameof(Get), new { id = newUser.userId }, newUser);
+            return CreatedAtAction("Post", new { id = newUser.userId }, newUser);
         }
         catch (Exception ex)
         { 
@@ -161,10 +164,10 @@ public class UserController : ControllerBase
     }
     
     [Authorize]
-    [HttpGet("getUserType")]
-    public async Task<IActionResult> GetUserTypeByToken()
+    [HttpGet("getUserType/{userId}")]
+    public async Task<IActionResult> GetUserTypeByToken(string userId)
     {
-        var userId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
+        //var userId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
         if (userId == null)
         {
             return Unauthorized("Invalid token.");
@@ -178,7 +181,8 @@ public class UserController : ControllerBase
             return NotFound("User not found.");
         }
 
-        return Ok(user.userType); // Return the user details
+        return Ok(new { user.userType });
+        
     }
     
     [Authorize]
@@ -214,66 +218,26 @@ public class UserController : ControllerBase
 
         return Ok(user); // Return user details
     }
-
-    [HttpPost("login")]
-    public async Task<IActionResult> Login([FromBody] LoginModel loginData)
-    {
-        
-        // Find the user by email
-        Dictionary<string, AttributeValue> userAttributes = await _userService.GetUserByEmailAsync(loginData.Email);
-
-        var userId = userAttributes.ContainsKey("userId") ? userAttributes["userId"].S : null;
-        var userType = userAttributes.ContainsKey("userType") ? userAttributes["userType"].S : null;
-        var password = userAttributes.ContainsKey("password") ? userAttributes["password"].S : null;
-        var name = userAttributes.ContainsKey("name") ? userAttributes["name"].S : null;  // If name is present
-        var email = userAttributes.ContainsKey("email") ? userAttributes["email"].S : null;
-        
-        
-
-        
-        // Log if user was found or not
-        if (userAttributes != null)
-        {
-            Console.WriteLine($"User found: {email}");
-        }
-        else
-        {
-            
-            Console.WriteLine("User not found");
-            return Unauthorized("Invalid credentials.");
-        }
-
-        // Hash the password provided in loginData and compare it with the stored hashed password
-        var hashedPassword = HashPassword(loginData.Password);
-        
-        if (password != hashedPassword) { return Unauthorized("Invalid credentials."); }
-
-        // if user is of different type
-        if(userType != loginData.UserType) { return Unauthorized("Invalid Credentials"); }
-        
-        // Generate JWT token
-        var accessToken = _authService.GenerateAccessToken(userId, email, userType); 
-
-        var refreshToken = _authService.GenerateRefreshToken();
-        
-        await _userService.StoreRefreshToken(userId, refreshToken, DateTime.UtcNow.AddDays(30)); // 30 days expiration
-        
-        
-        return Ok(new { accessToken});
-    }
+    
     
     [Authorize]
     [HttpPut("updateUser")]
     public async Task<IActionResult> UpdateUser([FromBody] User updatedUser)
     {
         
+        
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (updatedUser.userId != userId)
+        {
+            return Forbid();
+        }
+        
+        
         if (updatedUser == null || string.IsNullOrEmpty(updatedUser.userId))
         {
             return BadRequest("Invalid user data.");
         }
-        
-        
-        
         
         var existingUser = await _userService.GetByIdAsync(updatedUser.userId);
         if (existingUser == null)
@@ -281,16 +245,6 @@ public class UserController : ControllerBase
             return NotFound("User not found.");
         }
         
-        if (!string.IsNullOrEmpty(updatedUser.email) && updatedUser.email != existingUser.email)
-        {
-            var emailAlreadyExists = await _userService.CheckDuplicateEmailAsync(updatedUser.email);
-
-            if (emailAlreadyExists)
-            {
-                return BadRequest(new { message = "Email Address Already In Use" });
-            }
-            existingUser.email = updatedUser.email;
-        }
         
         // Update fields only if they are not null or empty
         if (!string.IsNullOrEmpty(updatedUser.name))
@@ -323,37 +277,5 @@ public class UserController : ControllerBase
 
         return Ok(existingUser);
     }
-
-    [Authorize]
-    [HttpPut("updateUserPassword")]
-    public async Task<IActionResult> UpdateUserPassword([FromBody] PasswordForm passwordForm)
-    {
-        
-        if (passwordForm == null || string.IsNullOrEmpty(passwordForm.userId))
-        {
-            return BadRequest("Invalid form data.");
-        }
-        
-        var existingUser = await _userService.GetPasswordByIdAsync(passwordForm.userId);
-        if (existingUser == null)
-        {
-            return NotFound("User not found.");
-        }
-
-        // Check if old Password entered is the same as current user password
-        if (HashPassword(passwordForm.oldPassword) != existingUser.password)
-        {
-            return Unauthorized("Old Password does not match.");
-        }
-        
-        // update existing user password with new hashed password then update user in DB
-        existingUser.password = HashPassword(passwordForm.newPassword);
-        
-        await _userService.UpdateUserPasswordAsync(existingUser);
-
-        return Ok(existingUser);
-    }
-
-
 }
 

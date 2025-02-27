@@ -3,9 +3,8 @@ using CSCI321.Server.Helpers;
 using CSCI321.Server.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Cryptography;
-using System.Text;
-using MongoDB.Bson.IO;
+using Amazon.DynamoDBv2.Model;
+using Newtonsoft.Json;
 
 namespace CSCI321.Server.Controllers;
 
@@ -20,19 +19,25 @@ public class EventController : ControllerBase
         _eventService = service;
     }
     
-    [HttpGet]
-    public async Task<List<Event>> Get() =>
-        await _eventService.GetAsync();
 
     [Authorize]
     [HttpPost("createEvent")]
     public async Task<IActionResult> Post(Event newEvent) {
+        
+        var userIdFromToken = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (userIdFromToken != newEvent.userId)
+        {
+            return Forbid();
+        }
+        
+        
         try
         {
             Console.WriteLine("Event Received: " + newEvent);
 
             await _eventService.CreateAsync(newEvent);
-            return CreatedAtAction(nameof(Get), new { id = newEvent.eventId }, newEvent);
+            return Created("", newEvent);        
         }
         catch (Exception ex)
         {
@@ -42,17 +47,47 @@ public class EventController : ControllerBase
     }
     
     [HttpGet("search")]
-    public async Task<IActionResult> GetEventSummaries([FromQuery] string searchTerm = null, int count = 10)
+    public async Task<IActionResult> GetEventSummaries( [FromQuery] string searchTerm = null,  [FromQuery] int pageSize = 10, [FromQuery] string lastKey = null)
     {
-        var events = await _eventService.GetEventSummariesAsync(searchTerm);
-        return Ok(events.Take(count));
+        string category = null;
+        
+        
+        Dictionary<string, AttributeValue> lastEvaluatedKey = null;
+    
+        if (!string.IsNullOrEmpty(lastKey))
+        {
+            lastEvaluatedKey = JsonConvert.DeserializeObject<Dictionary<string, AttributeValue>>(lastKey);
+        }
+        
+        var (events, nextKey) = await _eventService.GetEventSummariesAsync(
+            searchTerm,category, pageSize, lastEvaluatedKey);
+        return Ok(new {
+            events,
+            lastEvaluatedKey = nextKey != null ? JsonConvert.SerializeObject(nextKey) : null
+            
+        });
     }
 
     [HttpGet("category/{category}")]
-    public async Task<IActionResult> GetEventsByCategory( string category, [FromQuery] int count = 10)
+    public async Task<IActionResult> GetEventsByCategory([FromQuery] string searchTerm = null, string category = null, [FromQuery] int pageSize = 10, [FromQuery] string lastKey = null)
     {
-        var events = await _eventService.GetEventSummariesAsync(category: category);
-        return Ok(events.Take(count));
+        
+        
+        Dictionary<string, AttributeValue> lastEvaluatedKey = null;
+    
+        if (!string.IsNullOrEmpty(lastKey))
+        {
+            lastEvaluatedKey = JsonConvert.DeserializeObject<Dictionary<string, AttributeValue>>(lastKey);
+        }
+        
+        var (events, nextKey) = await _eventService.GetEventSummariesAsync(
+            searchTerm,category: category , pageSize, lastEvaluatedKey);
+        
+        return Ok(new {
+            events,
+            lastEvaluatedKey = nextKey != null ? JsonConvert.SerializeObject(nextKey) : null
+            
+        });
     }
 
     
@@ -81,6 +116,13 @@ public class EventController : ControllerBase
     public async Task<IActionResult> UpdateEvent(string id, [FromBody] Event updatedEvent)
     {
         
+        var userIdFromToken = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (userIdFromToken != updatedEvent.userId)
+        {
+            return Forbid();
+        }
+        
         Console.WriteLine("ID: " + id);
         
         Console.WriteLine("UpdatedEvent: " + updatedEvent.eventId);
@@ -100,9 +142,17 @@ public class EventController : ControllerBase
         return NoContent(); // Return 204 on successful update
     }
     
+    [Authorize]
     [HttpGet("byUser/{userId}")]
     public async Task<ActionResult<List<Event>>> GetEventsByUserId(string userId)
     {
+        
+        var userIdFromToken = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (userIdFromToken != userId)
+        {
+            return Forbid();
+        }
         var events = await _eventService.GetEventsByUserIdAsync(userId);
     
         // if (events == null || events.Count == 0)
@@ -113,9 +163,17 @@ public class EventController : ControllerBase
         return Ok(events);
     }
 
+    
+    [Authorize]
     [HttpGet("byUser/{userId}/drafts")]
     public async Task<ActionResult<List<Event>>> GetDraftEventsByUserId(string userId)
     {
+        var userIdFromToken = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (userIdFromToken != userId)
+        {
+            return Forbid();
+        }
         var events = await _eventService.GetDraftEventsByUserIdAsync(userId);
     
         // if (events == null || events.Count == 0)

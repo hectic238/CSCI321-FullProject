@@ -1,15 +1,6 @@
 import {RefreshToken} from "../components/RefreshToken.jsx";
 
-export const APIWithToken = async (url, method, body = null) => {
-
-    let accessToken = localStorage.getItem('accessToken');
-    //
-    if (!accessToken) {
-        console.log("No refresh token found. User is likely logged out.");
-        return null;
-    }
-
-
+export const APIWithToken = async (accessToken, url, method, body = null) => {
     try {
 
         const headers = {
@@ -26,21 +17,14 @@ export const APIWithToken = async (url, method, body = null) => {
             options.body = JSON.stringify(body);
         }
         
-        
         const response = await fetch(url, options);
-        // If the response is unauthorised then try and refresh the token and try the api call again
-        if(response.status === 401) {
-            await RefreshToken();
-
-            let accessToken = localStorage.getItem('accessToken');
-            //
-            if (!accessToken) {
-                console.log("No refresh token found. User is likely logged out.");
-                return null;
-            }
-            
-            const retryResponse = await fetch(url, options);
-            return retryResponse.json();
+        
+        if(response.status === 404) {
+            return null;
+        }
+        // If user tries to update an object thats not related to them
+        if(response.status === 403) {
+            return null;
         }
 
         if (!response.ok) {

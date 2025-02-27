@@ -1,23 +1,37 @@
-import {useNavigate, useParams} from "react-router-dom";
+import {useLocation, useParams} from 'react-router-dom';
 import React, {useEffect, useState} from "react";
 import Navbar from "@/components/Navbar.jsx";
 import {fetchEventsByCategory, fetchEventSummaries} from "@/components/Functions.jsx";
 import banner from "@/assets/exploreEvent.png";
-import EventCard from "@/components/EventCard.jsx";
 import EventPageCard from "@/components/EventPageCard.jsx";
+
 const ExploreEventPages = () => {
-    const category = useParams(); // Extract eventName and eventId from the URL
+    const category = useParams();
+    const [loading, setLoading] = useState(false);
+    const location = useLocation();
     const [events, setEvents] = useState([]);
     const [currentWebsiteEventCount, setCurrentWebsiteEventCount] = useState(5);
     const [totalPages, setTotalPages] = useState(null);
-    const [totalElements, setTotalElements] = useState( null);
     const [page, setPage] = useState(0);
     const API_URL = "https://app.ticketmaster.com/discovery/v2/events.json";
+    
+    //TODO - Place this API KEY as a get request from the backend
     const API_KEY = "bGImLf75hE3oDCJaWIGTpjjH1TuizHnA";
     const [noMoreWebsiteEvents, setNoMoreWebsiteEvents] = useState(false);
     const [ticketMasterEventsFetched, setTicketMasterEventsFetched] = useState(null);
+    const PAGE_SIZE = 5;
+    const isCategory = location.pathname.includes('/explore/category/');
+    const isSearch = location.pathname.includes('/explore/search/');
+    const [allAvailableEvents, setAllAvailableEvents] = useState([]);
+    const [modifiedWebsiteEvents, setModifiedWebsiteEvents] = useState([]);
+    const [lastEvaluatedKey, setLastEvaluatedKey] = useState(null);
+    const [noMorePages, setNoMorePages] = useState(false);
+
     
- 
+    const [ticketmasterEventsPage, setTicketmasterEventsPage] = useState(0);
+    
+    
+    
     const fetchTicketMasterEvents = async (size = 10, page = 0) => {
         setTicketMasterEventsFetched(true);
 
@@ -26,13 +40,15 @@ const ExploreEventPages = () => {
         if(category.categoryName === "popular") {
             params = `?dmaId=702&size=${size}&page=${page}&apikey=${API_KEY}`;
         }
+        else if (isSearch) {
+            params = `?dmaId=702&keyword=${category.searchTerm}&page=${page}&size=${size}&apikey=${API_KEY}`;
+        }
         else {
-            console.log(category.categoryName);
             params = `?dmaId=702&classificationName=${category.categoryName}&size=${size}&page=${page}&apikey=${API_KEY}`;
         }
         
         const url = `${API_URL}${params}`;
-        // DMAID only shows Events from NSW and ACT
+        
         try {
             const response = await fetch(url);
             if (!response.ok) {
@@ -51,18 +67,21 @@ const ExploreEventPages = () => {
     };
     
     
-    const calculateTotalPage = async (size) => {
+    const calculateTotalPage = async (size, searchTerm) => {
         let params;
 
         if(category.categoryName === "popular") {
             params = `?dmaId=702&size=${size}&apikey=${API_KEY}`;
         }
+        else if (isSearch) {
+            params = `?dmaId=702&keyword=${searchTerm}&size=${size}&apikey=${API_KEY}`;
+        }
         else {
-            console.log(category.categoryName);
             params = `?dmaId=702&classificationName=${category.categoryName}&size=${size}&apikey=${API_KEY}`;
         }
 
         const url = `${API_URL}${params}`;
+        
         
         const response = await fetch(url);
         if (!response.ok) {
@@ -74,86 +93,114 @@ const ExploreEventPages = () => {
         
 
     }
-
-    const fetchEvent = async (type, category, page = 0, searchTerm, websiteEventCount = 5) => {
+    
+    const fetchEvent = async (type, category, searchTerm) => {
+        // Fetch local events, 
         
-        await calculateTotalPage(5)
-        let events;
-
-        let websiteEvents;
-        let modifiedWebsiteEvents;
-        let modifiedTicketmasterEventsData;
-
-        if (type === "popular") {
-            websiteEvents = await fetchEventSummaries(searchTerm, websiteEventCount);
-            modifiedWebsiteEvents = websiteEvents.map(event => ({
-                ...event,
-                source: 'local'  // Mark these events as 'local'
-            }));
-        }
-        else if (type === "category") {
-            websiteEvents = await fetchEventsByCategory(category, websiteEventCount);
-            modifiedWebsiteEvents = websiteEvents.map(event => ({
-                ...event,
-                source: 'local'  // Mark these events as 'local'
-            }));
-        }
-
+        await calculateTotalPage(PAGE_SIZE, searchTerm);
         
-        const numberWebsiteEvents = websiteEvents.length;
-        if(numberWebsiteEvents === 5) {
-            return modifiedWebsiteEvents;
-        }
-        let numberEventsNeeded = 5 - numberWebsiteEvents % 5;
+        let websiteEvents = [];
         
-        if(noMoreWebsiteEvents) {
-            numberEventsNeeded = 5;
-        }
-        // If no external events are needed then skip this
-        if(numberEventsNeeded === 0) {
-            return modifiedWebsiteEvents;
-        }
-
-        const ticketmasterTickets = await fetchTicketMasterEvents(numberEventsNeeded, page);
-        if (Array.isArray(ticketmasterTickets)) {
-            modifiedTicketmasterEventsData = ticketmasterTickets.map(event => ({
-                ...event,
-                source: 'ticketmaster'  // Mark these events as 'ticketmaster'
-            }));
-
-            events = [
-                ...modifiedWebsiteEvents, // Local events first
-                ...modifiedTicketmasterEventsData, // Ticketmaster events next
-            ];
-            
-            if(numberEventsNeeded > 0){
-                setNoMoreWebsiteEvents(true);
+        let newWebsiteEvents = [];
+        
+        if(!noMoreWebsiteEvents) {
+            let data;
+            if (type === "popular") {
+                data = await fetchEventSummaries(searchTerm, PAGE_SIZE, lastEvaluatedKey);
+            } else if (type === "category") {
+                data = await fetchEventsByCategory(category, PAGE_SIZE, lastEvaluatedKey);
             }
-            return events.slice(-5);
 
-        }else {
-            console.error('Ticketmaster events data is not an array:', ticketmasterTickets);
-        }
-    }
-
-    const loadEvents = async () => {
-        try {
-            const popularEvents = await fetchEvent("popular","popular", 0, "");
-            setEvents(popularEvents);
+            websiteEvents = data.events;
             
-            if(category.categoryName === "music") {
+
+            setLastEvaluatedKey(data.lastEvaluatedKey);
+
+            newWebsiteEvents = websiteEvents.map(event => ({
+                ...event,
+                source: 'local'  // Mark these events as 'local'
+            }));
+
+            setModifiedWebsiteEvents(websiteEvents.map(event => ({
+                ...event,
+                source: 'local'  // Mark these events as 'local'
+            })));
+            
+        }
+        
+        // Fetch PAGE_SIZE amount of ticketmaster events, then splice the remainder from the front of the ticketmaster array
+        
+        const numberWebsiteEvents = newWebsiteEvents.length;
+        
+        let ticketMasterEvents = [];
+        
+        let newTicketMasterEvents = [];
+        
+        // If the website events doesnt equal 5 then fetch ticketmasterEvents
+        
+        if(numberWebsiteEvents !== 5) {
+
+            setNoMoreWebsiteEvents(true)
+            // fetch 5 ticketmaster events and store in array
+            ticketMasterEvents = await fetchTicketMasterEvents(5, ticketmasterEventsPage);
+            
+            setTicketmasterEventsPage(ticketmasterEventsPage + 1);
+
+            if (Array.isArray(ticketMasterEvents)) {
+
+                // change ticketmasterEvents into new format with the source variable
+                newTicketMasterEvents = ticketMasterEvents.map(event => ({
+                    ...event,
+                    source: 'ticketmaster'  // Mark these events as 'ticketmaster'
+                }));
+                
+                // store these new events at the end of the allTicketMasterEvents array to get ready to splice
+                
+                const availableEvents = [...allAvailableEvents, ...newTicketMasterEvents];
+                
+                // splice the availableEvents array with the neccessary amount of events to fill the page
+                const ticketmasterEventsNeeded = PAGE_SIZE - numberWebsiteEvents;
+                
+                
+                const splicedTicketmasterEvents = availableEvents.splice(0, ticketmasterEventsNeeded);
+                
+                setAllAvailableEvents(availableEvents);
+                
+                return [...newWebsiteEvents, ...splicedTicketmasterEvents];
+                
+            }
+        }
+
+        return [...events, ...newWebsiteEvents];
+    }
+    
+    const loadEvents = async (searchTerm, category) => {
+        try {
+            
+            if(isSearch) {
+                const searchedEvents = await fetchEvent("popular","popular", 0, searchTerm);
+                setEvents(searchedEvents);
+                return;
+            }
+            
+            if(category === "popular") {
+                const popularEvents = await fetchEvent("popular","popular", 0, "");
+                setEvents(popularEvents);
+            }
+            
+            if(category === "music") {
                 const concertsData = await fetchEvent("category",'music');
                 setEvents(concertsData);
             }
-            else if(category.categoryName === "theatre") {
+            else if(category === "theatre") {
                 const theatreEventsData = await fetchEvent("category",'theatre');
                 setEvents(theatreEventsData);
             }
-            else if(category.categoryName === "family") {
+            else if(category === "family") {
                 const familyEventsData = await fetchEvent("category",'family');
                 setEvents(familyEventsData);
             }
-            else if(category.categoryName === "comedy") {
+            else if(category === "comedy") {
                 const comedyEventsData = await fetchEvent("category",'comedy');
                 setEvents(comedyEventsData);
             }
@@ -164,11 +211,15 @@ const ExploreEventPages = () => {
     };
     
     const handleViewMore = async () => {
+        if(loading) return;
+        setLoading(true);
         try {
             if(page >= totalPages) {
-                console.log("No more pages");
+                setNoMorePages(true);
                 return;
             }
+            
+            
             const updatedCount = currentWebsiteEventCount + 5;
             setCurrentWebsiteEventCount(updatedCount);
             let nextPage = 0;
@@ -179,45 +230,71 @@ const ExploreEventPages = () => {
             
 
             try {
+                if(isSearch) {
+                    const searchedEvents = await fetchEvent("popular","popular", page, category.searchTerm);
+                    
+                    setEvents(prevEvents => [...prevEvents, ...searchedEvents]);
+                    setLoading(false);
+                    return;
+                    
+                }
+                
                 if(category.categoryName === "popular") {
                     const newEvents = await fetchEvent("popular", "popular", nextPage, "", updatedCount);
-                    setEvents(prevEvents => [...prevEvents, ...newEvents]); // Append new events
+                    setEvents(prevEvents => [...prevEvents, ...newEvents]); 
+                    
                 }
                 if(category.categoryName === "music") {
                     const newEvents = await fetchEvent("category",'music', nextPage, "", updatedCount);
-                    console.log(newEvents);
-                    setEvents(prevEvents => [...prevEvents, ...newEvents]); // Append new events
+                    setEvents(prevEvents => [...prevEvents, ...newEvents]); 
                 }
                 else if(category.categoryName === "theatre") {
                     const newEvents = await fetchEvent("category",'theatre', nextPage, "", updatedCount);
-                    setEvents(prevEvents => [...prevEvents, ...newEvents]); // Append new events
+                    setEvents(prevEvents => [...prevEvents, ...newEvents]); 
                 }
                 else if(category.categoryName === "family") {
                     const newEvents = await fetchEvent("category",'family', nextPage, "", updatedCount);
-                    setEvents(prevEvents => [...prevEvents, ...newEvents]); // Append new events
+                    setEvents(prevEvents => [...prevEvents, ...newEvents]); 
                 }
                 else if(category.categoryName === "comedy") {
                     const newEvents = await fetchEvent("category",'comedy', nextPage, "", updatedCount);
-                    setEvents(prevEvents => [...prevEvents, ...newEvents]); // Append new events
+                    setEvents(prevEvents => [...prevEvents, ...newEvents]); 
                 }
 
             } catch (error) {
-                console.log(category);
                 console.error('Error fetching events:', error);
             }
 
-            // const newEvents = await fetchEvent("category", category, nextPage,"", updatedCount );
-            // setEvents(prevEvents => [...prevEvents, ...newEvents]); // Append new events
+            
         } catch (error) {
             console.error("Error loading more events:", error);
         }
+        setPage(page + 1);
+        
+        setLoading(false);
     }
     
     
     useEffect( () => {
+        
+        if(isSearch) {
+            let searchTerm = category.searchTerm;
+            let category2 = "";
 
-        loadEvents();
-    }, [])
+
+            loadEvents(searchTerm, category2);
+
+        }
+
+        if(isCategory) {
+            let searchTerm = "";
+            let category2 = category.categoryName;
+
+            loadEvents(searchTerm, category2);
+        }
+        
+    }, [
+    ])
 
     return (
         <>
@@ -227,18 +304,30 @@ const ExploreEventPages = () => {
                 <div className="photo-bar">
                     <img src={banner} alt="Event Banner" className="top-banner"/>
                 </div>
-
-                    <div className="events-section">
-
-
-
+                    <div className="events-section" style={{"display":"flex","alignItems":"center","justifyContent":"center"}}>
                         <div>
                             {events.map(event => (
                                 <EventPageCard key={event.id} event={event}/>
                             ))}
 
-                            <div>
-                                <button onClick={handleViewMore}>View More</button>
+                            <div style={{"margin":"10px", "justifyContent":"center","display":"flex" }}>
+
+                                {noMorePages ? (
+                                    <div>
+                                        No More Pages
+                                    </div>
+                                ) : (
+                                    <button onClick={handleViewMore} disabled={loading || noMorePages}
+                                            style={{
+                                                "backgroundColor": loading ? "gray" : noMorePages ? "gray" : "red",
+                                                "width": "200px"
+                                            }}>
+                                        {loading ? "Loading..." : "View More"}
+                                    </button>
+                                )
+                                }
+
+
                             </div>
                         </div>
                     </div>

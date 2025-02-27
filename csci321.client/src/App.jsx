@@ -1,90 +1,59 @@
 import './App.css'
-import { BrowserRouter, Routes, Route, useLocation, useNavigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import Home from './pages/Home';
 import About from './pages/About';
-import ExploreEvents from "./pages/ExploreEvents.jsx";
-import Layout from "./components/Layout.jsx";
-import AttendeeLogin from "./pages/AttendeeLogin.jsx";
+import {Footer} from "./components/Footer.jsx";
 import { useEffect, useState } from 'react';
-import OrganiserLogin from "./pages/OrganiserLogin.jsx";
 import HostEventDetails from './pages/HostEvent/Details';
-import HostEventBanner from './pages/HostEvent/Banner'; // Create these components similarly
-import HostEventTicketing from './pages/HostEvent/Ticketing'; // Create these components similarly
+import HostEventBanner from './pages/HostEvent/Banner'; 
+import HostEventTicketing from './pages/HostEvent/Ticketing'; 
 import HostEventReview from './pages/HostEvent/Review';
 import HostEvent from "./pages/HostEvent/HostEvent.jsx";
-import SignUp from "./pages/SignUp.jsx";
-import ProfileDetails from "./pages/ProfileDetails.jsx"; // Create these components similarly
+import ProfileDetails from "./pages/Profile/ProfileDetails.jsx"; 
 import PrivateRoute from './components/PrivateRoute';
 import MyEvents from "./pages/MyEvents.jsx";
 import MyTickets from "./pages/MyTickets.jsx";
 import EventDetails from "@/pages/EventDetails.jsx";
-import Checkout from './pages/Checkout.jsx';
+import Checkout from './pages//Checkout/Checkout.jsx';
 import EventStatistics from './pages/EventStats.jsx';
-import { RefreshToken, logoutUser } from './components/refreshToken';
-import InterestedPage from './pages/InterestedPage.jsx';
+import { RefreshToken } from './components/refreshToken';
+import InterestedPage from './pages/Attendee/InterestedPage.jsx';
 import ExternalEventDetails from "./pages/ExternalEventDetails.jsx";
 import ExploreEventPages from "@/pages/ExploreEventPages.jsx";
+import CheckoutReturn from "@/pages/Checkout/CheckoutReturn.jsx";
+import RedirectPage from "@/pages/Profile/RedirectPage.jsx";
+
 
 const App = () => {
     const [accessToken, setAccessToken] = useState(localStorage.getItem("accessToken"));
     const [isLoggedOut, setIsLoggedOut] = useState(false);
     const location = useLocation();
-    
-    // Track user activity (idle timeout)
-    // const useIdleTimer = (timeout, onIdle) => {
-    //     useEffect(() => {
-    //       let timer;
-    //  
-    //       const resetTimer = () => {
-    //         clearTimeout(timer);
-    //         timer = setTimeout(onIdle, timeout);
-    //       };
-    //  
-    //       window.addEventListener("mousemove", resetTimer);
-    //       window.addEventListener("keydown", resetTimer);
-    //  
-    //       resetTimer(); // Initialize timer
-    //  
-    //       return () => {
-    //         clearTimeout(timer);
-    //         window.removeEventListener("mousemove", resetTimer);
-    //         window.removeEventListener("keydown", resetTimer);
-    //       };
-    //     }, [timeout, onIdle]);
-    //   };
-//
-  // Detect user inactivity (5 minutes = 300000ms)
-  // useIdleTimer(300000, () => {
-  //   console.log("User is idle for more than 5 minutes, logging out.");
-  //   logoutUser();
-  // });
+
 
     useEffect(() => {
     if(accessToken) {
        RefreshToken();
      }
 
-        // Check if the current route requires scrolling or not
         if (location.pathname === '/explore') {
-            document.body.classList.add('scrollable'); // Allow scrolling
-            document.body.classList.remove('no-scroll'); // Ensure no-scroll is removed
+            document.body.classList.add('scrollable'); 
+            document.body.classList.remove('no-scroll'); 
         }
         else if (location.pathname === '/host') {
-            document.body.classList.add('scrollable'); // Allow scrolling
-            document.body.classList.remove('no-scroll'); // Ensure no-scroll is removed
+            document.body.classList.add('scrollable');  
+            document.body.classList.remove('no-scroll');  
         } else if (location.pathname === '/host') {
-          document.body.classList.add('scrollable'); // Allow scrolling
-          document.body.classList.remove('no-scroll'); // Ensure no-scroll is removed
+          document.body.classList.add('scrollable');
+          document.body.classList.remove('no-scroll'); 
        } else {
-            document.body.classList.add('scrollable'); // Prevent scrolling
-            document.body.classList.remove('no-scroll'); // Ensure scrollable is removed
+            document.body.classList.add('scrollable'); 
+            document.body.classList.remove('no-scroll'); 
         }
 
-        // Clean up function to reset styles when component unmounts
-        return () => {
+         return () => {
             document.body.classList.remove('scrollable');
             document.body.classList.remove('no-scroll');
-            //clearInterval(interval);
+             
         };
     }, [location.pathname, accessToken, isLoggedOut]);
 
@@ -98,10 +67,6 @@ const App = () => {
                     <Route index element={<Home />} />
                     <Route path="/home" element={<Home />} />
                     <Route path="/about" element={<About />} />
-                    <Route path="/explore" element={<ExploreEvents />} />
-                    <Route path="/attendeeLogin" element={<AttendeeLogin />} />
-                    <Route path="/organiserLogin" element={<OrganiserLogin />} />
-                    <Route path="/signUp" element={<SignUp />} />
                     <Route path="/host" element={
                         <PrivateRoute allowedUserType="organiser">
                             <HostEvent />
@@ -128,7 +93,9 @@ const App = () => {
                     </PrivateRoute>
                     }
                     />
-                    <Route path="/explore/:categoryName" element={<ExploreEventPages/>} />
+                    <Route path="/explore/category/:categoryName" element={<ExploreEventPages/>} />
+
+                    <Route path="/explore/search/:searchTerm" element={<ExploreEventPages/>} />
 
                     <Route path="/interested" element={
                         <PrivateRoute allowedUserType="attendee">
@@ -137,22 +104,24 @@ const App = () => {
                     }
                     />
 
-                    <Route path="/:eventName/:eventId" element={
-                        <PrivateRoute allowedUserType="attendee">
-                        <EventDetails />
-                    </PrivateRoute>} />
-                    <Route path="/:eventId" element={
+                    <Route path="/event/:eventName/:eventId" element={
+                        <EventDetails />} />
+                    <Route path="/event/:eventId" element={
                         <PrivateRoute allowedUserType="attendee">
                             <ExternalEventDetails />
                         </PrivateRoute>} />
                     <Route path="/checkout/:eventId" element={<Checkout />} />
+                    <Route path="/checkoutReturn" element={<CheckoutReturn />} />
                     <Route path="/events/:eventId/statistics" element={
                         <PrivateRoute allowedUserType="organiser">
                             <EventStatistics />
                         </PrivateRoute>
                     }
                     />
+                    
+                    <Route path="/redirect" element={<RedirectPage />} />
                 </Routes>
+            <Footer />
             </main>
         </div>
     )

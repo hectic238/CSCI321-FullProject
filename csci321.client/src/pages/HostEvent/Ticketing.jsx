@@ -2,14 +2,17 @@ import React, {useEffect, useState} from "react";
 import ticketedEvent from "../../assets/ticketedEvent.png"
 import freeEvent from "../../assets/freeEvent.png"
 
-function Ticketing ({eventDetails, handleTicketFormChange, setEventDetails}) {
+function Ticketing ({eventDetails, handleTicketFormChange, setEventDetails, setFreeTicket}) {
     const [tickets, setTickets] = useState(eventDetails.tickets || []);
     const [eventTicketType, setEventTicketType] = useState(eventDetails.eventTicketType || '');
     const [showPopup, setShowPopup] = useState(false);
+    const [freeTicketCount, setFreeTicketCount] = useState(0);
 
 
     useEffect(() => {
         handleTicketFormChange('eventTicketType', eventTicketType); // Update the eventTicketType in eventDetails
+        if(eventTicketType === 'free') {
+        }
     }, [eventTicketType]);
 
     const handleEventTypeChange = (type) => {
@@ -20,6 +23,14 @@ function Ticketing ({eventDetails, handleTicketFormChange, setEventDetails}) {
     const handleAddTicket = () => {
         setTickets([...tickets, { name: '', price: '', count: '', soldOut: false, bought: 0 }]);
     };
+    
+    const handleFreeTicketCount = (value) => {
+        setFreeTicketCount(value);
+        setFreeTicket([{ name: "Free Admission", price: 0, count: value, soldOut: false, bought: 0 }])
+
+    }
+    
+    
 
     const handleTicketChange = (index, field, value) => {
         const updatedTickets = tickets.map((ticket, i) =>
@@ -55,7 +66,7 @@ return (
         <div className="events-grid">
             <form>
                 <h2>What type of event are you running?</h2>
-                <div className="event-type">
+                <div className="event-type"style={{"flexDirection": "row","display": "flex","justifyContent": "space-between","maxHeight": "140px"}}>
                     <label className={`image-radio ${eventTicketType === 'ticketed' ? 'selected' : ''}`}>
                         <input
                             type="radio"
@@ -125,7 +136,48 @@ return (
                     ))}
                     <button type="button" onClick={handleAddTicket}>Add Ticket</button>
                 </div>
-                    )}
+                )}
+
+                {eventTicketType === 'free' && (
+                    <div className="ticket-section">
+                        <h2>How many tickets are available?</h2>
+                        <div className="ticket-header">
+                            <div className="ticket-column">Ticket Name</div>
+                            <div className="ticket-column">Price</div>
+                            <div className="ticket-column">Count</div>
+                            <div className="ticket-column"></div>
+                            {/* Empty column for delete button */}
+                        </div>
+                            <div className="ticket-row">
+                                <div className="ticket-column">
+                                    <input
+                                        type="text"
+                                        disabled={true}
+                                        value={"Free Admission"}
+                                        placeholder="Ticket Name"
+                                    />
+                                </div>
+                                <div className="ticket-column">
+                                    <span className="currency-symbol">$</span>
+                                    <input
+                                        type="number"
+                                        className="with-currency"
+                                        disabled={true}
+                                        value={0}
+                                        placeholder="Price"
+                                    />
+                                </div>
+                                <div className="ticket-column">
+                                    <input
+                                        type="number"
+                                        value={freeTicketCount}
+                                        onChange={(e) => handleFreeTicketCount(e.target.value)}
+                                        placeholder="Count"
+                                    />
+                                </div>
+                            </div>
+                    </div>
+                )}
                 
             </form>
         </div>

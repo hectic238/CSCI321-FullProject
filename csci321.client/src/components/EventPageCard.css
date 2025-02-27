@@ -28,7 +28,7 @@
 
 /* Styles for event details */
 .event-page-Card-Column-image {
-    margin-left:40px;
+    margin-left:20px;
     padding: 10px; /* Padding inside the card */
 }
 
@@ -41,13 +41,11 @@
 
 .event-page-Card-Column-details {
     padding: 10px; /* Padding inside the card */
-    flex-grow: 1; /* Allow details to grow and fill space */
     text-align: left;
 }
 
 .event-page-Card-Column-buttons {
     flex-direction: row;
-    max-width: 175px;
     margin-right:20px;
 }
 
