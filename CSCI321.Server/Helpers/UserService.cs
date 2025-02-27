@@ -288,6 +288,16 @@ namespace CSCI321.Server.Helpers
                 throw new ArgumentException("Invalid user data.");
             }
             
+            Console.WriteLine($"Interests count: {updatedUser.interests.Count()}");
+            Console.WriteLine($"Name: {updatedUser.name}");
+            Console.WriteLine($"Interests: {string.Join(", ", updatedUser.interests)}");
+            
+            var interestsList = updatedUser.interests ?? new List<string>();  
+            if (!interestsList.Any())
+            {
+                interestsList = new List<string>();  
+            }
+
             
 
             var updateRequest = new UpdateItemRequest
@@ -312,7 +322,7 @@ namespace CSCI321.Server.Helpers
                     { ":dateOfBirth", new AttributeValue { S = updatedUser.dateOfBirth.ToString("o") } },
                     { ":phoneNumber", new AttributeValue { S = updatedUser.phoneNumber ?? string.Empty } },
                     { ":title", new AttributeValue { S = updatedUser.title ?? string.Empty } },
-                    { ":interests", new AttributeValue { L = updatedUser.interests.Select(interest => new AttributeValue { S = interest }).ToList() } }
+                    { ":interests", new AttributeValue { L = interestsList.Select(interest => new AttributeValue { S = interest }).ToList() } }
 
                 },
                 ReturnValues = "UPDATED_NEW"

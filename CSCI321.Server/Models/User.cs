@@ -17,7 +17,7 @@ namespace CSCI321.Server.Models
 
     public List<Ticket>? tickets { get; set; }
 
-    public List <string>? interests { get; set; }
+    public List<string> interests { get; set; }
 
      public DateTime dateOfBirth { get; set; }
     

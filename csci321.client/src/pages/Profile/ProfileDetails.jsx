@@ -1,30 +1,29 @@
 import React, { useEffect, useState } from 'react';
 import Navbar from "@/components/Navbar.jsx";
-import { RefreshToken } from "@/components/RefreshToken.jsx";
+import {RefreshToken} from "@/components/RefreshToken.jsx";
 import { Link } from 'react-router-dom';
 
 import './ProfileDetails.css'
-import { TextField, FormControl, InputLabel, MenuItem, Select } from '@mui/material';
+import {TextField, FormControl, InputLabel, MenuItem, Select} from '@mui/material';
 import { DateField } from '@mui/x-date-pickers/DateField';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DemoContainer } from '@mui/x-date-pickers/internals/demo';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { MuiTelInput } from 'mui-tel-input'
-import { enrichOrdersWithEventDetails } from "@/components/Functions.jsx";
+import {enrichOrdersWithEventDetails} from "@/components/Functions.jsx";
 import OrdersList from "@/components/OrdersList.jsx";
-import { getURL } from "@/components/URL.jsx";
+import {getURL} from "@/components/URL.jsx";
 import dayjs from "dayjs";
-import { APIWithToken } from "@/components/API.js";
+import {APIWithToken} from "@/components/API.js";
 import timezone from 'dayjs/plugin/timezone';
 import utc from 'dayjs/plugin/utc';
 import Alert from '@mui/material/Alert';
 import CheckIcon from '@mui/icons-material/Check';
-import { useAuth0 } from "@auth0/auth0-react";
-import InterestedPage from '@/components/InterestedPage.jsx'
+import {useAuth0} from "@auth0/auth0-react";
+import InterestedPage from "@/components/InterestedPage.jsx";
 
 
 dayjs.extend(utc);
-
 dayjs.extend(timezone);
 
 
@@ -46,10 +45,10 @@ const ProfileDetails = () => {
 
         let url = `${baseUrl}/api/User/get`;
 
-        let response = await APIWithToken(token, url, 'Get');
+        let response =  await APIWithToken(token, url, 'Get');
 
         document.title = response.name + " | PLANIT";
-        console.log(response);
+
         setUserDetails(response);
     };
 
@@ -84,8 +83,9 @@ const ProfileDetails = () => {
         }
     };
 
+
     useEffect(() => {
-        if (isAuthenticated) {
+        if(isAuthenticated) {
             const fetchOrders = async () => {
                 const enrichedOrders = await enrichOrdersWithEventDetails(true, await getAccessTokenSilently(), user.sub);
                 setOrders(enrichedOrders || []);
@@ -102,7 +102,7 @@ const ProfileDetails = () => {
     };
 
     const formatTime = (timeString) => {
-        if (timeString === undefined) {
+        if(timeString === undefined){
             return '';
         }
         const [hours, minutes] = timeString.split(':');
@@ -120,9 +120,8 @@ const ProfileDetails = () => {
     const handleFormSubmit = async (e) => {
         e.preventDefault();
 
-        console.log(userDetails);
-
         var baseUrl = getURL();
+        
 
         let url = `${baseUrl}/api/User/updateUser`;
 
@@ -131,6 +130,8 @@ const ProfileDetails = () => {
             Object.entries(userDetails).filter(([_, value]) => value !== null)
         );
 
+        console.log(sanitizedDetails);
+
         await APIWithToken(await getAccessTokenSilently({}), url, 'Put', sanitizedDetails);
         alert("User updated successfully.");
     };
@@ -138,7 +139,7 @@ const ProfileDetails = () => {
     const handlePasswordFormSubmit = async (e) => {
         e.preventDefault();
 
-        if (newPassword !== confirmPassword) {
+        if(newPassword !== confirmPassword) {
             setError("New Passwords do not match");
             alert("Passwords do not match");
         }
@@ -168,187 +169,188 @@ const ProfileDetails = () => {
     }
 
     return (
-        isAuthenticated && (<div>
-            <Navbar />
-            <div className="profile-page">
-                <div className="sidebar">
-                    <div className="sidebar-header">
-                        <h2>{user.name}</h2>
+        isAuthenticated &&  (<div>
+                <Navbar />
+                <div className="profile-page">
+                    <div className="sidebar">
+                        <div className="sidebar-header">
+                            <h2>{user.name}</h2>
+                        </div>
+
+                        <div className="tabs">
+                            <div className={`tab ${tab === "profile" ? "active" : ""}`} onClick={() => setTab("profile")}>
+                                Profile Details
+                            </div>
+
+                            <div className={`tab ${tab === "orders" ? "active" : ""}`} onClick={() => setTab("orders")}>
+                                Order History
+                            </div>
+                            <div className={`tab ${tab === "notifications" ? "active" : ""}`}
+                                 onClick={() => setTab("notifications")}>
+                                Notifications
+                            </div>
+                            <div className={`tab ${tab === "password" ? "active" : ""}`} onClick={() => setTab("password")}>
+                                Change Password
+                            </div>
+                            <div className={`tab ${tab === "interests" ? "active" : ""}`} onClick={() => setTab("interests")}>
+                                Interests
+                            </div>
+                        </div>
                     </div>
 
-                    <div className="tabs">
-                        <div className={`tab ${tab === "profile" ? "active" : ""}`} onClick={() => setTab("profile")}>
-                            Profile Details
-                        </div>
+                    <div className="main-content">
+                        {tab === "profile" && (
+                            <div className="profile-form">
+                                <form onSubmit={handleFormSubmit}>
+                                    <div className="form-group">
+                                        <TextField
+                                            required
+                                            fullWidth
+                                            label="Email Address"
+                                            type="email"
+                                            name="email"
+                                            disabled={true}
+                                            value={user.email}
+                                        />
+                                    </div>
 
-                        <div className={`tab ${tab === "orders" ? "active" : ""}`} onClick={() => setTab("orders")}>
-                            Order History
-                        </div>
-                        <div className={`tab ${tab === "interests" ? "active" : ""}`} onClick={() => setTab("interests")}>
-                            Interests
-                        </div>
-                        <div className={`tab ${tab === "notifications" ? "active" : ""}`}
-                            onClick={() => setTab("notifications")}>
-                            Notifications
-                        </div>
-                        <div className={`tab ${tab === "password" ? "active" : ""}`} onClick={() => setTab("password")}>
-                            Change Password
-                        </div>
-                    </div>
-                </div>
+                                    <FormControl fullWidth>
+                                        <InputLabel id="demo-simple-select-label">Title</InputLabel>
+                                        <Select
+                                            labelId="demo-simple-select-label"
+                                            id="demo-simple-select"
+                                            value={userDetails.title}
+                                            type="input"
+                                            name="title"
+                                            label="Title"
+                                            onChange={(e) => handleChange(e.target.name, e.target.value)}
+                                        >
+                                            <MenuItem value={"Mr"}>Mr</MenuItem>
+                                            <MenuItem value={"Mrs"}>Mrs</MenuItem>
+                                            <MenuItem value={"Ms"}>Ms</MenuItem>
+                                        </Select>
+                                    </FormControl>
 
-                <div className="main-content">
-                    {tab === "profile" && (
-                        <div className="profile-form">
-                            <form onSubmit={handleFormSubmit}>
-                                <div className="form-group">
+
                                     <TextField
                                         required
                                         fullWidth
-                                        label="Email Address"
-                                        type="email"
-                                        name="email"
-                                        disabled={true}
-                                        value={user.email}
+                                        label="Full Name"
+                                        type="input"
+                                        name="name"
+
+                                        value={userDetails.name}
+                                        onChange={(e) => handleChange(e.target.name, e.target.value)}
                                     />
+
+                                    <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                        <DemoContainer components={['DateField']}>
+                                            <DateField
+                                                label="Date of Birth"
+                                                value={dayjs(userDetails.dateOfBirth)}
+                                                type="input"
+                                                format="DD/MM/YYYY"
+                                                timezone="UTC"
+                                                onChange={(e) => handleChange("dateOfBirth", e)}
+                                            />
+                                        </DemoContainer>
+                                    </LocalizationProvider>
+
+                                    <MuiTelInput
+                                        value={userDetails.phoneNumber}
+                                        defaultCountry="AU"
+                                        onChange={(e) => handleChange("phoneNumber", e)}
+                                    />
+
+                                    <button type="submit">Save Changes</button>
+                                </form>
+                            </div>
+                        )}
+
+                        {tab === "orders" && (
+                            <div className="order-history">
+                                <h2>Order History</h2>
+                                <div className="tickets-container">
+
+                                    {orders.length === 0 ? (
+                                        <div className="no-tickets">
+                                            <p>No current tickets to display.</p>
+                                            <Link to="/explore">Explore Events</Link>
+                                        </div>
+                                    ) : (
+                                        <OrdersList orders={orders} formatDate={formatDate} formatTime={formatTime}/>
+                                    )}
                                 </div>
 
-                                <FormControl fullWidth>
-                                    <InputLabel id="demo-simple-select-label">Title</InputLabel>
-                                    <Select
-                                        labelId="demo-simple-select-label"
-                                        id="demo-simple-select"
-                                        value={userDetails.title}
-                                        type="input"
-                                        name="title"
-                                        label="Title"
-                                        onChange={(e) => handleChange(e.target.name, e.target.value)}
-                                    >
-                                        <MenuItem value={"Mr"}>Mr</MenuItem>
-                                        <MenuItem value={"Mrs"}>Mrs</MenuItem>
-                                        <MenuItem value={"Ms"}>Ms</MenuItem>
-                                    </Select>
-                                </FormControl>
 
+                            </div>
+                        )}
 
-                                <TextField
-                                    required
-                                    fullWidth
-                                    label="Full Name"
-                                    type="input"
-                                    name="name"
+                        {tab === "notifications" && (
+                            <div className="notifications">
+                                <h2>Notifications</h2>
+                                <p>Manage your notification preferences.</p>
+                            </div>
+                        )}
 
-                                    value={userDetails.name}
-                                    onChange={(e) => handleChange(e.target.name, e.target.value)}
+                        {tab === "interests" && (
+                            <div className="interests">
+                                <form onSubmit={handleFormSubmit}> 
+                                    <InterestedPage
+                                    interests={userDetails.interests}
+                                    onInterestsChange={handleInputChange}
                                 />
+                                    <button type="submit">Save Changes</button>
+                                </form>
 
-                                <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                    <DemoContainer components={['DateField']}>
-                                        <DateField
-                                            label="Date of Birth"
-                                            value={dayjs(userDetails.dateOfBirth)}
-                                            type="input"
-                                            format="DD/MM/YYYY"
-                                            timezone="UTC"
-                                            onChange={(e) => handleChange("dateOfBirth", e)}
+                            </div>
+                        )}
+
+                        {tab === "password" && (
+                            <div className="change-password">
+                                <h2>Change Password</h2>
+                                <form onSubmit={handlePasswordFormSubmit}>
+                                    <div className="form-group">
+                                        <label htmlFor="oldPassword">Old Password</label>
+                                        <input
+                                            type="password"
+                                            id="oldPassword"
+                                            value={oldPassword}
+                                            onChange={(e) => setOldPassword(e.target.value)}
+                                            required
                                         />
-                                    </DemoContainer>
-                                </LocalizationProvider>
-
-                                <MuiTelInput
-                                    value={userDetails.phoneNumber}
-                                    defaultCountry="AU"
-                                    onChange={(e) => handleChange("phoneNumber", e)}
-                                />
-
-                                <button type="submit">Save Changes</button>
-                            </form>
-                        </div>
-                    )}
-
-                    {tab === "orders" && (
-                        <div className="order-history">
-                            <h2>Order History</h2>
-                            <div className="tickets-container">
-
-                                {orders.length === 0 ? (
-                                    <div className="no-tickets">
-                                        <p>No current tickets to display.</p>
-                                        <Link to="/explore">Explore Events</Link>
                                     </div>
-                                ) : (
-                                    <OrdersList orders={orders} formatDate={formatDate} formatTime={formatTime} />
-                                )}
+                                    <div className="form-group">
+                                        <label htmlFor="newPassword">New Password</label>
+                                        <input
+                                            type="password"
+                                            id="newPassword"
+                                            value={newPassword}
+                                            onChange={(e) => setNewPassword(e.target.value)}
+                                            required
+                                        />
+                                    </div>
+                                    <div className="form-group">
+                                        <label htmlFor="confirmPassword">Confirm New Password</label>
+                                        <input
+                                            type="password"
+                                            id="confirmPassword"
+                                            value={confirmPassword}
+                                            onChange={(e) => setConfirmPassword(e.target.value)}
+                                            required
+                                        />
+                                    </div>
+
+                                    <button type="submit">Change Password</button>
+                                </form>
                             </div>
 
+                        )}
 
-                        </div>
-                    )}
-
-                    {tab === "notifications" && (
-                        <div className="notifications">
-                            <h2>Notifications</h2>
-                            <p>Manage your notification preferences.</p>
-                        </div>
-                    )}
-
-                    {tab === "interests" && (
-                        <div className="interests">
-                            <form onSubmit={handleFormSubmit}> <InterestedPage
-                                interests={userDetails.interests}
-                                onInterestsChange={handleInputChange}
-                            />
-                                <button type="submit">Save Changes</button>
-                            </form>
-
-                        </div>
-                    )}
-
-                    {tab === "password" && (
-                        <div className="change-password">
-                            <h2>Change Password</h2>
-                            <form onSubmit={handlePasswordFormSubmit}>
-                                <div className="form-group">
-                                    <label htmlFor="oldPassword">Old Password</label>
-                                    <input
-                                        type="password"
-                                        id="oldPassword"
-                                        value={oldPassword}
-                                        onChange={(e) => setOldPassword(e.target.value)}
-                                        required
-                                    />
-                                </div>
-                                <div className="form-group">
-                                    <label htmlFor="newPassword">New Password</label>
-                                    <input
-                                        type="password"
-                                        id="newPassword"
-                                        value={newPassword}
-                                        onChange={(e) => setNewPassword(e.target.value)}
-                                        required
-                                    />
-                                </div>
-                                <div className="form-group">
-                                    <label htmlFor="confirmPassword">Confirm New Password</label>
-                                    <input
-                                        type="password"
-                                        id="confirmPassword"
-                                        value={confirmPassword}
-                                        onChange={(e) => setConfirmPassword(e.target.value)}
-                                        required
-                                    />
-                                </div>
-
-                                <button type="submit">Change Password</button>
-                            </form>
-                        </div>
-
-                    )}
+                    </div>
 
                 </div>
-
             </div>
-        </div>
         )
     );
 };
