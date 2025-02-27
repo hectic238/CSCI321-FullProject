@@ -14,6 +14,7 @@ import {useAuth0} from "@auth0/auth0-react";
 import {deleteCookie, getCookie, setCookie} from "@/components/Cookie.jsx";
 import {getUserTypeByUserId} from "@/components/Functions.jsx";
 function Navbar() {
+    
     const {
         user,
         isAuthenticated,
@@ -167,10 +168,6 @@ function Navbar() {
                                     <img src={ticketIcon} alt="Tickets" className="attendee-icon"/>
                                     <span>Tickets</span>
                                 </Link>
-                                <Link to="/interested" className="attendee-btn">
-                                    <img src={starIcon} alt="Interested" className="attendee-icon"/>
-                                    <span>Interested</span>
-                                </Link>
 
                             </div>
 
@@ -205,10 +202,7 @@ function Navbar() {
                                 >
                                     Log in / Sign Up
                                 </Button>
-
-                                {/*<Link to="/Login" className="login-btn-attendee">Attendee Login</Link>*/}
                                 
-                                {/*<Link to="/organiserLogin" className="login-btn">Organizer Login</Link>*/}
                             </div>
                         )}
 

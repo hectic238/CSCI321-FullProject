@@ -192,9 +192,13 @@ const ProfileDetails = () => {
                             <div className={`tab ${tab === "password" ? "active" : ""}`} onClick={() => setTab("password")}>
                                 Change Password
                             </div>
-                            <div className={`tab ${tab === "interests" ? "active" : ""}`} onClick={() => setTab("interests")}>
-                                Interests
-                            </div>
+                            {userDetails.userType === 'attendee' && (
+                                <div className={`tab ${tab === "interests" ? "active" : ""}`}
+                                     onClick={() => setTab("interests")}>
+                                    Interests
+                                </div>
+                            )}
+
                         </div>
                     </div>
 
