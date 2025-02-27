@@ -31,6 +31,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="src\pages\Attendee\" />
     <Folder Include="src\pages\Events\" />
     <Folder Include="src\pages\Organiser\" />
   </ItemGroup>

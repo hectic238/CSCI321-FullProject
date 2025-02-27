@@ -103,7 +103,9 @@ namespace CSCI321.Server.Helpers
                 ["refreshTokenExpiry"] = newUser.refreshTokenExpiry,
                 ["tickets"] = JsonSerializer.Serialize(newUser.tickets),  
                 ["dateOfBirth"] = newUser.dateOfBirth.ToString("yyyy-MM-ddTHH:mm:ssZ"),
-                ["createdDate"] = DateTime.UtcNow.ToString()
+                ["createdDate"] = DateTime.UtcNow.ToString(),
+                ["interests"] = JsonSerializer.Serialize(newUser.interests)
+
             };
             
             
@@ -223,9 +225,10 @@ namespace CSCI321.Server.Helpers
                 return null;  
             }
 
-            
+
             var user = new User
             {
+                interests = response.Item["interests"].L.Select(attribute => attribute.S).ToList(),
                 userId = response.Item["userId"].S,
                 name = response.Item["name"].S,
                 userType = response.Item["userType"].S,
@@ -233,9 +236,9 @@ namespace CSCI321.Server.Helpers
                 // refreshTokenExpiry = DateTime.Parse(response.Item["refreshTokenExpiry"].S),
                 title = response.Item["title"].S,
                 dateOfBirth = DateTime.Parse(response.Item["dateOfBirth"].S),
-                    
+
                 phoneNumber = response.Item["phoneNumber"].S,
-                
+
             };
             return user;
         }
@@ -294,13 +297,14 @@ namespace CSCI321.Server.Helpers
                 {
                     { "userId", new AttributeValue { S = updatedUser.userId } }
                 },
-                UpdateExpression = "SET #name = :name, #dateOfBirth = :dateOfBirth,#phoneNumber = :phoneNumber ,#title = :title ",
+                UpdateExpression = "SET #name = :name, #dateOfBirth = :dateOfBirth,#phoneNumber = :phoneNumber ,#title = :title, #interests = :interests ",
                 ExpressionAttributeNames = new Dictionary<string, string>
                 {
                     { "#name", "name" },   
                     { "#dateOfBirth", "dateOfBirth" },
                     { "#phoneNumber", "phoneNumber" },
-                    { "#title", "title" }
+                    { "#title", "title" },
+                    { "#interests", "interests" }
                 },
                 ExpressionAttributeValues = new Dictionary<string, AttributeValue>
                 {
@@ -308,6 +312,7 @@ namespace CSCI321.Server.Helpers
                     { ":dateOfBirth", new AttributeValue { S = updatedUser.dateOfBirth.ToString("o") } },
                     { ":phoneNumber", new AttributeValue { S = updatedUser.phoneNumber ?? string.Empty } },
                     { ":title", new AttributeValue { S = updatedUser.title ?? string.Empty } },
+                    { ":interests", new AttributeValue { L = updatedUser.interests.Select(interest => new AttributeValue { S = interest }).ToList() } }
 
                 },
                 ReturnValues = "UPDATED_NEW"
