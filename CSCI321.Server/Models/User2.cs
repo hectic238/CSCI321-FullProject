@@ -10,6 +10,7 @@ public class User2
     public string? refreshToken { get; set; }
     public DateTime? refreshTokenExpiry { get; set; } 
     public List<Ticket>? tickets { get; set; }
+    public List<string>? interests { get; set; }
     public string? title { get; set; }
     public string? phoneNumber { get; set; }
     

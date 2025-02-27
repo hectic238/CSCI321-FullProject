@@ -8,13 +8,15 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DemoContainer } from '@mui/x-date-pickers/internals/demo';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { MuiTelInput } from 'mui-tel-input'
-import {setCookie} from "@/components/Cookie.jsx";
+import { setCookie } from "@/components/Cookie.jsx";
+import InterestedPage from "@/components/InterestedPage.jsx"
+
 const RedirectPage = () => {
     const [token, setToken] = useState(null);
     const [userType, setUserType] = useState('');
     const [loading, setLoading] = useState(true);
     const [accessToken, setAccessToken] = useState("");
-    const [state, setState] = useState("");
+    const [state, setState] = useState("");  
 
 
     const [formData, setFormData] = useState({
@@ -28,7 +30,8 @@ const RedirectPage = () => {
         tickets: [],
         title: '',
         phoneNumber: '',
-        dateOfBirth: ''
+        dateOfBirth: '',
+        interests: []
     });
 
     const handleInputChange = (field, value) => {
@@ -37,10 +40,19 @@ const RedirectPage = () => {
             value = value ? dayjs(value) : null;
         }
 
-        setFormData(prevData => ({
-            ...prevData,
-            [field]: value
-        }));
+        if (field === 'interests') {
+            setFormData(prevData => ({
+                ...prevData,
+                interests: prevData.interests.includes(value)
+                    ? prevData.interests.filter(item => item !== value)
+                    : [...prevData.interests, value]
+            }));
+        } else {
+            setFormData(prevData => ({
+                ...prevData,
+                [field]: value
+            }));
+        }
     };
 
     useEffect(() => {
@@ -63,11 +75,8 @@ const RedirectPage = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        //
+        
         try {
-
-            
-
             var baseUrl = getURL();
 
             formData.userId = token.sub;
@@ -95,7 +104,8 @@ const RedirectPage = () => {
             alert("Sign up successful!");
         } catch (error) {
             alert("Sign up failed! " + error.message);
-        }};
+    }
+};
 
     if (loading) {
         return <div>Loading...</div>;
@@ -143,16 +153,7 @@ const RedirectPage = () => {
                     </label>
                 )}
 
-                {/* Attendee-specific field */}
-                {formData.userType === 'attendee' && (
-                    <label>
-                        Preferences:
-                        <textarea
-                            value={formData.preferences}
-                            onChange={(e) => handleInputChange('preferences', e.target.value)}
-                        />
-                    </label>
-                )}
+                {/* Attendee-specific field */}  
 
                 <FormControl fullWidth>
                     <InputLabel id="demo-simple-select-label">Title</InputLabel>
@@ -186,6 +187,14 @@ const RedirectPage = () => {
                     defaultCountry="AU"  // Set a default country if needed
                     onChange={(value) => handleInputChange('phoneNumber', value)}  // Use the value directly, not event.target.value
                 />
+
+                {/* attendee-specific field */}
+                {formData.userType === 'attendee' && (
+                    <InterestedPage
+                        interests={formData.interests}
+                        onInterestsChange={handleInputChange}
+                    />
+                )}
                 <button type="submit">Submit</button>
             </form>
         </div>
