@@ -17,7 +17,7 @@ import EventDetails from "@/pages/EventDetails.jsx";
 import Checkout from './pages//Checkout/Checkout.jsx';
 import EventStatistics from './pages/EventStats.jsx';
 import { RefreshToken } from './components/refreshToken';
-import InterestedPage from './pages/Attendee/InterestedPage.jsx';
+import InterestedPage from './components/InterestedPage.jsx';
 import ExternalEventDetails from "./pages/ExternalEventDetails.jsx";
 import ExploreEventPages from "@/pages/ExploreEventPages.jsx";
 import CheckoutReturn from "@/pages/Checkout/CheckoutReturn.jsx";
@@ -96,13 +96,7 @@ const App = () => {
                     <Route path="/explore/category/:categoryName" element={<ExploreEventPages/>} />
 
                     <Route path="/explore/search/:searchTerm" element={<ExploreEventPages/>} />
-
-                    <Route path="/interested" element={
-                        <PrivateRoute allowedUserType="attendee">
-                            <InterestedPage />
-                        </PrivateRoute>
-                    }
-                    />
+                    
 
                     <Route path="/event/:eventName/:eventId" element={
                         <EventDetails />} />

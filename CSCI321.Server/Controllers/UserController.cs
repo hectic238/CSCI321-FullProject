@@ -272,6 +272,11 @@ public class UserController : ControllerBase
         {
             existingUser.tickets = updatedUser.tickets;
         }
+        
+        if (updatedUser.interests != null && updatedUser.interests.Any())
+        {
+            existingUser.interests = updatedUser.interests;
+        }
 
         await _userService.UpdateUserAsync(existingUser);
 

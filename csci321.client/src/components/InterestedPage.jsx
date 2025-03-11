@@ -1,10 +1,8 @@
-import Navbar from "../../components/Navbar";
 import React, { useState, useEffect } from 'react';
-import "../about.css";
 import "./interestedPage.css";
 
 
-const InterestedPage = () => {
+const InterestedPage = ({ interests, onInterestsChange }) => {
         const categories = {
             "Music": ["Concerts", "Music Festivals", "Music Workshops", "DJ Nights"],
             "Arts & Culture": ["Art Exhibitions", "Cultural Festivals", "Theater Plays", "Dance Performances"],
@@ -34,54 +32,36 @@ const InterestedPage = () => {
         document.title = "Interests | PLANIT"
     }, []);
 
-         const renderCategory = (category, interests) => (
-    <div className="category" key={category}>
-      <h3>{category}</h3>
-      <div className="tags">
-        {interests.map((interest) => (
-          <span
-            key={interest}
-            className={`tag ${selectedInterests[category]?.includes(interest) ? "selected" : ""}`}
-            onClick={() => toggleInterest(category, interest)}
-          >
-            {interest}
-            {selectedInterests[category]?.includes(interest) && (
-              <button onClick={(e) => { e.stopPropagation(); toggleInterest(category, interest); }}>X</button>
-            )}
-          </span>
-        ))}
-      </div>
-    </div>
-  );
+    const renderCategory = (category, categoryInterests) => (
+        <div className="category" key={category}>
+            <h3>{category}</h3>
+            <div className="tags">
+                {categoryInterests.map((interest) => (
+                    <span
+                        key={interest}
+                        className={`tag ${interests.includes(interest) ? "selected" : ""}`}
+                        onClick={() => onInterestsChange('interests', interest)}  // Use handleInputChange to toggle interest
+                    >
+                {interest}
+                {interests.includes(interest) && (
+                    <button onClick={(e) => {
+                        e.stopPropagation();
+                                onInterestsChange('interests', interest);  // Use handleInputChange to remove interest
+                    }}>X</button>
+                )}
+            </span>
+                ))}
+        </div>
+        </div >
+    );
 
     return (
         <>
-            <Navbar />
             <div className="interests">
                 <h2>Share your interests with us</h2>
                 {Object.entries(categories).map(([category, categoryInterests]) =>
                     renderCategory(category, categoryInterests)
                 )}
-                <div class="categories-container">
-                    <div class="category">
-                        <h3>Music</h3>
-                        <div class="tags">
-                            <div class="tag">Concerts</div>
-                            <div class="tag">Music Festivals</div>
-                            <div class="tag">Music Workshops</div>
-                            <div class="tag">DJ Nights</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="category">
-                    <h3>Arts & Culture</h3>
-                    <div class="tags">
-                        <div class="tag">Art Exhibitions</div>
-                        <div class="tag">Cultural Festivals</div>
-                        <div class="tag">Theater Plays</div>
-                        <div class="tag">Dance Performances</div>
-                    </div>
-                </div>
 
 
             </div>
