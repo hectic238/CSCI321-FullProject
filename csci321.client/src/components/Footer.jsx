@@ -1,4 +1,8 @@
+import {Link, useNavigate} from "react-router-dom";
+
 export const Footer = () => {
+    
+    const navigate = useNavigate();
     return (
         <div style={{
             backgroundColor: "#f5f5f5",
@@ -30,7 +34,8 @@ export const Footer = () => {
                     padding: "10px 20px",
                     cursor: "pointer",
                     borderRadius: "5px"
-                }}>
+                }} onClick={() => navigate("/contactUs")}
+                >
                     Contact
                 </button>
                 <button style={{
