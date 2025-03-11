@@ -1,7 +1,9 @@
 ﻿import {useNavigate, useParams} from "react-router-dom";
 import React, {useEffect, useState} from "react";
 import { Drawer, Button } from 'antd';
-import Navbar from "../components/Navbar.jsx"; // Ant Design imports
+import Navbar from "../components/Navbar.jsx";
+import {getCookie} from "@/components/Cookie.jsx"; // Ant Design imports
+import {useAuth0} from "@auth0/auth0-react";
 
 const ExternalEventDetails = () => {
     const { eventId } = useParams(); // Extract eventId from the URL
@@ -11,6 +13,12 @@ const ExternalEventDetails = () => {
     const [sidebarVisible, setSidebarVisible] = useState(false);
 
     const navigate = useNavigate();
+
+    const {
+        user,
+        isAuthenticated,
+        loginWithRedirect
+    } = useAuth0();
     
     const fetchExternalEventDetails =  async () => {
         const API_URL = `https://app.ticketmaster.com/discovery/v2/events/${eventId}.json`;
@@ -37,9 +45,19 @@ const ExternalEventDetails = () => {
         }
     }
 
-    const handleAttendClick = () => {
+    const handleAttendClick = async () => {
+        // If user isnt logged in, force them to the login page
+        if (!user && !isAuthenticated) {
+            await loginWithRedirect();
+        }
+        // If the user is not an attendee, alert user is on the wrong account
+        if (getCookie("userType") !== "attendee") {
+            alert("User type not allowed");
+            return;
+        }
+
         console.log(`Added  attendees to the event.`);
-        
+
     };
     
     const handleWebsiteClick = () => {
