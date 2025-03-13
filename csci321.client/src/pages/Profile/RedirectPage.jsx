@@ -59,6 +59,8 @@ const RedirectPage = () => {
         
         const urlParams = new URLSearchParams(window.location.search);
         const sessionToken = urlParams.get('session_token');
+        
+        console.log(formData.userType);
         setState(urlParams.get('state'));
         if (sessionToken) {
             setAccessToken(sessionToken);
