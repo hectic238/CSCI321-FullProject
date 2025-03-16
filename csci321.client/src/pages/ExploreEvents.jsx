@@ -30,7 +30,8 @@ function ExploreEvents() {
     const fetchTicketMasterEvents = async (size = 10, page = 0, category = "") => {
         const API_URL = "https://app.ticketmaster.com/discovery/v2/events.json";
         //TODO - MOVE API KEY TO BACKEND
-        const API_KEY = "bGImLf75hE3oDCJaWIGTpjjH1TuizHnA";
+        
+        const API_KEY = `${import.meta.env.VITE_TICKETMASTER_KEY}`;
         
         let params;
         
