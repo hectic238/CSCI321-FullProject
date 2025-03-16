@@ -317,7 +317,7 @@ const ProfileDetails = () => {
                                 }}
                             >
                                 <Tab label="Profile Details" />
-                                <Tab label="Order History" />
+                                {userDetails.userType === "attendee" && <Tab label="Order History" />}
                                 <Tab label="Notifications" />
                                 <Tab label="Change Password" />
                                 {userDetails.userType === "attendee" && <Tab label="Interests" />}
