@@ -55,7 +55,8 @@ const ExternalEventDetails = () => {
 
     const fetchExternalEventDetails = async () => {
         const API_URL = `https://app.ticketmaster.com/discovery/v2/events/${eventId}.json`
-        const API_KEY = "bGImLf75hE3oDCJaWIGTpjjH1TuizHnA"
+
+        const API_KEY = `${import.meta.env.VITE_TICKETMASTER_KEY}`;
         const params = `?apikey=${API_KEY}`
 
         try {

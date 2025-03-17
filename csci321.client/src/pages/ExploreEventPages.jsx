@@ -14,9 +14,7 @@ const ExploreEventPages = () => {
     const [totalPages, setTotalPages] = useState(null);
     const [page, setPage] = useState(0);
     const API_URL = "https://app.ticketmaster.com/discovery/v2/events.json";
-    
-    //TODO - Place this API KEY as a get request from the backend
-    const API_KEY = "bGImLf75hE3oDCJaWIGTpjjH1TuizHnA";
+    const API_KEY = `${import.meta.env.VITE_TICKETMASTER_KEY}`;
     const [noMoreWebsiteEvents, setNoMoreWebsiteEvents] = useState(false);
     const [ticketMasterEventsFetched, setTicketMasterEventsFetched] = useState(null);
     const PAGE_SIZE = 5;
