@@ -317,9 +317,10 @@ const ProfileDetails = () => {
                                 }}
                             >
                                 <Tab label="Profile Details" />
-                                <Tab label="Order History" />
+                                
                                 <Tab label="Notifications" />
                                 <Tab label="Change Password" />
+                                {userDetails.userType === "attendee" && <Tab label="Order History" />}
                                 {userDetails.userType === "attendee" && <Tab label="Interests" />}
                             </Tabs>
                         </Paper>
@@ -566,7 +567,7 @@ const ProfileDetails = () => {
                             )}
 
                             {/* Order History Tab */}
-                            {activeTab === 1 && (
+                            {activeTab === 3 && (
                                 <Box>
                                     <Typography variant="h5" gutterBottom fontWeight="bold" color="#ff4d4f">
                                         Order History
@@ -603,7 +604,7 @@ const ProfileDetails = () => {
                             )}
 
                             {/* Notifications Tab */}
-                            {activeTab === 2 && (
+                            {activeTab === 1 && (
                                 <Box>
                                     <Typography variant="h5" gutterBottom fontWeight="bold" color="#ff4d4f">
                                         Notifications
@@ -613,7 +614,7 @@ const ProfileDetails = () => {
                             )}
 
                             {/* Change Password Tab */}
-                            {activeTab === 3 && (
+                            {activeTab === 2 && (
                                 <form onSubmit={handlePasswordSubmit}>
                                     <Typography variant="h5" gutterBottom fontWeight="bold" color="#ff4d4f">
                                         Change Password
