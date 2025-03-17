@@ -16,6 +16,14 @@ Ensure you have the following installed:
 
 ## 🏃 Running the Project
 
+
+🔑🔑  
+As this project uses many external api's and applications such as Auth0, AWS, Stripe. We have various secret and access keys used for these
+as such we need to protect these keys. To do this we have removed files such as .env. files on the client side, and appsettings files
+on the server side. These need to be placed in the root of their respective folders /CSCI321.Server/ and /csci321.client/.
+
+They have been attached along side this project, however they will never be stored in the github to maintain security.  
+🔑🔑
 ### **1️⃣ Backend (ASP.NET 8) & Front End (React)**
 #### 🛠️ **Run Project Locally in Command Line**
 
