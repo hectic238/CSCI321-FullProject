@@ -5,7 +5,7 @@ import "./about.css";
 import { getURL } from "@/components/URL.jsx";
 import { APIWithToken } from "@/components/API.js"; 
 
-function About() {
+function ContactUs() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         let baseurl = getURL();
@@ -98,4 +98,4 @@ function About() {
     )
 }
 
-export default About
+export default ContactUs

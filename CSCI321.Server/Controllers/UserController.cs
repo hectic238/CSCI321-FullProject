@@ -138,7 +138,6 @@ public class UserController : ControllerBase
         
         Console.WriteLine($"UserType in refreshToken2: {userType}");
 
-        // Validate the refresh token
         var refreshTokenData = await _userService.GetRefreshTokenFromDB(userId); // Make sure userId is defined
 
         if (refreshTokenData == null)
@@ -146,7 +145,6 @@ public class UserController : ControllerBase
             return Unauthorized("Refresh token is invalid. Please log in again.");
         }
 
-        // Access the refreshToken and expiry from the returned tuple
         var storedRefreshToken = refreshTokenData.Value.refreshToken;
         var refreshTokenExpiry = refreshTokenData.Value.expiry;
         
@@ -175,12 +173,14 @@ public class UserController : ControllerBase
         
         // Find the user by userId
         var user = await _userService.GetByIdAsync(userId);
+        
+        
 
         if (user == null)
         {
             return NotFound("User not found.");
         }
-
+        Console.WriteLine(user.userType);
         return Ok(new { user.userType });
         
     }

@@ -17,8 +17,9 @@ const Home = () => {
             <div className="landing-page">
                 <div className="circle-container">
                     <img src={logoSmall} alt="Logo" className="homelogo"/>
-                    <h1 className="slogan">WHERE EVERY EVENT FALLS INTO PLACE</h1>
                     <nav>
+                        <h1 className="slogan">WHERE EVERY EVENT FALLS INTO PLACE</h1>
+
                         <a href="#exploreEvents" className="cta-button">Find Events</a>
                     </nav>
                 </div>

@@ -1,7 +1,7 @@
 import './App.css'
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import Home from './pages/Home';
-import About from './pages/About';
+import ContactUs from './pages/ContactUs.jsx';
 import {Footer} from "./components/Footer.jsx";
 import { useEffect, useState } from 'react';
 import HostEventDetails from './pages/HostEvent/Details';
@@ -66,7 +66,7 @@ const App = () => {
                 <Routes>
                     <Route index element={<Home />} />
                     <Route path="/home" element={<Home />} />
-                    <Route path="/about" element={<About />} />
+                    <Route path="/contactUs" element={<ContactUs />} />
                     <Route path="/host" element={
                         <PrivateRoute allowedUserType="organiser">
                             <HostEvent />
@@ -101,9 +101,9 @@ const App = () => {
                     <Route path="/event/:eventName/:eventId" element={
                         <EventDetails />} />
                     <Route path="/event/:eventId" element={
-                        <PrivateRoute allowedUserType="attendee">
+                        
                             <ExternalEventDetails />
-                        </PrivateRoute>} />
+                        } />
                     <Route path="/checkout/:eventId" element={<Checkout />} />
                     <Route path="/checkoutReturn" element={<CheckoutReturn />} />
                     <Route path="/events/:eventId/statistics" element={

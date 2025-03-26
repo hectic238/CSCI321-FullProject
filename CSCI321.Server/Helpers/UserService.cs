@@ -87,7 +87,7 @@ namespace CSCI321.Server.Helpers
         public async Task CreateAsync(User2 newUser)
         {
 
-            
+            Console.WriteLine(newUser.userType);
             var table = Table.LoadTable(dynamoClient, TableName);
 
             var item = new Document
@@ -228,8 +228,9 @@ namespace CSCI321.Server.Helpers
 
             var user = new User
             {
-                interests = response.Item["interests"].L.Select(attribute => attribute.S).ToList(),
-                userId = response.Item["userId"].S,
+                interests = response.Item.ContainsKey("interests") && response.Item["interests"].L != null
+                    ? response.Item["interests"].L.Select(attribute => attribute.S).ToList()
+                    : new List<string>(),                userId = response.Item["userId"].S,
                 name = response.Item["name"].S,
                 userType = response.Item["userType"].S,
                 // refreshToken = response.Item["refreshToken"].S,

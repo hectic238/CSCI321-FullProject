@@ -152,7 +152,7 @@ function Navbar() {
                     <nav>
                         <a href="/home#exploreEvents" className="cta-button">Explore Events</a>
                     </nav>
-                    <Link to="/about">Contact Us</Link>
+                    <Link to="/contactUs">Contact Us</Link>
                 </div>
 
 
