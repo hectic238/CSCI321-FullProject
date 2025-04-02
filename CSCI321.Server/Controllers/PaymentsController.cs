@@ -6,14 +6,14 @@ namespace CSCI321.Server.Controllers;
 
 public class PaymentsController :  ControllerBase
 {
-    
-    public PaymentsController()
+    private readonly string _apiKey;
+
+    public PaymentsController(IConfiguration configuration)
     {
-        var config = new ConfigurationBuilder()
-            .AddJsonFile("appsettings.json")
-            .Build();
+        _apiKey = configuration["Stripe:ApiKey"];
         
-        StripeConfiguration.ApiKey = config["Stripe:ApiKey"];    
+        
+        StripeConfiguration.ApiKey = configuration["Stripe:ApiKey"];    
     }
 
     [HttpPost("create-checkout-session")]
