@@ -3,17 +3,19 @@ import App from './App.jsx'
 import './index.css'
 import {Auth0Provider} from "@auth0/auth0-react";
 
+import { AuthProvider } from "react-oidc-context";
+
+const cognitoAuthConfig = {
+    authority: "https://cognito-idp.ap-southeast-2.amazonaws.com/ap-southeast-2_i8rut828H",
+    client_id: "71jdc4b1eh18i8d6f4194f7b1p",
+    redirect_uri: "https://localhost:5173/redirect",
+    response_type: "code",
+    scope: "email openid phone",
+};
+
 createRoot(document.getElementById('root')).render(
-    <Auth0Provider
-        domain="dev-6iygpn0kdurcf4mw.us.auth0.com"
-        clientId="38CmHMufyD5xgKw20Ilj2e8VysCIMZzt"
-        authorizationParams={{
-            redirect_uri: window.location.origin,
-            audience: "https://dev-6iygpn0kdurcf4mw.us.auth0.com/api/v2/", 
-            scope: " openid profile email update:users read:users read:current_user_metadata",
-        }}
-    >
-    <App />
-    </Auth0Provider>
+    <AuthProvider {...cognitoAuthConfig}>
+        <App />
+    </AuthProvider>
  ,
 )

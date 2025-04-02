@@ -13,6 +13,9 @@ import {useAuth0} from "@auth0/auth0-react";
 
 import {deleteCookie, getCookie, setCookie} from "@/components/Cookie.jsx";
 import {getUserTypeByUserId} from "@/components/Functions.jsx";
+
+import { useAuth } from "react-oidc-context";
+
 function Navbar() {
     
     const {
@@ -22,6 +25,16 @@ function Navbar() {
         logout,
         getAccessTokenSilently,
     } = useAuth0();
+    
+    const auth = useAuth();
+
+    const signOutRedirect = () => {
+        const clientId = "71jdc4b1eh18i8d6f4194f7b1p";
+        const logoutUri = "https://localhost:5173/home";
+        const cognitoDomain = "https://ap-southeast-2i8rut828h.auth.ap-southeast-2.amazoncognito.com";
+        window.location.href = `${cognitoDomain}/logout?client_id=${clientId}&logout_uri=${encodeURIComponent(logoutUri)}`;
+        auth.removeUser();
+    };
     
     useEffect(() => {
         
@@ -59,6 +72,8 @@ function Navbar() {
         
         deleteCookie("userType");
         setUserType(null);
+        
+        auth.removeUser();
         
         return logout({
             logoutParams: {
@@ -98,6 +113,7 @@ function Navbar() {
     };
 
     const toggleDropdown = () => {
+        console.log(auth.user);
         setDropdownOpen(prev => !prev);
     };
 
@@ -191,15 +207,14 @@ function Navbar() {
                     </>
                 ) : (
                     <>
-                        {!isAuthenticated && (
+                        {!auth.isAuthenticated && (
                             <div style={{display: "flex", justifyContent: "space-between"}}>
                                 <Button
                                     id="qsLoginBtn"
 
                                     color="primary"
                                     block
-                                    onClick={() => loginWithRedirect()}
-                                >
+                                    onClick={() => auth.signinRedirect()  }                              >
                                     Log in / Sign Up
                                 </Button>
                                 
@@ -209,7 +224,7 @@ function Navbar() {
 
                     </>
                 )}
-                {isAuthenticated && (
+                {auth.isAuthenticated && (
                     <div>
 
                         <Link className="attendee-btn" onClick={toggleDropdown}>
@@ -220,7 +235,7 @@ function Navbar() {
 
                         {dropdownOpen && (
                             <div ref={dropdownRef}>
-                                <ProfileDropdown onLogout={() => logoutWithRedirect()}/>
+                                <ProfileDropdown onLogout={() => signOutRedirect()}/>
                             </div>
                         )}
                     </div>

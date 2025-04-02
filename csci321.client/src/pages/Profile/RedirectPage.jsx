@@ -34,6 +34,8 @@ import {
     useMediaQuery,
 } from "@mui/material"
 
+import { useAuth } from "react-oidc-context";
+
 const RedirectPage = () => {
     const theme = useTheme()
     const isMobile = useMediaQuery(theme.breakpoints.down("sm"))
@@ -42,6 +44,7 @@ const RedirectPage = () => {
     const [accessToken, setAccessToken] = useState("")
     const [state, setState] = useState("")
     const [submitting, setSubmitting] = useState(false)
+    const auth = useAuth();
 
     const [formData, setFormData] = useState({
         name: "",
@@ -78,6 +81,13 @@ const RedirectPage = () => {
     }
 
     useEffect(() => {
+
+
+        // if (!auth.isAuthenticated) {
+        //     window.location.href = '/'; // Redirect to the home page
+        // }
+        
+        
         const urlParams = new URLSearchParams(window.location.search)
         const sessionToken = urlParams.get("session_token")
 
