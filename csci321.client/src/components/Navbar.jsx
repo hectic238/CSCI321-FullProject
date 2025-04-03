@@ -15,6 +15,7 @@ import {deleteCookie, getCookie, setCookie} from "@/components/Cookie.jsx";
 import {getUserTypeByUserId} from "@/components/Functions.jsx";
 
 import { useAuth } from "react-oidc-context";
+import {getUserTypeFromToken} from "@/components/userFunctions.jsx";
 
 function Navbar() {
     
@@ -37,18 +38,13 @@ function Navbar() {
     };
     
     useEffect(() => {
-        
-
         const getUserType = async () => {
-            if (isAuthenticated) {
+            if (auth.isAuthenticated) {
                 try {
-                    const token = await getAccessTokenSilently({
-                    });
-                    const userType = await getUserTypeByUserId(user.sub, token);
+                    const userType = await getUserTypeFromToken();
+                    
                     setUserType(userType);
                     setCookie("userType",userType);
-                    
-                    
                 } catch (error) {
                     console.error("Failed to get user type:", error);
                 }
@@ -56,16 +52,14 @@ function Navbar() {
                 deleteCookie("userType");
             }
         };
-
-        getUserType();
-
-        if (isAuthenticated && user) {
-            setUserType(getCookie("userType"));
-
+        if(!getCookie(userType)) {
+            console.log("no userType");
+            getUserType()
         }
-        
-        
-    }, [isAuthenticated, user, getAccessTokenSilently]);
+        if (auth.isAuthenticated) {
+            setUserType(getCookie("userType"));
+        }
+    }, [auth.isAuthenticated]);
 
     
     const logoutWithRedirect = () => {

@@ -1,11 +1,13 @@
 import {RefreshToken} from "../components/RefreshToken.jsx";
+import {getToken} from "@/components/getToken.jsx";
 
-export const APIWithToken = async (accessToken, url, method, body = null) => {
+export const APIWithToken = async (url, method, body = null) => {
     try {
-
+        const accessToken = getToken();
+        
         const headers = {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${accessToken}`,
+            Authorization: accessToken,
         };
 
         const options = {
@@ -17,28 +19,13 @@ export const APIWithToken = async (accessToken, url, method, body = null) => {
             options.body = JSON.stringify(body);
         }
         
-        const response = await fetch(url, options);
+        const baseUrl = "https://bfrc7mljh3.execute-api.ap-southeast-2.amazonaws.com/api/";
         
-        if(response.status === 404) {
-            return null;
-        }
-        // If user tries to update an object thats not related to them
-        if(response.status === 403) {
-            return null;
-        }
-
-        if (!response.ok) {
-            let errorData;
-            try {
-                errorData = await response.json();
-            } catch {
-                throw new Error('Failed to parse error response');
-            }
-            throw new Error(errorData.message);
-        }
-
-        const data = await response.json();
-        return data;
+        const response = await fetch(baseUrl + url, options);
+        
+        console.log(response);
+        
+        return response;
     } catch (e) {
         alert(`Error: ${e.message}`);
     }

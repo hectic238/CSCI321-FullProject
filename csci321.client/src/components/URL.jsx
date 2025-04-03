@@ -1,7 +1,7 @@
 export const getURL = () => {
     
     if(process.env.NODE_ENV === 'development'){
-        return "https://localhost:5144";
+        return "https://bfrc7mljh3.execute-api.ap-southeast-2.amazonaws.com/api";
     }
     
     if(process.env.NODE_ENV === 'production'){

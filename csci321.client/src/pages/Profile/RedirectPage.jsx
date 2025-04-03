@@ -1,40 +1,41 @@
 ﻿"use client"
 
-import { useState, useEffect } from "react"
-import { jwtDecode } from "jwt-decode"
-import { getURL } from "@/components/URL.jsx"
-import { setCookie } from "@/components/Cookie.jsx"
+import {useEffect, useState} from "react"
+import {getURL} from "@/components/URL.jsx"
+import {setCookie} from "@/components/Cookie.jsx"
 import InterestedPage from "@/components/InterestedPage.jsx"
 import background from "../../assets/background.png"
 import logoSmall from "../../assets/logo_small.png"
 import Navbar from "../../components/Navbar"
 import dayjs from "dayjs"
-import { MuiTelInput } from "mui-tel-input"
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs"
-import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers"
+import {MuiTelInput} from "mui-tel-input"
+import {AdapterDayjs} from "@mui/x-date-pickers/AdapterDayjs"
+import {DatePicker, LocalizationProvider} from "@mui/x-date-pickers"
 import {
-    TextField,
-    FormControl,
-    InputLabel,
-    MenuItem,
-    Select,
-    Button,
-    Container,
-    Box,
-    Typography,
-    Paper,
-    Grid,
-    Link,
-    FormHelperText,
-    Divider,
     Avatar,
+    Box,
+    Button,
     CircularProgress,
+    Container,
+    Divider,
     Fade,
-    useTheme,
+    FormControl,
+    FormHelperText,
+    Grid,
+    InputLabel,
+    Link,
+    MenuItem,
+    Paper,
+    Select,
+    TextField,
+    Typography,
     useMediaQuery,
+    useTheme,
 } from "@mui/material"
 
-import { useAuth } from "react-oidc-context";
+import {useAuth} from "react-oidc-context";
+import {getToken} from "@/components/getToken.jsx";
+import {APIWithToken} from "@/components/API.js";
 
 const RedirectPage = () => {
     const theme = useTheme()
@@ -49,15 +50,13 @@ const RedirectPage = () => {
     const [formData, setFormData] = useState({
         name: "",
         company: "",
-        preferences: "",
         userType: "",
-        userId: "",
-        refreshToken: "",
         tickets: [],
         title: "",
         phoneNumber: "",
         dateOfBirth: "",
         interests: [],
+        createdDate: ""
     })
 
     const handleInputChange = (field, value) => {
@@ -80,37 +79,34 @@ const RedirectPage = () => {
         }
     }
 
-    useEffect(() => {
-
-
-        // if (!auth.isAuthenticated) {
-        //     window.location.href = '/'; // Redirect to the home page
-        // }
-        
-        
-        const urlParams = new URLSearchParams(window.location.search)
-        const sessionToken = urlParams.get("session_token")
-
-        setState(urlParams.get("state"))
-        if (sessionToken) {
-            setAccessToken(sessionToken)
-
-            try {
-                const decodedToken = jwtDecode(sessionToken)
-                setToken(decodedToken)
-
-                // Pre-fill name if available in token
-                if (decodedToken.name) {
-                    setFormData((prev) => ({
-                        ...prev,
-                        name: decodedToken.name,
-                    }))
+    const checkSessionStorage = () => {
+        return new Promise((resolve) => {
+            const checkInterval = setInterval(() => {
+                const token = getToken();
+                if (token) {
+                    clearInterval(checkInterval);
+                    resolve(token);
                 }
-            } catch (error) {
-                console.error("Token decoding failed:", error)
+            }, 500); // Check every 500ms
+        });
+    };
+
+    useEffect(() => {
+        
+        const init = async () => {
+            
+            // Await for session storage to be updated with accessToken
+            await checkSessionStorage();
+            const checkUserResponse = await APIWithToken("user/checkExists", "GET");
+            const data = await checkUserResponse.json();
+            
+            // Check if user exists already, if so then redirect to the home page
+            if(data.exists === true) {
+                window.location.href = '/';
             }
         }
-
+        init();
+        
         // Simulate a slightly longer loading for better UX
         setTimeout(() => {
             setLoading(false)
@@ -122,27 +118,21 @@ const RedirectPage = () => {
         setSubmitting(true)
 
         try {
-            var baseUrl = getURL()
+            
+            formData.createdDate = new Date().toISOString();
 
-            formData.userId = token.sub
-
-            setCookie("userType", formData.userType)
-
-            const response = await fetch(`${baseUrl}/api/User/signUp`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(formData),
-            })
-
-            if (!response.ok) {
-                const errorData = await response.json()
-                throw new Error(errorData.message || "Sign up failed!")
+            formData.dateOfBirth = formData.dateOfBirth.toISOString();
+            
+            const response = await APIWithToken("user/create", "PUT", formData);
+            if(!response.ok) {
+                throw new Error("Sign Up Failed");
             }
-
-            const continueURL = `https://${import.meta.env.VITE_AUTH0_DOMAIN}/continue?state=${state}&userType=${formData.userType}`
-            window.location.href = continueURL
+            
+            if(response.status === 201)
+            {
+                window.location.href = '/';
+            }
+            
             await response.json()
         } catch (error) {
             alert("Sign up failed! " + error.message)
@@ -263,7 +253,7 @@ const RedirectPage = () => {
                                     textShadow: "0 2px 10px rgba(0,0,0,0.2)",
                                 }}
                             >
-                                Welcome, {token?.name || "User"}
+                                Welcome
                             </Typography>
                             <Typography
                                 variant="h6"

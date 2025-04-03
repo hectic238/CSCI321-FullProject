@@ -27,7 +27,6 @@ function EventCard({ event }) {
     let totalTicketsLeft;
     let isLimitedSpace;
     let isFreeEvent;
-
     if(event.source === 'local') {
         isFreeEvent = event.eventTicketType === 'free'; 
     }
@@ -39,6 +38,11 @@ function EventCard({ event }) {
         isLimitedSpace = totalTicketsLeft > 0 && totalTicketsLeft < 50;
         isSoldOut = totalTicketsLeft <= 0;
     }
+
+    const venue = event._embedded?.venues?.[0] || {};
+    const address = venue.address?.line1 || "";
+    const city = venue.city?.name || "";
+    const state = venue.state?.stateCode || "";
     
     
     return (
@@ -105,7 +109,7 @@ function EventCard({ event }) {
                             <p><strong>Date:</strong> {formatDate(event.dates.start.localDate)}</p>
                             <p><strong>Time:</strong> {formatTime(event.dates.start.localTime)}</p>
                             <p>
-                                <strong>Location:</strong> {event._embedded.venues[0].address.line1 + ", " + event._embedded.venues[0].city.name + ", " + event._embedded.venues[0].state.stateCode}
+                                <strong>Location:</strong> {`${address}, ${city}, ${state}`}
                             </p>
                         </div>
                     </div>
