@@ -4,6 +4,7 @@ import {useNavigate} from "react-router-dom";
 import {useAuth0} from "@auth0/auth0-react"; // Create a CSS file for styles
 
 import { useAuth } from "react-oidc-context";
+import {getCookie} from "@/components/Cookie.jsx";
 
 
 const ProfileDropdown = ({ onLogout }) => {
@@ -13,6 +14,8 @@ const ProfileDropdown = ({ onLogout }) => {
     } = useAuth0();
     
     const auth = useAuth();
+    
+    const name = getCookie("name");
 
 
     const navigate = useNavigate();
@@ -23,7 +26,7 @@ const ProfileDropdown = ({ onLogout }) => {
     return (
         <div className="profile-dropdown">
             <ul>
-                <li > Hi! {auth.user?.profile.name}</li>
+                <li > Hi! {name}</li>
                 <li onClick={() => profileDetailsButton()}>Profile Details</li>
                 <li onClick={onLogout}>Logout</li>
             </ul>

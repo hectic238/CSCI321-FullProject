@@ -39,6 +39,7 @@ import OrdersList from "../../components/OrdersList.jsx"
 import { getURL } from "../../components/URL"
 import { APIWithToken } from "../../components/API"
 import { enrichOrdersWithEventDetails } from "@/components/Functions.jsx"
+import {useAuth} from "react-oidc-context";
 
 // Extend dayjs with plugins
 dayjs.extend(utc)
@@ -47,7 +48,6 @@ dayjs.extend(timezone)
 const ProfileDetails = () => {
     const theme = useTheme()
     const isMobile = useMediaQuery(theme.breakpoints.down("sm"))
-    const { user, isAuthenticated, isLoading, getAccessTokenSilently } = useAuth0()
     const [activeTab, setActiveTab] = useState(0)
     const [userDetails, setUserDetails] = useState(null)
     const [orders, setOrders] = useState([])
@@ -60,13 +60,21 @@ const ProfileDetails = () => {
         confirmPassword: "",
     })
 
+    const auth = useAuth();
+
     // Fetch user details
     const fetchUserDetails = async () => {
         try {
-            const token = await getAccessTokenSilently()
-            const baseUrl = getURL()
-            const response = await APIWithToken(token, `${baseUrl}/api/User/get`, "GET")
-            setUserDetails(response)
+            const response = await APIWithToken( `user/fetch`, "GET")
+            
+            if(!response.ok) {
+                console.error("Could not fetch the user details");
+            }
+            const data = await response.json()
+            
+            const {userId, ...updatedData} = data
+            setUserDetails(updatedData)
+            
             document.title = `${response.name} | PLANIT`
         } catch (error) {
             setError("Failed to fetch user details")
@@ -110,16 +118,12 @@ const ProfileDetails = () => {
     const handleSubmit = async (e) => {
         e.preventDefault()
         try {
-            const token = await getAccessTokenSilently()
-            const baseUrl = getURL()
+            const response = await APIWithToken(`user/update`, "PUT", userDetails)
 
-            const updatedDetails = {
-                ...userDetails,
-                dateOfBirth: dayjs(userDetails.dateOfBirth).utc(),
+            if(!response.ok) {
+                console.error("Error updating user details");
             }
-
-            await APIWithToken(token, `${baseUrl}/api/User/updateUser`, "PUT", updatedDetails)
-
+            
             setSuccess(true)
             setTimeout(() => setSuccess(false), 3000)
         } catch (error) {
@@ -127,54 +131,23 @@ const ProfileDetails = () => {
         }
     }
 
-    // Handle password update
-    const handlePasswordSubmit = async (e) => {
-        e.preventDefault()
-
-        if (passwordForm.newPassword !== passwordForm.confirmPassword) {
-            setError("Passwords do not match")
-            return
-        }
-
-        try {
-            const token = await getAccessTokenSilently()
-            const baseUrl = getURL()
-
-            await APIWithToken(token, `${baseUrl}/api/User/updateUserPassword`, "PUT", {
-                userId: userDetails.userId,
-                oldPassword: passwordForm.oldPassword,
-                newPassword: passwordForm.newPassword,
-            })
-
-            setSuccess(true)
-            setPasswordForm({
-                oldPassword: "",
-                newPassword: "",
-                confirmPassword: "",
-            })
-            setTimeout(() => setSuccess(false), 3000)
-        } catch (error) {
-            setError("Failed to update password")
-        }
-    }
-
     // Fetch user details when authenticated
     useEffect(() => {
-        if (isAuthenticated) {
+        if (auth.isAuthenticated) {
             fetchUserDetails()
         }
-    }, [isAuthenticated])
+    }, [auth.isAuthenticated])
 
     // Fetch orders - this was missing in the new version
     useEffect(() => {
-        if (isAuthenticated && user) {
+        if (auth.isAuthenticated) {
             const fetchOrders = async () => {
                 try {
                     setLoading(true)
                     // Note: Using 'true' as first parameter like in the old version
-                    const enrichedOrders = await enrichOrdersWithEventDetails(true, await getAccessTokenSilently(), user.sub)
-                    console.log("Fetched orders for profile:", enrichedOrders)
-                    setOrders(enrichedOrders || [])
+                    //const enrichedOrders = await enrichOrdersWithEventDetails(true, await getAccessTokenSilently(), user.sub)
+                    //console.log("Fetched orders for profile:", enrichedOrders)
+                    //setOrders(enrichedOrders || [])
                 } catch (error) {
                     console.error("Error fetching orders:", error)
                     setError("Failed to fetch order history")
@@ -184,9 +157,9 @@ const ProfileDetails = () => {
             }
             fetchOrders()
         }
-    }, [user]) // Using same dependency as in the old version
+    }, [auth]) // Using same dependency as in the old version
 
-    if (isLoading || !userDetails) {
+    if (!userDetails) {
         return (
             <Box
                 sx={{
@@ -274,8 +247,8 @@ const ProfileDetails = () => {
                         >
                             <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", mb: 3 }}>
                                 <Avatar
-                                    src={user?.picture}
-                                    alt={user?.name}
+                                    src={userDetails?.picture}
+                                    alt={userDetails?.name}
                                     sx={{
                                         width: 80,
                                         height: 80,
@@ -284,7 +257,7 @@ const ProfileDetails = () => {
                                     }}
                                 />
                                 <Typography variant="h6" gutterBottom fontWeight="bold" textAlign="center">
-                                    {user?.name}
+                                    {userDetails?.name}
                                 </Typography>
                                 <Typography variant="body2" color="text.secondary" textAlign="center">
                                     {userDetails.userType === "attendee" ? "Event Attendee" : "Event Organiser"}
@@ -376,7 +349,7 @@ const ProfileDetails = () => {
                                                             </Typography>
                                                             <TextField
                                                                 fullWidth
-                                                                value={user?.email}
+                                                                value={auth.user.profile.email}
                                                                 disabled
                                                                 variant="outlined"
                                                                 InputProps={{

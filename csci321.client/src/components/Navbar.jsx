@@ -41,14 +41,16 @@ function Navbar() {
         const getUserType = async () => {
             if (auth.isAuthenticated) {
                 try {
-                    const userType = await getUserTypeFromToken();
+                    const data = await getUserTypeFromToken();
                     
-                    setUserType(userType);
-                    setCookie("userType",userType);
+                    setUserType(data.userType);
+                    setCookie("userType",data.userType);
+                    setCookie("name",data.name);
                 } catch (error) {
                     console.error("Failed to get user type:", error);
                 }
             } else {
+                deleteCookie("name")
                 deleteCookie("userType");
             }
         };
@@ -107,7 +109,6 @@ function Navbar() {
     };
 
     const toggleDropdown = () => {
-        console.log(auth.user);
         setDropdownOpen(prev => !prev);
     };
 

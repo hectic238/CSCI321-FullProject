@@ -11,7 +11,7 @@ export const getUserTypeFromToken =  async () => {
             throw new Error("Failed to fetch userType");
         }
         const data = await response.json();
-        return data.userType;  // This will return the userType
+        return data;  // This will return the userType
     } catch (error) {
         console.error("Error:", error);
     }
