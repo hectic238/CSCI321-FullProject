@@ -11,6 +11,7 @@ import Home from "@/pages/Home.jsx"; // Import your CSS file
 import {generateObjectId} from "@/components/Functions.jsx";
 import {RefreshToken} from "@/components/RefreshToken.jsx";
 import {useAuth0} from "@auth0/auth0-react";
+import {createEvent} from "@/components/eventFunctions.jsx";
 
 const HostEvent = () => {
 
@@ -74,37 +75,18 @@ const HostEvent = () => {
     const handlePublishEvent = async () => {
         
         try {
-            const response = await fetch('https://localhost:5144/api/Event/createEvent', {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${await getAccessTokenSilently({})}`,
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(eventDetails),
-            })
-            if(!response.ok) {
-                let errorData;
-                try {
-                    errorData = await response.json();
-                } catch (error) {
-                    throw new Error("Failed to parse error response");
-                }
-                throw new Error(errorData.message || "Publish Event Failed!");
+            
+            console.log(eventDetails)
+            const message = await createEvent(eventDetails)
+            
+            if(message) {
+                alert(message);
+                navigate('/home');
             }
             
-            await response.json();
-            navigate('/home');
-            alert("Sign up successful!");
-            // const response = await addEvent(eventDetails);
-            //
-            // if (response.success) {
-            //     console.log('Event successfully added!', response);
-            //     navigate("/home"); // Navigate to home on success
-            // }
+            
         } catch (error) {
             console.error('Error adding event:', error);
-
-            // Display an error message to the user
             alert(`Error: ${error.message}`);
         }
     };

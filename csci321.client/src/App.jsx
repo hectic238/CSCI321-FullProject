@@ -11,7 +11,7 @@ import HostEventReview from './pages/HostEvent/Review';
 import HostEvent from "./pages/HostEvent/HostEvent.jsx";
 import ProfileDetails from "./pages/Profile/ProfileDetails.jsx"; 
 import PrivateRoute from './components/PrivateRoute';
-import MyEvents from "./pages/MyEvents.jsx";
+import MyEvents from "./pages/Organiser/MyEvents.jsx";
 import MyTickets from "./pages/MyTickets.jsx";
 import EventDetails from "@/pages/EventDetails.jsx";
 import Checkout from './pages//Checkout/Checkout.jsx';

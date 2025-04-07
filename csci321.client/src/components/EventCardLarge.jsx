@@ -39,13 +39,6 @@ function EventCardLarge({ event, isDraft }) {
         const url = `/api/calendar/generate-ics?title=${encodeURIComponent(title)}&description=${encodeURIComponent(description)}&startDate=${encodeURIComponent(startDate)}&endDate=${encodeURIComponent(endDate)}&location=${encodeURIComponent(location)}`;
         window.open(url, '_blank');
     };
-
-    return (
-        <button onClick={() => handleAddToCalendar(event)}>Add to Calendar</button>
-    );
-
-
-
     const editEvent = () => {
         
         navigate('/host', { state: event });
@@ -89,6 +82,10 @@ function EventCardLarge({ event, isDraft }) {
                     <button onClick={editEvent} className="edit-button">Edit Event Details</button>
                     </div>
                 )}
+                {
+                    <button onClick={() => handleAddToCalendar(event)}>Add to Calendar</button>
+
+                }
             </div>
         </div>
     );

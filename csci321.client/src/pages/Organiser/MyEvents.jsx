@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import './MyEvents.css';
-import Navbar from "../components/Navbar.jsx"; // Add necessary styles here
-import EventCardLarge from "../components/EventCardLarge.jsx";
-import {getUserIdFromToken, fetchEventsByUserId, fetchDraftEventsByUserId} from "@/components/Functions.jsx";
+import Navbar from "../../components/Navbar.jsx"; // Add necessary styles here
+import EventCardLarge from "../../components/EventCardLarge.jsx";
+import {getUsersDraftEvents, getUsersEvents} from "@/components/eventFunctions.jsx";
+import {useAuth} from "react-oidc-context";
+import EventCard from "@/components/EventCard.jsx";
 
 
 
@@ -12,21 +14,21 @@ const MyEvents = () => {
     const [draftEvents, setDraftEvents] = useState([]);
     const [currentTab, setCurrentTab] = useState('active'); // To handle tab switching
     const [userEvents, setUserEvents] = useState([]);
+
+    const auth = useAuth();
     
 
     useEffect(() => {
-        const token = localStorage.getItem('accessToken');
         
-        if (token) {
+        if (auth.isAuthenticated) {
             
-            const userId = getUserIdFromToken(token);
-            fetchEventsByUserId(userId).then(events => {
+            getUsersEvents().then(events => {
                 if (events && events.length > 0) {
                     setUserEvents(events);
                 }
             })
             
-            fetchDraftEventsByUserId(userId).then(events => {
+            getUsersDraftEvents().then(events => {
                 if (events && events.length > 0) {
                     setDraftEvents(events);
                 }
