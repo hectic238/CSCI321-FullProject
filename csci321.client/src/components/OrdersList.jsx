@@ -9,6 +9,7 @@ const OrdersList = ({ orders, formatDate, formatTime }) => {
         setExpandedOrderId(expandedOrderId === orderId ? null : orderId);
     };
 
+    console.log(orders)
     const handleAddToGoogleCalendar = (order) => {
         const { title, startDate, endDate, location, startTime, endTime } = order;
 
@@ -88,15 +89,15 @@ const OrdersList = ({ orders, formatDate, formatTime }) => {
                     <div key={order.orderId}>
                         <div className="ticket-row">
                             <div className="ticket-image">
-                                <img src={order.image} alt={order.title} />
+                                <img src={order.event.image} alt={order.event.title} />
                             </div>
                             <div className="ticket-details">
-                                <div className="ticket-name">{order.title}</div>
-                                <div className="ticket-date">{formatDate(order.startDate)}</div>
+                                <div className="ticket-name">{order.event.title}</div>
+                                <div className="ticket-date">{formatDate(order.event.startDate)}</div>
                                 <div className="ticket-time">
-                                    {formatTime(order.startTime)} - {formatTime(order.endTime)}
+                                    {formatTime(order.event.startTime)} - {formatTime(order.event.endTime)}
                                 </div>
-                                <div className="ticket-location">{order.location}</div>
+                                <div className="ticket-location">{order.event.location}</div>
                             </div>
                             <div className="ticket-actions">
                                 <button onClick={() => toggleExpand(order.orderId)}>

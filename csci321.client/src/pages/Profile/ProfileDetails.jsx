@@ -1,7 +1,6 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useAuth0 } from "@auth0/auth0-react"
 import dayjs from "dayjs"
 import timezone from "dayjs/plugin/timezone"
 import utc from "dayjs/plugin/utc"
@@ -36,9 +35,7 @@ import background from "../../assets/background.png"
 import Navbar from "../../components/Navbar"
 import InterestedPage from "../../components/InterestedPage"
 import OrdersList from "../../components/OrdersList.jsx"
-import { getURL } from "../../components/URL"
 import { APIWithToken } from "../../components/API"
-import { enrichOrdersWithEventDetails } from "@/components/Functions.jsx"
 import {useAuth} from "react-oidc-context";
 
 // Extend dayjs with plugins
@@ -54,11 +51,6 @@ const ProfileDetails = () => {
     const [error, setError] = useState(null)
     const [success, setSuccess] = useState(false)
     const [loading, setLoading] = useState(true)
-    const [passwordForm, setPasswordForm] = useState({
-        oldPassword: "",
-        newPassword: "",
-        confirmPassword: "",
-    })
 
     const auth = useAuth();
 
@@ -75,10 +67,52 @@ const ProfileDetails = () => {
             const {userId, ...updatedData} = data
             setUserDetails(updatedData)
             
-            document.title = `${response.name} | PLANIT`
+            document.title = `${updatedData.name} | PLANIT`
         } catch (error) {
             setError("Failed to fetch user details")
         }
+    }
+    
+    
+    const fetchOrders = async () => {
+        try {
+            setLoading(true)
+            const response = await APIWithToken( `order/getOrders`, "GET")
+
+            if(!response.ok) {
+                console.error("Could not fetch the orders");
+            }
+            const data = await response.json()
+            
+            // fetch event based on orders
+
+            const updatedOrders = await Promise.all(data.map(async order => {
+
+                const eventResponse = await APIWithToken(`event/fetchEventSummary/${order.eventId}`, "GET")
+                
+                if(!eventResponse) {
+                    console.error("Could not fetch the event")
+                }
+                
+                const event = await eventResponse.json();
+                
+                const parsedTickets = JSON.parse(order.tickets)
+                return {
+                    ...order,
+                    event,
+                    tickets: parsedTickets,
+                }
+            }))
+            
+            console.log(updatedOrders)
+            setOrders(updatedOrders)
+            
+        } catch (error) {
+            setError("Failed to fetch user details")
+        } finally {
+            setLoading(false)
+        }
+        
     }
 
     // Format date and time functions
@@ -106,14 +140,6 @@ const ProfileDetails = () => {
         }))
     }
 
-    // Handle password form changes
-    const handlePasswordChange = (field, value) => {
-        setPasswordForm((prev) => ({
-            ...prev,
-            [field]: value,
-        }))
-    }
-
     // Handle form submission
     const handleSubmit = async (e) => {
         e.preventDefault()
@@ -134,31 +160,11 @@ const ProfileDetails = () => {
     // Fetch user details when authenticated
     useEffect(() => {
         if (auth.isAuthenticated) {
-            fetchUserDetails()
+            fetchUserDetails();
+            fetchOrders();
         }
     }, [auth.isAuthenticated])
-
-    // Fetch orders - this was missing in the new version
-    useEffect(() => {
-        if (auth.isAuthenticated) {
-            const fetchOrders = async () => {
-                try {
-                    setLoading(true)
-                    // Note: Using 'true' as first parameter like in the old version
-                    //const enrichedOrders = await enrichOrdersWithEventDetails(true, await getAccessTokenSilently(), user.sub)
-                    //console.log("Fetched orders for profile:", enrichedOrders)
-                    //setOrders(enrichedOrders || [])
-                } catch (error) {
-                    console.error("Error fetching orders:", error)
-                    setError("Failed to fetch order history")
-                } finally {
-                    setLoading(false)
-                }
-            }
-            fetchOrders()
-        }
-    }, [auth]) // Using same dependency as in the old version
-
+    
     if (!userDetails) {
         return (
             <Box
@@ -292,7 +298,6 @@ const ProfileDetails = () => {
                                 <Tab label="Profile Details" />
                                 
                                 <Tab label="Notifications" />
-                                <Tab label="Change Password" />
                                 {userDetails.userType === "attendee" && <Tab label="Order History" />}
                                 {userDetails.userType === "attendee" && <Tab label="Interests" />}
                             </Tabs>
@@ -540,7 +545,7 @@ const ProfileDetails = () => {
                             )}
 
                             {/* Order History Tab */}
-                            {activeTab === 3 && (
+                            {activeTab === 2 && (
                                 <Box>
                                     <Typography variant="h5" gutterBottom fontWeight="bold" color="#ff4d4f">
                                         Order History
@@ -586,66 +591,8 @@ const ProfileDetails = () => {
                                 </Box>
                             )}
 
-                            {/* Change Password Tab */}
-                            {activeTab === 2 && (
-                                <form onSubmit={handlePasswordSubmit}>
-                                    <Typography variant="h5" gutterBottom fontWeight="bold" color="#ff4d4f">
-                                        Change Password
-                                    </Typography>
-                                    <Grid container spacing={3}>
-                                        <Grid item xs={12}>
-                                            <TextField
-                                                fullWidth
-                                                type="password"
-                                                label="Current Password"
-                                                value={passwordForm.oldPassword}
-                                                onChange={(e) => handlePasswordChange("oldPassword", e.target.value)}
-                                                required
-                                            />
-                                        </Grid>
-                                        <Grid item xs={12}>
-                                            <TextField
-                                                fullWidth
-                                                type="password"
-                                                label="New Password"
-                                                value={passwordForm.newPassword}
-                                                onChange={(e) => handlePasswordChange("newPassword", e.target.value)}
-                                                required
-                                            />
-                                        </Grid>
-                                        <Grid item xs={12}>
-                                            <TextField
-                                                fullWidth
-                                                type="password"
-                                                label="Confirm New Password"
-                                                value={passwordForm.confirmPassword}
-                                                onChange={(e) => handlePasswordChange("confirmPassword", e.target.value)}
-                                                required
-                                            />
-                                        </Grid>
-                                        <Grid item xs={12}>
-                                            <Button
-                                                type="submit"
-                                                variant="contained"
-                                                fullWidth
-                                                sx={{
-                                                    mt: 2,
-                                                    py: 1.5,
-                                                    backgroundColor: "#ff4d4f",
-                                                    "&:hover": {
-                                                        backgroundColor: "#ff7875",
-                                                    },
-                                                }}
-                                            >
-                                                Update Password
-                                            </Button>
-                                        </Grid>
-                                    </Grid>
-                                </form>
-                            )}
-
                             {/* Interests Tab */}
-                            {activeTab === 4 && userDetails.userType === "attendee" && (
+                            {activeTab === 3 && userDetails.userType === "attendee" && (
                                 <Box>
                                     <Typography variant="h5" gutterBottom fontWeight="bold" color="#ff4d4f">
                                         Interests

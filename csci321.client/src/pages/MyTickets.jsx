@@ -46,6 +46,8 @@ import Navbar from "../components/Navbar.jsx"
 import banner from "../assets/exploreEvent.png"
 import background from "../assets/background.png"
 import { enrichOrdersWithEventDetails } from "@/components/Functions.jsx"
+import {APIWithToken} from "@/components/API.js";
+import {useAuth} from "react-oidc-context";
 
 const MyTickets = () => {
     const [orders, setOrders] = useState([])
@@ -63,6 +65,8 @@ const MyTickets = () => {
     const [favorites, setFavorites] = useState([])
     const [weatherData, setWeatherData] = useState({})
     const { user, isAuthenticated, isLoading, getAccessTokenSilently } = useAuth0()
+    
+    const auth = useAuth();
 
     const formatDate = (dateString) => {
         if (!dateString) return ""
@@ -82,6 +86,54 @@ const MyTickets = () => {
         return `${formattedHours}:${minutes} ${ampm}`
     }
 
+    const fetchOrders = async () => {
+        try {
+            setLoading(true)
+            const response = await APIWithToken( `order/getFutureOrders`, "GET")
+
+            if(!response.ok) {
+                console.error("Could not fetch the orders");
+            }
+            const data = await response.json()
+
+            // fetch event based on orders
+
+            const updatedOrders = await Promise.all(data.map(async order => {
+
+                const eventResponse = await APIWithToken(`event/fetchEventSummary/${order.eventId}`, "GET")
+
+                if(!eventResponse) {
+                    console.error("Could not fetch the event")
+                }
+
+                const event = await eventResponse.json();
+
+                const parsedTickets = JSON.parse(order.tickets)
+                return {
+                    ...order,
+                    event,
+                    tickets: parsedTickets,
+                }
+            }))
+            
+            console.log(updatedOrders)
+            setOrders(updatedOrders)
+
+        } catch (error) {
+            setError("Failed to fetch user details")
+        } finally {
+            setLoading(false)
+        }
+
+    }
+
+    useEffect(() => {
+        if (auth.isAuthenticated) {
+            fetchOrders();
+        }
+    }, [auth.isAuthenticated])
+
+    /*
     useEffect(() => {
         if (isAuthenticated) {
             const fetchOrders = async () => {
@@ -103,7 +155,7 @@ const MyTickets = () => {
             fetchOrders()
         }
     }, [user, isAuthenticated])
-
+*/
     useEffect(() => {
         document.title = "My Tickets | PLANIT"
 
@@ -218,17 +270,17 @@ const MyTickets = () => {
         if (!order) return
 
         // Format date and time for Google Calendar
-        const startDate = order.startDate ? new Date(order.startDate) : new Date()
-        if (order.startTime) {
-            const [hours, minutes] = order.startTime.split(":")
+        const startDate = order.event.startDate ? new Date(order.event.startDate) : new Date()
+        if (order.event.startTime) {
+            const [hours, minutes] = order.event.startTime.split(":")
             startDate.setHours(Number.parseInt(hours), Number.parseInt(minutes), 0)
         }
 
         // End time
         let endDate
-        if (order.endTime) {
+        if (order.event.endTime) {
             endDate = new Date(startDate)
-            const [hours, minutes] = order.endTime.split(":")
+            const [hours, minutes] = order.event.endTime.split(":")
             endDate.setHours(Number.parseInt(hours), Number.parseInt(minutes), 0)
         } else {
             // Default to 2 hours after start
@@ -244,7 +296,7 @@ const MyTickets = () => {
         const endDateFormatted = formatForCalendar(endDate)
 
         // Create Google Calendar URL
-        const googleCalendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(order.title || "Event")}&dates=${startDateFormatted}/${endDateFormatted}&details=${encodeURIComponent(`Ticket purchased through PLANIT`)}&location=${encodeURIComponent(order.location || "")}`
+        const googleCalendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(order.event.title || "Event")}&dates=${startDateFormatted}/${endDateFormatted}&details=${encodeURIComponent(`Ticket purchased through PLANIT`)}&location=${encodeURIComponent(order.event.location || "")}`
 
         // Open in new tab
         window.open(googleCalendarUrl, "_blank")
@@ -276,17 +328,17 @@ const MyTickets = () => {
         showSnackbar("Downloading calendar file...")
 
         // Create .ics file content
-        const startDate = order.startDate ? new Date(order.startDate) : new Date()
-        if (order.startTime) {
-            const [hours, minutes] = order.startTime.split(":")
+        const startDate = order.event.startDate ? new Date(order.event.startDate) : new Date()
+        if (order.event.startTime) {
+            const [hours, minutes] = order.event.startTime.split(":")
             startDate.setHours(Number.parseInt(hours), Number.parseInt(minutes), 0)
         }
 
         // End time
         let endDate
-        if (order.endTime) {
+        if (order.event.endTime) {
             endDate = new Date(startDate)
-            const [hours, minutes] = order.endTime.split(":")
+            const [hours, minutes] = order.event.endTime.split(":")
             endDate.setHours(Number.parseInt(hours), Number.parseInt(minutes), 0)
         } else {
             // Default to 2 hours after start
@@ -305,10 +357,10 @@ const MyTickets = () => {
             "VERSION:2.0",
             "CALSCALE:GREGORIAN",
             "BEGIN:VEVENT",
-            `SUMMARY:${order.title || "Event"}`,
+            `SUMMARY:${order.event.title || "Event"}`,
             `DTSTART:${formatICSDate(startDate)}`,
             `DTEND:${formatICSDate(endDate)}`,
-            `LOCATION:${order.location || ""}`,
+            `LOCATION:${order.event.location || ""}`,
             `DESCRIPTION:Ticket purchased through PLANIT`,
             "END:VEVENT",
             "END:VCALENDAR",
@@ -319,7 +371,7 @@ const MyTickets = () => {
         const url = URL.createObjectURL(blob)
         const link = document.createElement("a")
         link.href = url
-        link.setAttribute("download", `${order.title || "event"}.ics`)
+        link.setAttribute("download", `${order.event.title || "event"}.ics`)
         document.body.appendChild(link)
         link.click()
         document.body.removeChild(link)
@@ -332,15 +384,15 @@ const MyTickets = () => {
 
         // Create ticket info content
         const ticketInfo = [
-            `Event: ${order.title || "Unnamed Event"}`,
-            `Date: ${formatDate(order.startDate)}`,
-            `Time: ${formatTime(order.startTime)} - ${formatTime(order.endTime)}`,
-            `Location: ${order.location || "TBA"}`,
-            `Order ID: ${order.id || "N/A"}`,
-            `Ticket Type: ${order.ticketType || "Standard Admission"}`,
+            `Event: ${order.event.title || "Unnamed Event"}`,
+            `Date: ${formatDate(order.event.startDate)}`,
+            `Time: ${formatTime(order.event.startTime)} - ${formatTime(order.event.endTime)}`,
+            `Location: ${order.event.location || "TBA"}`,
+            `Order ID: ${order.orderId || "N/A"}`,
+            `Ticket Type: ${order.event.eventTicketType || "Standard Admission"}`,
             `Quantity: ${order.quantity || 1}`,
-            `Price: $${order.price?.toFixed(2) || "0.00"} per ticket`,
-            `Total: $${(order.price * order.quantity)?.toFixed(2) || "0.00"}`,
+            `Price: $${order.totalPrice?.toFixed(2) || "0.00"} per ticket`,
+            `Total: $${(order.totalPrice)?.toFixed(2) || "0.00"}`,
         ].join("\n")
 
         // Create download link
@@ -604,13 +656,13 @@ const MyTickets = () => {
                             </Paper>
                         ) : (
                             <Box>
-                                {orders.map((order, index) => {
-                                    const countdown = getTimeUntilEvent(order.startDate, order.startTime)
-                                    const weather = weatherData[order.id]
+                                {orders.map((order) => {
+                                    const countdown = getTimeUntilEvent(order.event.startDate, order.event.startTime)
+                                    const weather = weatherData[order.orderId]
 
                                     return (
                                         <Paper
-                                            key={order.id || index}
+                                            key={order.orderId}
                                             elevation={darkMode ? 3 : 1}
                                             sx={{
                                                 mb: 4,
@@ -643,7 +695,7 @@ const MyTickets = () => {
                                                 />
                                             )}
 
-                                            {favorites.includes(order.id) && (
+                                            {favorites.includes(order.orderId) && (
                                                 <Chip
                                                     icon={<Favorite sx={{ color: "white !important", fontSize: "0.8rem" }} />}
                                                     label="Favorite"
@@ -665,8 +717,8 @@ const MyTickets = () => {
                                                     <Box sx={{ position: "relative", height: { xs: 200, sm: "100%" } }}>
                                                         <CardMedia
                                                             component="img"
-                                                            image={order.image || "/placeholder.svg?height=200&width=300"}
-                                                            alt={order.title || "Event"}
+                                                            image={order.event.image || "/placeholder.svg?height=200&width=300"}
+                                                            alt={order.event.title || "Event"}
                                                             sx={{
                                                                 height: "100%",
                                                                 minHeight: 200,
@@ -687,8 +739,8 @@ const MyTickets = () => {
                                                                 alignItems: "center",
                                                             }}
                                                         >
-                                                            <IconButton onClick={() => toggleFavorite(order.id)} sx={{ color: "white" }}>
-                                                                {favorites.includes(order.id) ? (
+                                                            <IconButton onClick={() => toggleFavorite(order.orderId)} sx={{ color: "white" }}>
+                                                                {favorites.includes(order.orderId) ? (
                                                                     <Favorite sx={{ color: "#ff4d4f" }} />
                                                                 ) : (
                                                                     <FavoriteBorder />
@@ -724,7 +776,7 @@ const MyTickets = () => {
                                                                 color: darkMode ? "white" : "black",
                                                             }}
                                                         >
-                                                            {order.title || "Unnamed Event"}
+                                                            {order.event.title || "Unnamed Event"}
                                                         </Typography>
 
                                                         <Typography
@@ -738,7 +790,7 @@ const MyTickets = () => {
                                                                 color: darkMode ? "white" : "black",
                                                             }}
                                                         >
-                                                            {formatDate(order.startDate)}
+                                                            {formatDate(order.event.startDate)}
                                                         </Typography>
 
                                                         <Typography
@@ -752,7 +804,7 @@ const MyTickets = () => {
                                                                 color: darkMode ? "white" : "black",
                                                             }}
                                                         >
-                                                            {formatTime(order.startTime)} - {formatTime(order.endTime)}
+                                                            {formatTime(order.event.startTime)} - {formatTime(order.event.endTime)}
                                                         </Typography>
 
                                                         <Typography
@@ -765,7 +817,7 @@ const MyTickets = () => {
                                                                 color: darkMode ? "white" : "black",
                                                             }}
                                                         >
-                                                            {order.location || "Location TBA"}
+                                                            {order.event.location || "Location TBA"}
                                                         </Typography>
 
                                                         {countdown && (
@@ -941,7 +993,7 @@ const MyTickets = () => {
                     }}
                 >
                     <Typography variant="h5" fontWeight="bold">
-                        {selectedTicket?.title || "Event Details"}
+                        {selectedTicket?.event.title || "Event Details"}
                     </Typography>
                 </DialogTitle>
                 <DialogContent sx={{ pt: 3, mt: 1 }}>
@@ -950,8 +1002,8 @@ const MyTickets = () => {
                             <Box sx={{ mb: 3 }}>
                                 <CardMedia
                                     component="img"
-                                    image={selectedTicket?.image || "/placeholder.svg?height=300&width=500"}
-                                    alt={selectedTicket?.title || "Event"}
+                                    image={selectedTicket?.event.image || "/placeholder.svg?height=300&width=500"}
+                                    alt={selectedTicket?.event.title || "Event"}
                                     sx={{
                                         width: "100%",
                                         height: 200,
@@ -973,7 +1025,7 @@ const MyTickets = () => {
                                             color: darkMode ? "white" : "black",
                                         }}
                                     >
-                                        {formatDate(selectedTicket?.startDate)}
+                                        {formatDate(selectedTicket?.event.startDate)}
                                     </Typography>
                                 </Box>
 
@@ -989,7 +1041,7 @@ const MyTickets = () => {
                                             color: darkMode ? "white" : "black",
                                         }}
                                     >
-                                        {formatTime(selectedTicket?.startTime)} - {formatTime(selectedTicket?.endTime)}
+                                        {formatTime(selectedTicket?.event.startTime)} - {formatTime(selectedTicket?.event.endTime)}
                                     </Typography>
                                 </Box>
 
@@ -1005,7 +1057,7 @@ const MyTickets = () => {
                                             color: darkMode ? "white" : "black",
                                         }}
                                     >
-                                        {selectedTicket?.location || "TBA"}
+                                        {selectedTicket?.event.location || "TBA"}
                                     </Typography>
                                 </Box>
                             </Box>
@@ -1026,7 +1078,7 @@ const MyTickets = () => {
                                         Ticket Type
                                     </Typography>
                                     <Typography variant="body1" fontWeight="medium" color={darkMode ? "white" : "black"}>
-                                        {selectedTicket?.ticketType || "Standard Admission"}
+                                        {selectedTicket?.event.eventTicketType || "Standard Admission"}
                                     </Typography>
                                 </Box>
 
@@ -1044,7 +1096,7 @@ const MyTickets = () => {
                                         Order ID
                                     </Typography>
                                     <Typography variant="body1" fontWeight="medium" color={darkMode ? "white" : "black"}>
-                                        {selectedTicket?.id || "N/A"}
+                                        {selectedTicket?.orderId || "N/A"}
                                     </Typography>
                                 </Box>
 
@@ -1053,7 +1105,7 @@ const MyTickets = () => {
                                         Total Amount
                                     </Typography>
                                     <Typography variant="h6" fontWeight="bold" color="#ff4d4f">
-                                        ${(selectedTicket?.price * selectedTicket?.quantity)?.toFixed(2) || "0.00"}
+                                        ${(selectedTicket?.totalPrice)?.toFixed(2) || "0.00"}
                                     </Typography>
                                 </Box>
                             </Box>
@@ -1074,7 +1126,7 @@ const MyTickets = () => {
                                         alignItems: "center",
                                         justifyContent: "center",
                                         mb: 3,
-                                        backgroundImage: `url(https://maps.googleapis.com/maps/api/staticmap?center=${encodeURIComponent(selectedTicket?.location || "Sydney")}&zoom=13&size=600x300&maptype=roadmap&markers=color:red%7C${encodeURIComponent(selectedTicket?.location || "Sydney")}&key=YOUR_API_KEY)`,
+                                        backgroundImage: `url(https://maps.googleapis.com/maps/api/staticmap?center=${encodeURIComponent(selectedTicket?.event.location || "Sydney")}&zoom=13&size=600x300&maptype=roadmap&markers=color:red%7C${encodeURIComponent(selectedTicket?.event.location || "Sydney")}&key=YOUR_API_KEY)`,
                                         backgroundSize: "cover",
                                         backgroundPosition: "center",
                                         position: "relative",
@@ -1095,7 +1147,7 @@ const MyTickets = () => {
                                         startIcon={<Map />}
                                         onClick={() =>
                                             window.open(
-                                                `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(selectedTicket?.location || "Sydney")}`,
+                                                `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(selectedTicket?.event.location || "Sydney")}`,
                                                 "_blank",
                                             )
                                         }
@@ -1203,7 +1255,7 @@ const MyTickets = () => {
             >
                 <DialogTitle sx={{ borderBottom: `1px solid ${darkMode ? "#333" : "#e0e0e0"}`, pb: 2 }}>
                     <Typography variant="h6" fontWeight="bold">
-                        Event Location: {selectedTicket?.location || "TBA"}
+                        Event Location: {selectedTicket?.event.location || "TBA"}
                     </Typography>
                 </DialogTitle>
                 <DialogContent sx={{ pt: 3, height: 500, p: 0 }}>
@@ -1211,7 +1263,7 @@ const MyTickets = () => {
                         sx={{
                             height: "100%",
                             width: "100%",
-                            backgroundImage: `url(https://maps.googleapis.com/maps/api/staticmap?center=${encodeURIComponent(selectedTicket?.location || "Sydney")}&zoom=14&size=1200x500&maptype=roadmap&markers=color:red%7C${encodeURIComponent(selectedTicket?.location || "Sydney")}&key=YOUR_API_KEY)`,
+                            backgroundImage: `url(https://maps.googleapis.com/maps/api/staticmap?center=${encodeURIComponent(selectedTicket?.event.location || "Sydney")}&zoom=14&size=1200x500&maptype=roadmap&markers=color:red%7C${encodeURIComponent(selectedTicket?.event.location || "Sydney")}&key=YOUR_API_KEY)`,
                             backgroundSize: "cover",
                             backgroundPosition: "center",
                         }}
@@ -1223,7 +1275,7 @@ const MyTickets = () => {
                         startIcon={<OpenInNew />}
                         onClick={() =>
                             window.open(
-                                `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(selectedTicket?.location || "Sydney")}`,
+                                `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(selectedTicket?.event.location || "Sydney")}`,
                                 "_blank",
                             )
                         }
@@ -1271,10 +1323,10 @@ const MyTickets = () => {
                 </DialogTitle>
                 <DialogContent sx={{ pt: 4, pb: 4, textAlign: "center" }}>
                     <Typography variant="body1" gutterBottom>
-                        {selectedTicket?.title || "Event"}
+                        {selectedTicket?.event.title || "Event"}
                     </Typography>
                     <Typography variant="body2" color={darkMode ? "white" : "black"} gutterBottom>
-                        {formatDate(selectedTicket?.startDate)} | {formatTime(selectedTicket?.startTime)}
+                        {formatDate(selectedTicket?.event.startDate)} | {formatTime(selectedTicket?.event.startTime)}
                     </Typography>
 
                     <Box
@@ -1289,7 +1341,7 @@ const MyTickets = () => {
                         }}
                     >
                         <img
-                            src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(`PLANIT-TICKET-${selectedTicket?.id || "123456789"}`)}`}
+                            src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(`PLANIT-TICKET-${selectedTicket?.orderId || "123456789"}`)}`}
                             alt="Ticket QR Code"
                             width="200"
                             height="200"
@@ -1300,7 +1352,7 @@ const MyTickets = () => {
                         Present this QR code at the event entrance
                     </Typography>
                     <Typography variant="body2" fontWeight="bold" sx={{ mt: 1 }}>
-                        Ticket ID: {selectedTicket?.id || "N/A"}
+                        Ticket ID: {selectedTicket?.orderId || "N/A"}
                     </Typography>
                 </DialogContent>
                 <DialogActions sx={{ p: 2, backgroundColor: darkMode ? "rgba(255,255,255,0.05)" : "#f9f9f9" }}>
