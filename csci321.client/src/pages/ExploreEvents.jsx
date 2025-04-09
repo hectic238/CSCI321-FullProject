@@ -69,17 +69,22 @@ function ExploreEvents() {
         let newWebsiteEvents = [];
 
         if(!noMoreWebsiteEvents) {
+            
             let data;
+            /*
             if (type === "popular") {
                 data = await fetchEventSummaries(searchTerm, PAGE_SIZE, lastEvaluatedKey);
             } else if (type === "category") {
                 data = await fetchEventsByCategory(category, PAGE_SIZE, lastEvaluatedKey);
             }
+            
 
             websiteEvents = data.events;
-
+            
             setLastEvaluatedKey(data.lastEvaluatedKey);
-
+            */
+             
+            websiteEvents = [];
             newWebsiteEvents = websiteEvents.map(event => ({
                 ...event,
                 source: 'local'  // Mark these events as 'local'
