@@ -1,52 +1,393 @@
-﻿using CSCI321.Server.DBSettings;
+﻿using System.Text;
+using CSCI321.Server.DBSettings;
 using Microsoft.Extensions.Options;
-using MongoDB.Driver;
 using CSCI321.Server.Models;
+using Amazon.DynamoDBv2;
+using Amazon.DynamoDBv2.Model;
+using Amazon.DynamoDBv2.DocumentModel;
+using Amazon.Internal;
+using Amazon.Runtime;
+using Amazon;
+using Amazon.DynamoDBv2.Model;
+using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
+using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace CSCI321.Server.Helpers
 {
     public class UserService
     {
-        private readonly IMongoCollection<User> _UserCollection;
+        
+        private readonly AmazonDynamoDBClient dynamoClient;
+        
+        private readonly IConfiguration _configuration;
+        
+        private const string TableName = "Users";  
+
+
 
         public UserService(
-            IOptions<UserDatabaseSettings> UserDatabaseSettings)
+            IOptions<UserDatabaseSettings> UserDatabaseSettings, IConfiguration configuration)
         {
-            var mongoClient = new MongoClient(
-                UserDatabaseSettings.Value.ConnectionString);
+            _configuration = configuration;
 
-            var mongoDatabase = mongoClient.GetDatabase(
-                UserDatabaseSettings.Value.DatabaseName);
+            var config = new AmazonDynamoDBConfig
+            {
+                RegionEndpoint = RegionEndpoint.APSoutheast2  
+            };
+            
+            var awsAccessKeyId = _configuration["Database:AWS_ACCESS_KEY_ID"];
+            var awsSecretAccessKey = _configuration["Database:AWS_SECRET_ACCESS_KEY"];
 
-            _UserCollection = mongoDatabase.GetCollection<User>(
-                UserDatabaseSettings.Value.UserCollectionName);
+            dynamoClient = new AmazonDynamoDBClient(
+                new BasicAWSCredentials(
+                    awsAccessKeyId,awsSecretAccessKey
+                ),
+                config);
+        }
+        
+        
+        // Method to get a refresh token from the database
+        public async Task<(string refreshToken, DateTime? expiry)?> GetRefreshTokenFromDB(string userId)
+        {
+            // Find the user by userId
+            var request = new GetItemRequest
+            {
+                TableName = "Users",  
+                Key = new Dictionary<string, AttributeValue>
+                {
+                    { "userId", new AttributeValue { S = userId } }  
+                }
+            };
+
+            var response = await dynamoClient.GetItemAsync(request);
+
+            if (response.Item == null || response.Item.Count == 0)
+            {
+                return null;  // User not found
+            }
+
+            // Convert DynamoDB attributes to a User object
+            var user = new User
+            {
+                refreshToken = response.Item["refreshToken"].S,
+                refreshTokenExpiry = DateTime.Parse(response.Item["refreshTokenExpiry"].S),
+                
+            };
+    
+            // Check if user exists and return the refresh token and expiry date
+            if (user != null)
+            {
+                return (user.refreshToken, user.refreshTokenExpiry);
+            }
+    
+            return null; // Return null if user is not found
         }
 
-        public async Task<List<User>> GetAsync() =>
-            await _UserCollection.Find(_ => true).ToListAsync();
+        public async Task CreateAsync(User2 newUser)
+        {
 
-        public async Task<User?> GetAsync(string id) =>
-            await _UserCollection.Find(x => x.userId == id).FirstOrDefaultAsync();
+            Console.WriteLine(newUser.userType);
+            var table = Table.LoadTable(dynamoClient, TableName);
 
-        public async Task CreateAsync(User newUser) =>
-            await _UserCollection.InsertOneAsync(newUser);
+            var item = new Document
+            {
+                ["userId"] = newUser.userId,
+                ["phoneNumber"] = newUser.phoneNumber,
+                ["name"] = newUser.name,
+                ["title"] = newUser.title,
+                ["userType"] = newUser.userType,
+                ["company"] = newUser.company,
+                ["preferences"] = newUser.preferences,
+                ["refreshToken"] = newUser.refreshToken,
+                ["refreshTokenExpiry"] = newUser.refreshTokenExpiry,
+                ["tickets"] = JsonSerializer.Serialize(newUser.tickets),  
+                ["dateOfBirth"] = newUser.dateOfBirth.ToString("yyyy-MM-ddTHH:mm:ssZ"),
+                ["createdDate"] = DateTime.UtcNow.ToString(),
+                ["interests"] = JsonSerializer.Serialize(newUser.interests)
 
-        public async Task UpdateAsync(string id, User updateUser) =>
-            await _UserCollection.ReplaceOneAsync(x => x.userId == id, updateUser);
+            };
+            
+            
 
-        public async Task RemoveAsync(string id) =>
-            await _UserCollection.DeleteOneAsync(x => x.userId == id);
+            await table.PutItemAsync(item);
+            Console.WriteLine("Item inserted successfully!");
+        }
+        
+        public async Task<bool> CheckDuplicateUserIdAsync(string userId)
+        {
+            var request = new QueryRequest
+            {
+                TableName = TableName,
+                KeyConditionExpression = "userId = :userId",
+                ExpressionAttributeValues = new Dictionary<string, AttributeValue>
+                {
+                    { ":userId", new AttributeValue { S = userId } }
+                }
+            };
 
-        public async Task<User?> GetAsyncByCreds(string username, string password) =>
-            await _UserCollection.Find(x => x.email == username && x.password == password).FirstOrDefaultAsync();
+            var response = await dynamoClient.QueryAsync(request);
+            return response.Count > 0;
+        }
+        public async Task<bool> CheckDuplicateEmailAsync(string email)
+        {
+            var request = new QueryRequest
+            {
+                TableName = TableName,
+                IndexName = "EmailIndex",  
+                KeyConditionExpression = "email = :email",
+                ExpressionAttributeValues = new Dictionary<string, AttributeValue>
+                {
+                    { ":email", new AttributeValue { S = email } }
+                }
+            };
+
+            var response = await dynamoClient.QueryAsync(request);
+            return response.Count > 0;
+        }
+
+
+        // Method to store a refresh token and its expiry date in the database
+        public async Task StoreRefreshToken(string userId, string refreshToken, DateTime expiry)
+        {
+            var updateRequest = new UpdateItemRequest
+            {
+                TableName = "Users",
+                Key = new Dictionary<string, AttributeValue>
+                {
+                    { "userId", new AttributeValue { S = userId } }
+                },
+                UpdateExpression = "SET refreshToken = :token, refreshTokenExpiry = :expiry",
+                ExpressionAttributeValues = new Dictionary<string, AttributeValue>
+                {
+                    { ":token", new AttributeValue { S = refreshToken } },
+                    { ":expiry", new AttributeValue { S = expiry.ToString("o") } }
+                },
+                ReturnValues = "UPDATED_NEW"
+            };
+
+            try
+            {
+                var response = await dynamoClient.UpdateItemAsync(updateRequest);
+                Console.WriteLine("Refresh token updated successfully.");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Failed to update refresh token: {ex.Message}");
+            }
+
+        }
+        
+        
+        public async Task<User?> GetPasswordByIdAsync(string userId)
+        {
+            var request = new GetItemRequest
+            {
+                TableName = "Users",  
+                Key = new Dictionary<string, AttributeValue>
+                {
+                    { "userId", new AttributeValue { S = userId } }  
+                }
+            };
+
+            var response = await dynamoClient.GetItemAsync(request);
+
+            if (response.Item == null || response.Item.Count == 0)
+            {
+                return null;  
+            }
+            
+            var user = new User
+            {
+                password = response.Item["password"].S,
+                userId = response.Item["userId"].S,
+            };
+
+            return user;
+        }
         
 
-                public async Task<User?> GetByIdAsync(string userId) =>
-            await _UserCollection.Find(x => x.userId == userId).FirstOrDefaultAsync();
+        public async Task<User?> GetByIdAsync(string userId)
+        {
+            var request = new GetItemRequest
+            {
+                TableName = "Users",  
+                Key = new Dictionary<string, AttributeValue>
+                {
+                    { "userId", new AttributeValue { S = userId } }  
+                }
+            };
 
-        // New method to get user by Email
-        public async Task<User?> GetByEmailAsync(string email) =>
-            await _UserCollection.Find(x => x.email == email).FirstOrDefaultAsync();
+            var response = await dynamoClient.GetItemAsync(request);
+
+            if (response.Item == null || response.Item.Count == 0)
+            {
+                return null;  
+            }
+
+
+            var user = new User
+            {
+                interests = response.Item.ContainsKey("interests") && response.Item["interests"].L != null
+                    ? response.Item["interests"].L.Select(attribute => attribute.S).ToList()
+                    : new List<string>(),                userId = response.Item["userId"].S,
+                name = response.Item["name"].S,
+                userType = response.Item["userType"].S,
+                // refreshToken = response.Item["refreshToken"].S,
+                // refreshTokenExpiry = DateTime.Parse(response.Item["refreshTokenExpiry"].S),
+                title = response.Item["title"].S,
+                dateOfBirth = DateTime.Parse(response.Item["dateOfBirth"].S),
+
+                phoneNumber = response.Item["phoneNumber"].S,
+
+            };
+            return user;
+        }
+
+        
+        public async Task<Dictionary<string, AttributeValue>> GetUserByEmailAsync(string email)
+        {
+            
+            var queryRequest = new QueryRequest
+            {
+                TableName = TableName,
+                IndexName = "EmailIndex", 
+                KeyConditionExpression = "email = :email", 
+                ExpressionAttributeValues = new Dictionary<string, AttributeValue>
+                {
+                    { ":email", new AttributeValue { S = email } } 
+                },
+                
+                ProjectionExpression = "#userId, #userType, #password, #name, #email",
+                ExpressionAttributeNames = new Dictionary<string, string>
+                {
+                    { "#userId", "userId" },
+                    { "#userType", "userType" },
+                    { "#password", "password" },
+                    { "#name", "name" }, 
+                    { "#email", "email" } 
+                }
+            };
+
+            
+            var response = await dynamoClient.QueryAsync(queryRequest);
+
+            if (response.Items.Count > 0)
+            {
+                return response.Items[0]; 
+            }
+
+            return null; 
+        }
+        
+        // Updating Users Information from the Profile Page
+        public async Task UpdateUserAsync(User updatedUser)
+        {
+            
+            if (updatedUser == null || string.IsNullOrEmpty(updatedUser.userId))
+            {
+                throw new ArgumentException("Invalid user data.");
+            }
+            
+            Console.WriteLine($"Interests count: {updatedUser.interests.Count()}");
+            Console.WriteLine($"Name: {updatedUser.name}");
+            Console.WriteLine($"Interests: {string.Join(", ", updatedUser.interests)}");
+            
+            var interestsList = updatedUser.interests ?? new List<string>();  
+            if (!interestsList.Any())
+            {
+                interestsList = new List<string>();  
+            }
+
+            
+
+            var updateRequest = new UpdateItemRequest
+            {
+                TableName = "Users",
+                Key = new Dictionary<string, AttributeValue>
+                {
+                    { "userId", new AttributeValue { S = updatedUser.userId } }
+                },
+                UpdateExpression = "SET #name = :name, #dateOfBirth = :dateOfBirth,#phoneNumber = :phoneNumber ,#title = :title, #interests = :interests ",
+                ExpressionAttributeNames = new Dictionary<string, string>
+                {
+                    { "#name", "name" },   
+                    { "#dateOfBirth", "dateOfBirth" },
+                    { "#phoneNumber", "phoneNumber" },
+                    { "#title", "title" },
+                    { "#interests", "interests" }
+                },
+                ExpressionAttributeValues = new Dictionary<string, AttributeValue>
+                {
+                    { ":name", new AttributeValue { S = updatedUser.name ?? string.Empty } },
+                    { ":dateOfBirth", new AttributeValue { S = updatedUser.dateOfBirth.ToString("o") } },
+                    { ":phoneNumber", new AttributeValue { S = updatedUser.phoneNumber ?? string.Empty } },
+                    { ":title", new AttributeValue { S = updatedUser.title ?? string.Empty } },
+                    { ":interests", new AttributeValue { L = interestsList.Select(interest => new AttributeValue { S = interest }).ToList() } }
+
+                },
+                ReturnValues = "UPDATED_NEW"
+            };
+
+            try
+            {
+                var response = await dynamoClient.UpdateItemAsync(updateRequest);
+
+                if (response.Attributes.Count == 0)
+                {
+                    throw new InvalidOperationException("No records were updated. The user might not exist.");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error updating user: {ex.Message}");
+                throw;
+            }
+        }
+        
+        public async Task UpdateUserPasswordAsync(User updatedUser)
+        {
+            
+            if (updatedUser == null || string.IsNullOrEmpty(updatedUser.userId))
+            {
+                throw new ArgumentException("Invalid user data.");
+            }
+            
+            var updateRequest = new UpdateItemRequest
+            {
+                TableName = "Users",
+                Key = new Dictionary<string, AttributeValue>
+                {
+                    { "userId", new AttributeValue { S = updatedUser.userId } }
+                },
+                UpdateExpression = "SET #password = :password",
+                ExpressionAttributeNames = new Dictionary<string, string>
+                {
+                    { "#password", "password" },   
+                },
+                ExpressionAttributeValues = new Dictionary<string, AttributeValue>
+                {
+                    { ":password", new AttributeValue { S = updatedUser.password ?? string.Empty } },
+
+                },
+                ReturnValues = "UPDATED_NEW"
+            };
+
+            try
+            {
+                var response = await dynamoClient.UpdateItemAsync(updateRequest);
+
+                if (response.Attributes.Count == 0)
+                {
+                    throw new InvalidOperationException("No records were updated. The user might not exist.");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error updating user: {ex.Message}");
+                throw;
+            }
+        }
     }
 }
 

@@ -8,22 +8,28 @@ import { Button, message, Steps, theme } from 'antd';
 import banner from '../../assets/exploreEvent.png';
 import Navbar from "../../components/Navbar.jsx";
 import Home from "@/pages/Home.jsx"; // Import your CSS file
-import mockEvents , { addEvent, addDraftEvent } from "../../mockEvents.jsx";
+import {generateObjectId} from "@/components/Functions.jsx";
+import {RefreshToken} from "@/components/RefreshToken.jsx";
+import {useAuth0} from "@auth0/auth0-react";
+import {createEvent} from "@/components/eventFunctions.jsx";
+
 const HostEvent = () => {
-    
+
+    const { user, isAuthenticated, isLoading, getAccessTokenSilently } = useAuth0();
+
+
     const location = useLocation();
     const passedEvent = location.state || {};
-    
-    console.log(passedEvent);
 
     const navigate = useNavigate();
     const { token } = theme.useToken();
     const [current, setCurrent] = useState(0);
-    const [formErrors, setFormErrors] = useState({});  // Track form errors
+    const [formErrors, setFormErrors] = useState({});  
+    const [freeTicket, setFreeTicket] = useState([{}]);
     const [eventDetails, setEventDetails] = useState({
         eventTicketType: '',
         tickets:  [],
-        id:  '',
+        eventId:  generateObjectId(),
         userId:  '',
         title:  passedEvent.title || '',
         category:  'Music',
@@ -35,7 +41,8 @@ const HostEvent = () => {
         additionalInfo:  'Hi',
         recurrenceFrequency:  '', 
         recurrenceEndDate:  '',
-        editing: passedEvent.editing || false,
+        numberAttendees: 0,
+        isDraft: false,
     });
 
     useEffect(() => {
@@ -47,53 +54,45 @@ const HostEvent = () => {
     const handleFormChange = (newDetails) => {
         setEventDetails((prevDetails) => ({
             ...prevDetails,
-            ...newDetails, // Spread the new details to update the state
+            ...newDetails, 
         }));
     };
 
     const handleImageChange = (image) => {
         setEventDetails((prevDetails) => ({
             ...prevDetails,
-            image: image, // Add image to eventDetails
+            image: image, 
         }));
     };
 
     const handleTicketFormChange = (field, value) => {
         setEventDetails((prevDetails) => ({
             ...prevDetails,
-            [field]: value, // Correctly assign the field as a key and the value as its value
+            [field]: value, 
         }));
     };
 
-    // Logic to handle publishing or saving the event
     const handlePublishEvent = async () => {
-
-        console.log('Event Published', eventDetails);
+        
         try {
-            const response = await addEvent(eventDetails);
-
-            if (response.success) {
-                console.log('Event successfully added!', response);
-                navigate("/home"); // Navigate to home on success
+            
+            console.log(eventDetails)
+            const message = await createEvent(eventDetails)
+            
+            if(message) {
+                alert(message);
+                navigate('/home');
             }
+            
+            
         } catch (error) {
             console.error('Error adding event:', error);
+            alert(`Error: ${error.message}`);
         }
     };
 
     const handleSaveDraft =  async () => {
-        // Add save draft logic here
-        console.log('Event Saved as Draft', eventDetails);
-        try {
-            const response = await addDraftEvent(eventDetails);
-
-            if (response.success) {
-                console.log('Event draft successfully added!', response);
-                navigate("/home"); // Navigate to home on success
-            }
-        } catch (error) {
-            console.error('Error adding event:', error);
-        }
+        
         
     };
     
@@ -118,12 +117,15 @@ const HostEvent = () => {
                 eventDetails={eventDetails}
                 handleTicketFormChange={handleTicketFormChange}
                 setEventDetails={setEventDetails}
+                setFreeTicket={setFreeTicket}
             />,
         },
         {
             title: 'Review',
             content: <Review
                 eventDetails={eventDetails}
+                isAuthenticated={isAuthenticated}
+                user={user}
             />,
         },
     ];
@@ -212,6 +214,15 @@ const HostEvent = () => {
         if (Object.keys(errors).length > 0) {
             const errorMessages = Object.values(errors).join(', ');
             message.error(`Please complete all required fields: ${errorMessages}`);
+        }
+
+        if(eventDetails.eventTicketType === 'free') {
+            setEventDetails((prevDetails) => ({
+                    ...prevDetails,
+                    tickets: freeTicket,
+                }
+
+            ));
         }
         
         return Object.keys(errors).length === 0;

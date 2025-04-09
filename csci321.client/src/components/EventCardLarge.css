@@ -36,7 +36,6 @@
     margin-left:20px;
     padding: 10px; /* Padding inside the card */
     
-    max-width:200px;
 }
 
 .event-Card-Column-details {
@@ -47,13 +46,12 @@
 
 .event-Card-Column-buttons {
     flex-direction: row;
-    max-width: 175px;
     margin-right:20px;
 }
 
 .event-card {
     width: 250px; /* Set a consistent width */
-    height: 250px; /* Set a consistent height */
+    height: 450px; /* Set a consistent height */
     border: 1px solid #ddd; /* Optional: border for visual separation */
     border-radius: 8px; /* Optional: rounded corners */
     overflow: hidden; /* Prevent overflow */
@@ -71,4 +69,24 @@
     background-color: black;
     color: white;
 }
+
+.sold-out-tag {
+    background-color: red;
+    color: white;
+    padding: 5px;
+    text-align: center;
+    font-weight: bold;
+    margin-top: 10px;
+}
+
+.limited-space-tag {
+    background-color: yellow;
+    color: black;
+    padding: 5px;
+    text-align: center;
+    font-weight: bold;
+    margin-top: 10px;
+}
+
+
 

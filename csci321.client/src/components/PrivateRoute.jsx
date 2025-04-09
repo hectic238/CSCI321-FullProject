@@ -1,15 +1,14 @@
 import { Navigate } from 'react-router-dom';
+import {getCookie} from "@/components/Cookie.jsx"; 
 
 const PrivateRoute = ({ children, allowedUserType }) => {
-    const user = JSON.parse(localStorage.getItem('user')); // Retrieve the user from local storage
 
-    // Check if the user is logged in and if their userType matches the allowed type
-    if (!user || user.userType !== allowedUserType) {
-        // If the user is not authenticated or doesn't match the allowed type, redirect them to a login page
+    const userType = getCookie("userType")
+    if (!userType || userType !== allowedUserType) {
         return <Navigate to="/home" />;
     }
 
-    return children; // Allow access to the page if the user is authorized
+    return children; 
 };
 
 export default PrivateRoute;

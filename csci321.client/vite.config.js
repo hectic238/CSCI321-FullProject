@@ -10,7 +10,7 @@ import { env } from 'process';
 const baseFolder =
     env.APPDATA !== undefined && env.APPDATA !== ''
         ? `${env.APPDATA}/ASP.NET/https`
-        : `${env.HOME}/.aspnet/https`;
+        : `${env.HOME}/.aspnet/dev-certs/https`;
 
 const certificateName = "csci321.client";
 const certFilePath = path.join(baseFolder, `${certificateName}.pem`);
@@ -30,8 +30,6 @@ if (!fs.existsSync(certFilePath) || !fs.existsSync(keyFilePath)) {
     }
 }
 
-const target = env.ASPNETCORE_HTTPS_PORT ? `https://localhost:${env.ASPNETCORE_HTTPS_PORT}` :
-    env.ASPNETCORE_URLS ? env.ASPNETCORE_URLS.split(';')[0] : 'https://localhost:7225';
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -42,12 +40,7 @@ export default defineConfig({
         }
     },
     server: {
-        proxy: {
-            '^/weatherforecast': {
-                target,
-                secure: false
-            }
-        },
+        
         port: 5173,
         https: {
             key: fs.readFileSync(keyFilePath),

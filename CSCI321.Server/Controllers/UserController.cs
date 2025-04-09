@@ -1,9 +1,12 @@
-﻿using CSCI321.Server.Helpers;
+﻿using System.Security.Claims;
+using CSCI321.Server.Helpers;
 using CSCI321.Server.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Cryptography;
 using System.Text;
+using Amazon.DynamoDBv2.DocumentModel;
+using Amazon.DynamoDBv2.Model;
 
 namespace CSCI321.Server.Controllers;
 
@@ -20,18 +23,30 @@ public class UserController : ControllerBase
         _userService = usersService;
     }
 
-    [HttpGet]
-    public async Task<List<User>> Get() =>
-    await _userService.GetAsync();
-
-    [HttpPost]
-    public async Task<IActionResult> Post(User newUser)
+    [HttpPost("signUp")]
+    public async Task<IActionResult> Post(User2 newUser)
     {
-        newUser.password = HashPassword(newUser.password);
+        Console.WriteLine(newUser.userType);
+        try
+        {
+            var existingUser = await _userService.CheckDuplicateUserIdAsync(newUser.userId);
 
-        await _userService.CreateAsync(newUser);
-
-        return CreatedAtAction(nameof(Get), new { id = newUser.userId }, newUser);
+            if (existingUser)
+            {
+                return BadRequest(new { message = "User Already Exists!" });
+            }
+            
+            //newUser.password = HashPassword(newUser.password);
+            newUser.refreshTokenExpiry = DateTime.UtcNow.AddDays(30);
+            newUser.dateOfBirth = DateTime.UtcNow.AddDays(1);
+            
+            await _userService.CreateAsync(newUser);
+            return CreatedAtAction("Post", new { id = newUser.userId }, newUser);
+        }
+        catch (Exception ex)
+        { 
+            return StatusCode(500, "Internal server error.");
+        }
     }
     private string HashPassword(string password)
     {
@@ -41,74 +56,231 @@ public class UserController : ControllerBase
             return BitConverter.ToString(hashedBytes).Replace("-", "").ToLower();
         }
     }
-
-
-    [Authorize]
-    [HttpGet("{userId}")]
-    public async Task<IActionResult> GetUserById(string userId)
+    
+    
+    [HttpGet("getRefreshExpiry")]
+    public async Task<IActionResult> RefreshTokenExpiry()
     {
-        // Find the user by userId
+        
+        var authHeader = Request.Headers["Authorization"].FirstOrDefault();
+        
+        if (authHeader == null || !authHeader.StartsWith("Bearer "))
+        {
+            return Unauthorized("Refresh token is missing or invalid.");
+        }
+
+        var accessToken = authHeader.Substring("Bearer ".Length).Trim();
+
+       // Console.WriteLine($"Access Token: {accessToken}");
+
+        var principal = _authService.GetPrincipalFromExpiredToken(accessToken); // Validate and get the claims
+
+        if (principal == null)
+        {
+            return Unauthorized("Invalid access token.");
+        }
+        
+        
+        var userId = principal.FindFirst(ClaimTypes.NameIdentifier).Value;
+    
+        //Console.WriteLine($"User Id: {userId}");
+
+        // Validate the refresh token
+        var refreshTokenData = await _userService.GetRefreshTokenFromDB(userId); // Make sure userId is defined
+
+        if (refreshTokenData == null)
+        {
+            return Unauthorized("Refresh token is invalid. Please log in again.");
+        }
+
+        var refreshTokenExpiry = refreshTokenData.Value.expiry;
+        
+        return Ok(new { refreshExpiry = refreshTokenExpiry });
+    }
+    
+    [HttpPost("refreshToken")]
+    public async Task<IActionResult> RefreshToken()
+    {
+        
+        var authHeader = Request.Headers["Authorization"].FirstOrDefault();
+        
+        if (authHeader == null || !authHeader.StartsWith("Bearer "))
+        {
+            return Unauthorized("Refresh token is missing or invalid.");
+        }
+
+        var accessToken = authHeader.Substring("Bearer ".Length).Trim();
+
+        Console.WriteLine($"Access Token: {accessToken}");
+
+        var principal = _authService.GetPrincipalFromExpiredToken(accessToken); // Validate and get the claims
+
+        if (principal == null)
+        {
+            return Unauthorized("Invalid access token.");
+        }
+        
+        var userType = principal.FindFirst("userType").Value;
+        
+        Console.WriteLine($"UserType in refreshToken: {userType}");
+        
+        
+        var userId = principal.FindFirst(ClaimTypes.NameIdentifier).Value;
+    
+        Console.WriteLine($"User Id in refreshToken: {userId}");
+        
         var user = await _userService.GetByIdAsync(userId);
 
         if (user == null)
         {
             return NotFound("User not found.");
         }
+        
+        Console.WriteLine($"UserType in refreshToken2: {userType}");
 
-        return Ok(user); // Return the user details
+        var refreshTokenData = await _userService.GetRefreshTokenFromDB(userId); // Make sure userId is defined
+
+        if (refreshTokenData == null)
+        {
+            return Unauthorized("Refresh token is invalid. Please log in again.");
+        }
+
+        var storedRefreshToken = refreshTokenData.Value.refreshToken;
+        var refreshTokenExpiry = refreshTokenData.Value.expiry;
+        
+        if (storedRefreshToken == null || refreshTokenExpiry <= DateTime.UtcNow)
+        {
+            return Unauthorized("Refresh token is expired or invalid. Please log in again.");
+        }
+
+
+        // Generate a new access token
+        var newAccessToken = _authService.GenerateAccessToken(user.userId, user.email, userType);
+
+        
+        return Ok(new { accessToken = newAccessToken });
     }
+    
+    [Authorize]
+    [HttpGet("getUserType/{userId}")]
+    public async Task<IActionResult> GetUserTypeByToken(string userId)
+    {
+        //var userId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
+        if (userId == null)
+        {
+            return Unauthorized("Invalid token.");
+        }
+        
+        // Find the user by userId
+        var user = await _userService.GetByIdAsync(userId);
+        
+        
 
-    [HttpPost("login")]
-    public async Task<IActionResult> Login([FromBody] LoginModel loginData)
+        if (user == null)
+        {
+            return NotFound("User not found.");
+        }
+        Console.WriteLine(user.userType);
+        return Ok(new { user.userType });
+        
+    }
+    
+    [Authorize]
+    [HttpGet("get")]
+    public async Task<IActionResult> GetUserByToken()
     {
 
-        // Find the user by email
-        var user = await _userService.GetByEmailAsync(loginData.Email);
+        var userId =  User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         
-        // Log if user was found or not
-        if (user != null)
-        {
-            Console.WriteLine($"User found: {user.email}"); // Log user's email for confirmation
-        }
-        else
-        {
-            Console.WriteLine("User not found");
-        }
+        Console.WriteLine(userId);
+        
+        var user = await _userService.GetByIdAsync(userId);
+
+        Console.WriteLine(user.ToString());
+        
         
         if (user == null)
         {
-            return Unauthorized("Invalid credentials.");
+            return NotFound("User not found.");
         }
 
-        // Hash the password provided in loginData and compare it with the stored hashed password
-        var hashedPassword = HashPassword(loginData.Password);
-        
-        if (user.password != hashedPassword)
-        {
-            return Unauthorized("Invalid credentials.");
-        }
-
-        // if user is of different type
-        if(user.userType != loginData.UserType) {
-            return Unauthorized("Invalid Credentials");
-        }
-
-        // Generate JWT token
-        var accessToken = _authService.GenerateJwtToken(user.userId, 2); // minute accessToken
-
-        var refreshToken = _authService.GenerateJwtToken(user.userId, 60); // 1 hour refresh token
-
-        var userResponse = new
-        {
-            userId = user.userId,
-            email = user.email,
-            userType = user.userType,
-            // Add any other non-sensitive fields as necessary
-        };
-
-        // Return the token and user data
-        return Ok(new { AccessToken = accessToken,  RefreshToken = refreshToken, User = userResponse });
+        return Ok(user);
     }
+    
+    public async Task<IActionResult> GetUserByEmail(string email)
+    {
+        var user = await _userService.GetUserByEmailAsync(email);
+        
+        if (user == null)
+        {
+            return NotFound("User not found");
+        }
 
+        return Ok(user); // Return user details
+    }
+    
+    
+    [Authorize]
+    [HttpPut("updateUser")]
+    public async Task<IActionResult> UpdateUser([FromBody] User updatedUser)
+    {
+        
+        
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (updatedUser.userId != userId)
+        {
+            return Forbid();
+        }
+        
+        
+        if (updatedUser == null || string.IsNullOrEmpty(updatedUser.userId))
+        {
+            return BadRequest("Invalid user data.");
+        }
+        
+        var existingUser = await _userService.GetByIdAsync(updatedUser.userId);
+        if (existingUser == null)
+        {
+            return NotFound("User not found.");
+        }
+        
+        
+        // Update fields only if they are not null or empty
+        if (!string.IsNullOrEmpty(updatedUser.name))
+        {
+            existingUser.name = updatedUser.name;
+        }
+
+
+        if (updatedUser.dateOfBirth != null)
+        {
+            existingUser.dateOfBirth = updatedUser.dateOfBirth;
+        }
+
+        if (!string.IsNullOrEmpty(updatedUser.phoneNumber))
+        {
+            existingUser.phoneNumber = updatedUser.phoneNumber;
+        }
+
+        if (!string.IsNullOrEmpty(updatedUser.title))
+        {
+            existingUser.title = updatedUser.title;
+        }
+
+        if (updatedUser.tickets != null && updatedUser.tickets.Any())
+        {
+            existingUser.tickets = updatedUser.tickets;
+        }
+        
+        if (updatedUser.interests != null && updatedUser.interests.Any())
+        {
+            existingUser.interests = updatedUser.interests;
+        }
+
+        await _userService.UpdateUserAsync(existingUser);
+
+        return Ok(existingUser);
+    }
 }
 
