@@ -8,6 +8,8 @@ import {loadStripe} from "@stripe/stripe-js";
 import {getURL} from "@/components/URL.jsx";
 import {useAuth0} from "@auth0/auth0-react";
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_KEY);
+import {useAuth} from "react-oidc-context";
+import {generateCheckout} from "@/components/checkoutFunctions.jsx";
 
 const Checkout = () => {
     
@@ -15,7 +17,7 @@ const Checkout = () => {
     const location = useLocation(); 
     const selectedTickets = location.state?.selectedTickets;
     const event = location.state?.eventDetails;
-    
+    const auth = useAuth();
     
     const [clientSecret, setClientSecret] = useState(null);
     
@@ -23,25 +25,35 @@ const Checkout = () => {
     useEffect(() => {
         
         const fetchCheckoutSession = async () => {
-            console.log(user)
+            console.log(auth.user)
             sessionStorage.clear();
-            if(isAuthenticated) {
+            if(auth.isAuthenticated) {
+
+                const body = JSON.stringify({
+                    products: selectedTickets,
+                    eventId: event.eventId,
+                    userId: auth.user.profile.sub,
+                });
+                
+                const data = await generateCheckout(body)
+                
+                setClientSecret(data.clientSecret);
                 
                 try {
-                    const response = await fetch(`${getURL()}/create-checkout-session`, {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                        },
-                        body: JSON.stringify({
-                            products: selectedTickets,
-                            eventId: event.eventId,
-                            userId: user.sub,
-                        }),
-                    });
-
-                    const data = await response.json();
-                    setClientSecret(data.clientSecret);
+                    // const response = await fetch(`${getURL()}/create-checkout-session`, {
+                    //     method: "POST",
+                    //     headers: {
+                    //         "Content-Type": "application/json",
+                    //     },
+                    //     body: JSON.stringify({
+                    //         products: selectedTickets,
+                    //         eventId: event.eventId,
+                    //         userId: auth.user.profile.sub,
+                    //     }),
+                    // });
+                    //
+                    // const data = await response.json();
+                    // setClientSecret(data.clientSecret);
                 } catch (error) {
                     console.error("Error fetching checkout session:", error);
                 }
