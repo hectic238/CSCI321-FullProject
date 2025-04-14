@@ -3,19 +3,7 @@ import {APIWithToken} from "@/components/API.js";
 
 export const generateCheckout = async (body) => {
     try {
-        // const response = await fetch(`${getURL()}/create-checkout-session`, {
-        //     method: "POST",
-        //     headers: {
-        //         "Content-Type": "application/json",
-        //     },
-        //     body: JSON.stringify({
-        //         products: selectedTickets,
-        //         eventId: event.eventId,
-        //         userId: auth.user.profile.sub,
-        //     }),
-        // });
-
-        const response = await APIWithToken(`event/checkout`, "POST", body)
+        const response = await APIWithToken(`checkout`, "POST", body)
 
         if (!response.ok) {
             throw new Error("Failed to generate Checkout");
@@ -25,5 +13,20 @@ export const generateCheckout = async (body) => {
         return data;
     } catch (error) {
         console.error("Error fetching checkout session:", error);
+    }
+}
+
+export const fetchSessionStatus = async (sessionId) => {
+    try {
+        const response = await APIWithToken(`sessionStatus?session_id=${sessionId}`, "GET")
+
+        if (!response.ok) {
+            throw new Error("Failed to get sessionStatus");
+        }
+
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error("Error fetching sessionStatus", error);
     }
 }

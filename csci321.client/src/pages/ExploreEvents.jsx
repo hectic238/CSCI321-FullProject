@@ -121,8 +121,6 @@ function ExploreEvents() {
             // fetch 5 ticketmaster events and store in array
             ticketMasterEvents = await fetchTicketMasterEvents(5 - numberWebsiteEvents, ticketmasterEventsPage, category);
             
-            
-            
             setTicketmasterEventsPage(ticketmasterEventsPage + 1);
 
             if (Array.isArray(ticketMasterEvents)) {
@@ -189,7 +187,7 @@ function ExploreEvents() {
 
                     <div className="events-grid">
                         {popularEvents.map(event => (
-                            <EventCard key={event.id} event={event}/>
+                            <EventCard key={event.eventId} event={event}/>
                         ))}
                     </div>
 
@@ -199,7 +197,7 @@ function ExploreEvents() {
                     </div>
                     <div className="events-grid">
                         {concerts.map(event => (
-                            <EventCard key={event.id} event={event}/>
+                            <EventCard key={event.eventId} event={event}/>
                         ))}
                     </div>
 
@@ -209,7 +207,7 @@ function ExploreEvents() {
                     </div>
                     <div className="events-grid">
                         {familyEvents.map(event => (
-                            <EventCard key={event.id} event={event}/>
+                            <EventCard key={event.eventId} event={event}/>
                         ))}
                     </div>
 
@@ -220,7 +218,7 @@ function ExploreEvents() {
                     </div>
                     <div className="events-grid">
                         {theatreEvents.map(event => (
-                            <EventCard key={event.id} event={event}/>
+                            <EventCard key={event.eventId} event={event}/>
                         ))}
                     </div>
                     
@@ -230,7 +228,7 @@ function ExploreEvents() {
                     </div>
                     <div className="events-grid">
                         {comedyEvents.map(event => (
-                            <EventCard key={event.id} event={event}/>
+                            <EventCard key={event.eventId} event={event}/>
                         ))}
                     </div>
 

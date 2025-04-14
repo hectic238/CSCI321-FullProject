@@ -26,17 +26,20 @@ const Checkout = () => {
         
         const fetchCheckoutSession = async () => {
             console.log(auth.user)
-            sessionStorage.clear();
+            //sessionStorage.clear();
             if(auth.isAuthenticated) {
 
-                const body = JSON.stringify({
+                const body = {
                     products: selectedTickets,
                     eventId: event.eventId,
                     userId: auth.user.profile.sub,
-                });
+                };
+                
+                console.log(body);
                 
                 const data = await generateCheckout(body)
                 
+                console.log(data);
                 setClientSecret(data.clientSecret);
                 
                 try {

@@ -1,8 +1,8 @@
 ﻿import {useEffect, useState} from 'react';
 import {useLocation} from 'react-router-dom';
-import {getURL} from "@/components/URL.jsx";
 import Navbar from "@/components/Navbar.jsx";
-import {fetchEvent} from "@/components/Functions.jsx";
+import {getEvent} from "@/components/eventFunctions.jsx";
+import {fetchSessionStatus} from "@/components/checkoutFunctions.jsx";
 
 const CheckoutReturn = () => {
     const location = useLocation();
@@ -11,25 +11,9 @@ const CheckoutReturn = () => {
     const [event, setEvent] = useState(null);
     const [tickets, setTickets] = useState([]);
     
-    const [alreadyLoaded, setAlreadyLoaded] = useState(false);
-
-    
     
     useEffect(() => {
-        
-        console.log("UseEffect");
-
-        const orderCompleted = sessionStorage.getItem("orderCompleted");
-        console.log(orderCompleted)
-        if(orderCompleted === "true") {
-            sessionStorage.clear();
-            window.location.href = "/home";
-        }
-        
         const getSessionStatus = async () => {
-
-            
-            
             
             const params = new URLSearchParams(location.search);
             const sessionId = params.get('session_id');
@@ -37,35 +21,34 @@ const CheckoutReturn = () => {
             if (!sessionId) return;
 
             try {
-                const response = await fetch(`${getURL()}/session-status?session_id=${sessionId}`);
-                const data = await response.json();
+                const data = await fetchSessionStatus(sessionId)
                 
-                setStatus(data.status);
+                console.log(data);
+                
+                if(data.orderExists) {
+                    window.location.href = "/home"
+                }
+                
+                
                 setCustomerEmail(data.customer_email);
 
                 if (data.eventId) {
-                    const eventData = await fetchEvent(data.eventId);
+                    const eventData = await getEvent(data.eventId);
                     setEvent(eventData);
                 }
                 if (data.lineItems) {
                     setTickets(data.lineItems);
                     console.log(data.lineItems);
                 }
-                setAlreadyLoaded(true);
-                sessionStorage.setItem("orderCompleted", "true");
-                
+                setStatus(data.status);
                 
             } catch (error) {
                 console.error('Error fetching session status:', error);
             }
             
         };
-        if(orderCompleted === "false" || orderCompleted === null) {
-            console.log("getting session status")
-            getSessionStatus();
-        }
         
-        
+        getSessionStatus();
         
     }, [location]);
 

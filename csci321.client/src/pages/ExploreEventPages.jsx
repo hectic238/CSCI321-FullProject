@@ -1,9 +1,10 @@
-import {useLocation, useParams} from 'react-router-dom';
+import {useLocation, useParams, useSearchParams} from 'react-router-dom';
 import React, {useEffect, useState} from "react";
 import Navbar from "@/components/Navbar.jsx";
 import {fetchEventsByCategory, fetchEventSummaries} from "@/components/Functions.jsx";
 import banner from "@/assets/exploreEvent.png";
 import EventPageCard from "@/components/EventPageCard.jsx";
+import {getEventsByCategory, getEventsBySearchTerm} from "@/components/eventFunctions.jsx";
 
 const ExploreEventPages = () => {
     const category = useParams();
@@ -19,16 +20,15 @@ const ExploreEventPages = () => {
     const [ticketMasterEventsFetched, setTicketMasterEventsFetched] = useState(null);
     const PAGE_SIZE = 5;
     const isCategory = location.pathname.includes('/explore/category/');
-    const isSearch = location.pathname.includes('/explore/search/');
+    const isSearch = location.pathname.includes('/explore/search');
     const [allAvailableEvents, setAllAvailableEvents] = useState([]);
     const [modifiedWebsiteEvents, setModifiedWebsiteEvents] = useState([]);
     const [lastEvaluatedKey, setLastEvaluatedKey] = useState(null);
     const [noMorePages, setNoMorePages] = useState(false);
+    const [searchParams] = useSearchParams();
 
     
     const [ticketmasterEventsPage, setTicketmasterEventsPage] = useState(0);
-    
-    
     
     const fetchTicketMasterEvents = async (size = 10, page = 0) => {
         setTicketMasterEventsFetched(true);
@@ -39,7 +39,7 @@ const ExploreEventPages = () => {
             params = `?dmaId=702&size=${size}&page=${page}&apikey=${API_KEY}`;
         }
         else if (isSearch) {
-            params = `?dmaId=702&keyword=${category.searchTerm}&page=${page}&size=${size}&apikey=${API_KEY}`;
+            params = `?dmaId=702&keyword=${searchParams.get("q")}&page=${page}&size=${size}&apikey=${API_KEY}`;
         }
         else {
             params = `?dmaId=702&classificationName=${category.categoryName}&size=${size}&page=${page}&apikey=${API_KEY}`;
@@ -92,10 +92,9 @@ const ExploreEventPages = () => {
 
     }
     
-    const fetchEvent = async (type, category, searchTerm) => {
+    const fetchEvent = async (type, category,page, searchTerm) => {
         // Fetch local events, 
         
-        await calculateTotalPage(PAGE_SIZE, searchTerm);
         
         let websiteEvents = [];
         
@@ -104,16 +103,26 @@ const ExploreEventPages = () => {
         if(!noMoreWebsiteEvents) {
             let data;
             if (type === "popular") {
-                data = await fetchEventSummaries(searchTerm, PAGE_SIZE, lastEvaluatedKey);
+                data = await getEventsBySearchTerm(searchTerm, lastEvaluatedKey, PAGE_SIZE);
             } else if (type === "category") {
-                data = await fetchEventsByCategory(category, PAGE_SIZE, lastEvaluatedKey);
+                data = await getEventsByCategory(category, lastEvaluatedKey, PAGE_SIZE);
             }
 
+
+            if (data?.events?.length) {
+                data.events = data.events.map(event => ({
+                    ...event,
+                    tickets: typeof event.tickets === "string" ? JSON.parse(event.tickets) : event.tickets
+                }));
+            }
+            
+            
             websiteEvents = data.events;
             
-
+            
+            
             setLastEvaluatedKey(data.lastEvaluatedKey);
-
+            
             newWebsiteEvents = websiteEvents.map(event => ({
                 ...event,
                 source: 'local'  // Mark these events as 'local'
@@ -125,7 +134,10 @@ const ExploreEventPages = () => {
             })));
             
         }
-        
+
+        await calculateTotalPage(PAGE_SIZE, searchTerm);
+
+
         // Fetch PAGE_SIZE amount of ticketmaster events, then splice the remainder from the front of the ticketmaster array
         
         const numberWebsiteEvents = newWebsiteEvents.length;
@@ -176,13 +188,14 @@ const ExploreEventPages = () => {
         try {
             
             if(isSearch) {
-                const searchedEvents = await fetchEvent("popular","popular", 0, searchTerm);
+                const searchedEvents = await fetchEvent("popular","popular", 0,searchTerm);
                 setEvents(searchedEvents);
                 return;
             }
             
             if(category === "popular") {
-                const popularEvents = await fetchEvent("popular","popular", 0, "");
+                const popularEvents = await fetchEvent("popular","popular",0,  " ");
+                console.log(popularEvents)
                 setEvents(popularEvents);
             }
             
@@ -229,8 +242,8 @@ const ExploreEventPages = () => {
 
             try {
                 if(isSearch) {
-                    const searchedEvents = await fetchEvent("popular","popular", page, category.searchTerm);
-                    
+                    const searchedEvents = await fetchEvent("popular","popular", page, searchParams.get("q"));
+                    console.log(searchedEvents)
                     setEvents(prevEvents => [...prevEvents, ...searchedEvents]);
                     setLoading(false);
                     return;
@@ -238,7 +251,7 @@ const ExploreEventPages = () => {
                 }
                 
                 if(category.categoryName === "popular") {
-                    const newEvents = await fetchEvent("popular", "popular", nextPage, "", updatedCount);
+                    const newEvents = await fetchEvent("popular", "popular", nextPage, " ", updatedCount);
                     setEvents(prevEvents => [...prevEvents, ...newEvents]); 
                     
                 }
@@ -276,9 +289,10 @@ const ExploreEventPages = () => {
     useEffect( () => {
         
         if(isSearch) {
-            let searchTerm = category.searchTerm;
-            let category2 = "";
 
+            const searchTerm = searchParams.get("q");
+            //let searchTerm = category.searchTerm;
+            let category2 = "";
 
             loadEvents(searchTerm, category2);
 
@@ -291,8 +305,7 @@ const ExploreEventPages = () => {
             loadEvents(searchTerm, category2);
         }
         
-    }, [
-    ])
+    }, [])
 
     return (
         <>
@@ -305,7 +318,7 @@ const ExploreEventPages = () => {
                     <div className="events-section" style={{"display":"flex","alignItems":"center","justifyContent":"center"}}>
                         <div>
                             {events.map(event => (
-                                <EventPageCard key={event.id} event={event}/>
+                                <EventPageCard key={event.eventId} event={event}/>
                             ))}
 
                             <div style={{"margin":"10px", "justifyContent":"center","display":"flex" }}>

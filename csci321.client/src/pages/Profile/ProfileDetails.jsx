@@ -95,8 +95,8 @@ const ProfileDetails = () => {
                 }
                 
                 const event = await eventResponse.json();
-                
-                const parsedTickets = JSON.parse(order.tickets)
+
+                const parsedTickets = typeof order.tickets === "string" ? JSON.parse(order.tickets) : order.tickets;
                 return {
                     ...order,
                     event,
