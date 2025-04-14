@@ -65,6 +65,7 @@ const MyTickets = () => {
     const [favorites, setFavorites] = useState([])
     const [weatherData, setWeatherData] = useState({})
     const { user, isAuthenticated, isLoading, getAccessTokenSilently } = useAuth0()
+    const {error, setError} = useState(null);
     
     const auth = useAuth();
 
@@ -105,18 +106,21 @@ const MyTickets = () => {
                 if(!eventResponse) {
                     console.error("Could not fetch the event")
                 }
+                
+                
 
                 const event = await eventResponse.json();
+                
+                const parsedTickets = typeof order.tickets === "string" ? JSON.parse(order.tickets) : order.tickets;
 
-                const parsedTickets = JSON.parse(order.tickets)
                 return {
                     ...order,
                     event,
                     tickets: parsedTickets,
-                }
+                };
+
             }))
             
-            console.log(updatedOrders)
             setOrders(updatedOrders)
 
         } catch (error) {

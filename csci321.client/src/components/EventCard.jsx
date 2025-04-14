@@ -81,7 +81,7 @@ function EventCard({ event }) {
                         
 
                         <img src={event.image} alt={event.title} style={{"width": "250px", "height": "141px"}}/>
-                        <Link to={`/event/${event.title.replace(/\s+/g, '-')}/${event.id}`}><h3>{event.title}</h3>
+                        <Link to={`/event/${event.title.replace(/\s+/g, '-')}/${event.eventId}`}><h3>{event.title}</h3>
                         </Link>
                         <p><strong>Date:</strong> {formatDate(event.startDate)}</p>
                         <p><strong>Time:</strong> {formatTime(event.startTime) + " - " + formatTime(event.endTime)}</p>

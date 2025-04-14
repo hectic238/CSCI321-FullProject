@@ -33,9 +33,9 @@ function EventPageCard({ event }) {
     if(event.source === 'local') {
         isFreeEvent = event.eventTicketType === 'free';
     }
-
+    
     return (
-        <div key={event.id} className="event-page-card-large">
+        <div key={event.eventId} className="event-page-card-large">
 
             {event.source === 'local' ? (
                 <div className="event-page-card-large">
@@ -43,7 +43,7 @@ function EventPageCard({ event }) {
                         <img src={event.image} alt={event.title} className="event-image"/>
                     </div>
                     <div className="event-page-Card-Column-details" style={{"width": "500px", "marginLeft":"20px"}}>
-                        <Link to={`/event/${event.title.replace(/\s+/g, '-')}/${event.id}`}><h3>{event.title}</h3></Link>
+                        <Link to={`/event/${event.title.replace(/\s+/g, '-')}/${event.eventId}`}><h3>{event.title}</h3></Link>
                         <p><strong>Date:</strong> {formatDate(event.startDate)}</p>
                         <p><strong>Time:</strong> {formatTime(event.startTime) + " - " + formatTime(event.endTime)}</p>
                         <p><strong>Location:</strong> {event.location}</p>

@@ -4,7 +4,8 @@ import React, {useEffect, useState} from 'react';
 import {useNavigate} from "react-router-dom";
 
 import EventCard from "../components/EventCard.jsx";
-import {fetchEventsByCategory, fetchEventSummaries} from "../components/Functions.jsx"; // Assuming your image is in src/assets
+import {fetchEventsByCategory, fetchEventSummaries} from "../components/Functions.jsx";
+import {getEventsByCategory, getEventsBySearchTerm} from "@/components/eventFunctions.jsx"; // Assuming your image is in src/assets
 
 function ExploreEvents() {
     const [popularEvents, setPopularEvents] = useState([]); 
@@ -71,20 +72,25 @@ function ExploreEvents() {
         if(!noMoreWebsiteEvents) {
             
             let data;
-            /*
+            
             if (type === "popular") {
-                data = await fetchEventSummaries(searchTerm, PAGE_SIZE, lastEvaluatedKey);
+                data = await getEventsBySearchTerm(" ", lastEvaluatedKey, PAGE_SIZE);
             } else if (type === "category") {
-                data = await fetchEventsByCategory(category, PAGE_SIZE, lastEvaluatedKey);
+                data = await getEventsByCategory(category, lastEvaluatedKey, PAGE_SIZE);
+            }
+
+            if (data?.events?.length) {
+                data.events = data.events.map(event => ({
+                    ...event,
+                    tickets: typeof event.tickets === "string" ? JSON.parse(event.tickets) : event.tickets
+                }));
             }
             
 
             websiteEvents = data.events;
             
             setLastEvaluatedKey(data.lastEvaluatedKey);
-            */
-             
-            websiteEvents = [];
+
             newWebsiteEvents = websiteEvents.map(event => ({
                 ...event,
                 source: 'local'  // Mark these events as 'local'
@@ -114,8 +120,6 @@ function ExploreEvents() {
             
             // fetch 5 ticketmaster events and store in array
             ticketMasterEvents = await fetchTicketMasterEvents(5 - numberWebsiteEvents, ticketmasterEventsPage, category);
-            
-            
             
             setTicketmasterEventsPage(ticketmasterEventsPage + 1);
 
@@ -183,7 +187,7 @@ function ExploreEvents() {
 
                     <div className="events-grid">
                         {popularEvents.map(event => (
-                            <EventCard key={event.id} event={event}/>
+                            <EventCard key={event.eventId} event={event}/>
                         ))}
                     </div>
 
@@ -193,7 +197,7 @@ function ExploreEvents() {
                     </div>
                     <div className="events-grid">
                         {concerts.map(event => (
-                            <EventCard key={event.id} event={event}/>
+                            <EventCard key={event.eventId} event={event}/>
                         ))}
                     </div>
 
@@ -203,7 +207,7 @@ function ExploreEvents() {
                     </div>
                     <div className="events-grid">
                         {familyEvents.map(event => (
-                            <EventCard key={event.id} event={event}/>
+                            <EventCard key={event.eventId} event={event}/>
                         ))}
                     </div>
 
@@ -214,7 +218,7 @@ function ExploreEvents() {
                     </div>
                     <div className="events-grid">
                         {theatreEvents.map(event => (
-                            <EventCard key={event.id} event={event}/>
+                            <EventCard key={event.eventId} event={event}/>
                         ))}
                     </div>
                     
@@ -224,7 +228,7 @@ function ExploreEvents() {
                     </div>
                     <div className="events-grid">
                         {comedyEvents.map(event => (
-                            <EventCard key={event.id} event={event}/>
+                            <EventCard key={event.eventId} event={event}/>
                         ))}
                     </div>
 

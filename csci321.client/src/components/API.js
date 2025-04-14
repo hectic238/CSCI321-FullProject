@@ -23,8 +23,6 @@ export const APIWithToken = async (url, method, body = null) => {
 
         const response = await fetch(baseUrl + url, options);
 
-        console.log(response);
-
         return response;
     } catch (e) {
         alert(`Error: ${e.message}`);

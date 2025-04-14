@@ -9,9 +9,9 @@ import banner from '../../assets/exploreEvent.png';
 import Navbar from "../../components/Navbar.jsx";
 import Home from "@/pages/Home.jsx"; // Import your CSS file
 import {generateObjectId} from "@/components/Functions.jsx";
-import {RefreshToken} from "@/components/RefreshToken.jsx";
 import {useAuth0} from "@auth0/auth0-react";
 import {createEvent} from "@/components/eventFunctions.jsx";
+import {useAuth} from "react-oidc-context";
 
 const HostEvent = () => {
 
@@ -20,6 +20,7 @@ const HostEvent = () => {
 
     const location = useLocation();
     const passedEvent = location.state || {};
+    const auth = useAuth();
 
     const navigate = useNavigate();
     const { token } = theme.useToken();
@@ -77,12 +78,12 @@ const HostEvent = () => {
         try {
             
             console.log(eventDetails)
-            const message = await createEvent(eventDetails)
-            
-            if(message) {
-                alert(message);
-                navigate('/home');
-            }
+            // const message = await createEvent(eventDetails)
+            //
+            // if(message) {
+            //     alert(message);
+            //     navigate('/home');
+            // }
             
             
         } catch (error) {

@@ -94,16 +94,23 @@ function Navbar() {
     const onSearch = async (value, _e, info) => {
         console.log(value);
         const currentPath = window.location.pathname;
-        const newPath = `/explore/search/${value}`;
+        
+        //const newPath = `/explore/search/${value}`;
 
+        const params = new URLSearchParams({ q: value });
+
+        const newPath =`/explore/search?${params.toString()}`;
+        const basePath = newPath.split('/').slice(0, 3).join('/'); // "/explore/search"
+
+        console.log(currentPath);
         // On search if the current search term equals what is already searched do nothing
         // If the search term is different to what is searched then reload the page and navigate to the newpath
-        if (currentPath === newPath) {
-            
-        } else {
-            
+        if (currentPath === "/explore/search") {
             navigate(newPath);
-            window.location.reload();
+            window.location.reload(); 
+        }
+        else {
+            navigate(newPath);
         }
         //navigate(`/explore/search/${value}`);
     };

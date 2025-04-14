@@ -96,7 +96,9 @@ const App = () => {
                     <Route path="/explore/category/:categoryName" element={<ExploreEventPages/>} />
 
                     <Route path="/explore/search/:searchTerm" element={<ExploreEventPages/>} />
-                    
+                    <Route path="/explore/search" element={<ExploreEventPages/>} />
+
+
 
                     <Route path="/event/:eventName/:eventId" element={
                         <EventDetails />} />

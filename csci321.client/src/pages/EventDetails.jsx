@@ -3,11 +3,10 @@ import { useParams, useNavigate } from 'react-router-dom';
 import Navbar from "../components/Navbar.jsx"; 
 import { Drawer, Button } from 'antd'; 
 import './EventDetails.css';
-import {fetchEvent, getUserIdFromToken, editEvent} from "@/components/Functions.jsx"; 
-import {loadStripe} from "@stripe/stripe-js";
-import {getURL} from "@/components/URL.jsx";
-import {useAuth0} from "@auth0/auth0-react";
+import {fetchEvent, getUserIdFromToken, editEvent} from "@/components/Functions.jsx";
 import {getCookie} from "@/components/Cookie.jsx";
+import {getEvent} from "@/components/eventFunctions.jsx";
+import {useAuth} from "react-oidc-context";
 
 const EventDetails = () => {
     const { eventName, eventId } = useParams(); 
@@ -21,14 +20,10 @@ const EventDetails = () => {
     const [isDrawerVisible, setIsDrawerVisible] = useState(false);
     const [sidebarVisible, setSidebarVisible] = useState(false);
     const [userId, setUserId] = useState(null);
-
-    const {
-        user,
-        isAuthenticated,
-        loginWithRedirect,
-        logout,
-        getAccessTokenSilently,
-    } = useAuth0();
+    
+    const auth = useAuth();
+    
+    
 
     const handleAddTicket = (ticket) => {
         if (ticket.soldOut) {
@@ -66,16 +61,16 @@ const EventDetails = () => {
     const handleCheckout =  async () => {
         
         // If user isnt logged in, force them to the login page
-        if(!user && !isAuthenticated) {
-            await loginWithRedirect();
+        if(!auth.isAuthenticated) {
+            alert("User is not logged in, and will not go to checkout -- PLEASE ADD STYLING")
         }
         // If the user is not an attendee, alert user is on the wrong account
         if(getCookie("userType") !== "attendee") {
-            alert("User type not allowed");
+            alert("User type not allowed or user is not logged in -- PLEASE ADD STYLING");
             return;
         }
         if (totalTickets === 0) {
-            console.log("No tickets selected for checkout.");
+            alert("No tickets selected for checkout.");
             return;
         }
         navigate(`/checkout/${eventId}`, { state: { selectedTickets, eventDetails } });
@@ -98,8 +93,18 @@ const EventDetails = () => {
     useEffect(() => {
 
         setUserId(getUserIdFromToken());
-        fetchEvent(eventId).then(event => {
+        getEvent(eventId).then(event => {
             if (event) {
+                // Parse tickets array
+                if (typeof event.tickets === "string") {
+                    try {
+                        event.tickets = JSON.parse(event.tickets);
+                    } catch (err) {
+                        console.error("Failed to parse tickets:", err);
+                        event.tickets = []; 
+                    }
+                }
+                
                 setEventDetails(event);
                 console.log(event);
                 const now = new Date();
