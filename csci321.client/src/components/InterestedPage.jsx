@@ -10,22 +10,11 @@ const InterestedPage = ({ interests, onInterestsChange }) => {
             "Sports & Fitness": ["Marathons", "Yoga Sessions", "Fitness Workshops", "Sporting Events"],
             "Business & Networking": ["Conferences", "Seminars", "Workshops", "Networking Events"],
             "Family & Kids": ["Family-Friendly Events", "Children's Workshops", "Kid-Friendly Shows", "Educational Activities"],
-            Technology: ["Tech Conferences", "Hackathons", "Startup Events", "Gadget Expos"],
+            "Technology": ["Tech Conferences", "Hackathons", "Startup Events", "Gadget Expos"],
             "Comedy & Entertainment": ["Stand-up Comedy", "Improv Nights", "Comedy Festivals", "Magic Shows"],
             "Charity & Causes": ["Fundraising Events", "Charity Galas", "Benefit Concerts", "Auctions & Fundraisers"],
-            "Education & Learning": ["Lectures & Talks", "Workshops", "Educational Seminars", "Skill-Building Sessions"],
+            "Education & Learning": ["Lectures & Talks", "Education Workshops", "Educational Seminars", "Skill-Building Sessions"],
             "Travel & Adventures": ["City Tours", "Adventure Travel", "Cultural Experiences", "Cruise Vacations"],
-        };
-
-        const [selectedInterests, setSelectedInterests] = useState({});
-
-        const toggleInterest = (category, interest) => {
-            setSelectedInterests((prev) => ({
-                ...prev,
-                [category]: prev[category]?.includes(interest)
-                    ? prev[category].filter((item) => item !== interest)
-                    : [...(prev[category] || []), interest],
-            }));
         };
 
     useEffect(() => {
@@ -43,12 +32,7 @@ const InterestedPage = ({ interests, onInterestsChange }) => {
                         onClick={() => onInterestsChange('interests', interest)}  // Use handleInputChange to toggle interest
                     >
                 {interest}
-                {interests.includes(interest) && (
-                    <button onClick={(e) => {
-                        e.stopPropagation();
-                                onInterestsChange('interests', interest);  // Use handleInputChange to remove interest
-                    }}>X</button>
-                )}
+
             </span>
                 ))}
         </div>
