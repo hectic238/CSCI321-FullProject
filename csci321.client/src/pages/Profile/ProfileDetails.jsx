@@ -119,7 +119,7 @@ const ProfileDetails = () => {
     const formatDate = (dateString) => {
         const date = new Date(dateString)
         const options = { day: "numeric", month: "long", year: "numeric" }
-        return date.toLocaleDateString("en-GB", options)
+        return date.toLocaleDateString("en-AU", options)
     }
 
     const formatTime = (timeString) => {
@@ -600,8 +600,18 @@ const ProfileDetails = () => {
                                     <form onSubmit={handleSubmit}>
                                         <InterestedPage
                                             interests={userDetails.interests}
-                                            onInterestsChange={(field, value) => handleChange("interests", value)}
+                                            onInterestsChange={(field, interest) => {
+                                                // Toggling logic in the parent component:
+                                                setUserDetails(prev => {
+                                                    const currentInterests = prev.interests || [];
+                                                    const updatedInterests = currentInterests.includes(interest)
+                                                        ? currentInterests.filter(i => i !== interest)
+                                                        : [...currentInterests, interest];
+                                                    return { ...prev, interests: updatedInterests };
+                                                });
+                                            }}
                                         />
+
                                         <Button
                                             type="submit"
                                             variant="contained"
