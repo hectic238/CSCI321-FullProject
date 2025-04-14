@@ -2,7 +2,7 @@ import './Home.css';
 import React, { useEffect } from "react";
 import Navbar from '../components/Navbar';
 import logoSmall from '../assets/logo_small.png';
-import ExploreEvents from "@/pages/ExploreEvents.jsx";
+import ExploreEvents from "@/pages/Events/ExploreEvents.jsx";
 
 const Home = () => {
 

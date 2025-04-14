@@ -55,7 +55,6 @@ function Navbar() {
             }
         };
         if(!getCookie(userType)) {
-            console.log("no userType");
             getUserType()
         }
         if (auth.isAuthenticated) {

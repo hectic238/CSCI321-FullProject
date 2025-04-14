@@ -36,8 +36,8 @@ import {
     Share,
     AccessTime,
 } from "@mui/icons-material"
-import background from "../assets/background.png"
-import Navbar from "../components/Navbar"
+import background from "@/assets/background.png"
+import Navbar from "@/components/Navbar"
 import { getCookie } from "@/components/Cookie.jsx"
 
 const ExternalEventDetails = () => {

@@ -66,47 +66,27 @@ const Details = ({ eventDetails, onFormChange}) => {
                             >
                                 <option value="">Select Category</option>
                                 <option value="Music">Music</option>
-                                <option value="Sports">Sports</option>
-                                <option value="Art">Art</option>
-                                {/* Add more categories as needed */}
+                                <option value="Art">Arts & Culture</option>
+                                <option value="Food">Food & Drink</option>
+                                <option value="Theatre">Theatre</option>
+                                <option value="Sports">Sports & Fitness</option>
+                                <option value="Business">Business & Networking</option>
+                                <option value="Family">Family & Kids</option>
+                                <option value="Technology">Technology</option>
+                                <option value="Comedy">Comedy & Entertainment</option>
+                                <option value="Art">Charity & Causes</option>
+                                <option value="Education">Education & Learning</option>
+                                <option value="Travel">Travel & Adventures</option>
                             </select>
                         </div>
                     </div>
 
                     <h2 className="heading">Date & Time</h2>
 
-                    <div className="form-group">
-                        <div className="input-container">
-                            <label>Event Type</label>
-                            <div className="radio-group">
-                                <input
-                                    type="radio"
-                                    name="eventType"
-                                    value="single"
-                                    className="radio-input"
-                                    checked={details.eventType === 'single'}
-                                    onChange={handleInputChange}
-                                    required
-                                />
-                                <label htmlFor="single-event" className="radio-button">Single Event</label>
-                                <input
-                                    type="radio"
-                                    name="eventType"
-                                    value="recurring"
-                                    className="radio-input"
-                                    checked={details.eventType === 'recurring'}
-                                    onChange={handleInputChange}
-                                    required
-                                />
-                                <label htmlFor="recurring-event" className="radio-button">Recurring Event</label>
-                            </div>
-                        </div>
-                    </div>
-
                     {/* First row with headings only */}
                     <div className="form-group">
                         <div className="input-container">
-                            <label>Session(s)</label>
+                            <label>Session</label>
                             <div className="date-time-headings">
                                 <span>Start Date</span>
                                 <span>Start Time</span>
@@ -148,39 +128,6 @@ const Details = ({ eventDetails, onFormChange}) => {
                         </div>
                     </div>
 
-                    {isRecurring && (
-                        <div className="form-group">
-                            <div className="input-container">
-                                <label>Recurring Frequency</label>
-                                <select
-                                    name="recurrenceFrequency"
-                                    value={details.recurrenceFrequency}
-                                    onChange={handleInputChange}
-                                >
-                                    <option value="">Select Frequency</option>
-                                    <option value="Daily">Daily</option>
-                                    <option value="Weekly">Weekly</option>
-                                    <option value="Monthly">Monthly</option>
-                                    <option value="Yearly">Yearly</option>
-                                </select>
-                            </div>
-                        </div>
-                    )}
-
-                    {isRecurring && (
-                        <div className="form-group">
-                            <div className="input-container">
-                                <label htmlFor="recurrence-end-date">End Date</label>
-                                <input
-                                    type="date"
-                                    name="recurrenceEndDate"
-                                    value={details.recurrenceEndDate}
-                                    onChange={handleInputChange}
-                                />
-                            </div>
-                        </div>
-                    )}
-
                     <h2 className="heading">Location</h2>
 
                     <div className="form-group">
@@ -191,6 +138,7 @@ const Details = ({ eventDetails, onFormChange}) => {
                                 name="location"
                                 value={details.location}
                                 onChange={handleInputChange}
+                                placeholder="Location Event Takes Place"
                                 required
                             />
                         </div>
@@ -205,6 +153,7 @@ const Details = ({ eventDetails, onFormChange}) => {
                                 name="additionalInfo"
                                 value={details.additionalInfo}
                                 onChange={handleInputChange}
+                                placeholder="Please include any additional information required for the event."
                             />
                         </div>
                     </div>

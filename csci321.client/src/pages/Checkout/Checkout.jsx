@@ -1,11 +1,8 @@
 ﻿import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import Navbar from "@/components/Navbar.jsx"; 
-import {editEvent, generateObjectId, getUserIdFromToken} from "@/components/Functions.jsx";
-import eventDetails from "@/pages/EventDetails.jsx";
+import Navbar from "@/components/Navbar.jsx";
 import {EmbeddedCheckout, Elements, EmbeddedCheckoutProvider} from "@stripe/react-stripe-js";
 import {loadStripe} from "@stripe/stripe-js";
-import {getURL} from "@/components/URL.jsx";
 import {useAuth0} from "@auth0/auth0-react";
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_KEY);
 import {useAuth} from "react-oidc-context";

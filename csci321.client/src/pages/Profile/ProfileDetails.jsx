@@ -562,7 +562,7 @@ const ProfileDetails = () => {
                                             </Typography>
                                             <Button
                                                 component={Link}
-                                                to="/explore"
+                                                to="/home#exploreEvents"
                                                 variant="contained"
                                                 sx={{
                                                     mt: 2,

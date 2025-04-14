@@ -26,25 +26,30 @@ const HostEvent = () => {
     const { token } = theme.useToken();
     const [current, setCurrent] = useState(0);
     const [formErrors, setFormErrors] = useState({});  
-    const [freeTicket, setFreeTicket] = useState([{}]);
+    const [freeTicket, setFreeTicket] = useState([{ name: "Free Admission", price: 0, count: 0, soldOut: false, bought: 0 }]);
     const [eventDetails, setEventDetails] = useState({
         eventTicketType: '',
         tickets:  [],
         eventId:  generateObjectId(),
         userId:  '',
-        title:  passedEvent.title || '',
+        title:  passedEvent.title || 'Sydney',
         category:  'Music',
         eventType:  'single',
-        startDate:  '2024-09-09',
-        startTime:  '16:10',
-        endTime:  '18:10',
-        location:  'Sydney',
-        additionalInfo:  'Hi',
+        startDate:  new Date().toISOString().split('T')[0],
+        startTime:  '10:00',
+        endTime:  '17:00',
+        location:  '123',
+        additionalInfo:  '123',
         recurrenceFrequency:  '', 
         recurrenceEndDate:  '',
         numberAttendees: 0,
         isDraft: false,
     });
+
+
+    const [freeTicketCount, setFreeTicketCount] = useState(0);
+    const [tickets, setTickets] = useState(eventDetails.tickets || []);
+
 
     useEffect(() => {
         if (passedEvent && Object.keys(passedEvent).length > 0) {
@@ -78,12 +83,11 @@ const HostEvent = () => {
         try {
             
             console.log(eventDetails)
-            // const message = await createEvent(eventDetails)
-            //
-            // if(message) {
-            //     alert(message);
-            //     navigate('/home');
-            // }
+             const response = await createEvent(eventDetails)
+             if(response) {
+                 alert(response.message);
+                 navigate('/home');
+             }
             
             
         } catch (error) {
@@ -94,6 +98,8 @@ const HostEvent = () => {
 
     const handleSaveDraft =  async () => {
         
+        eventDetails.isDraft = true;
+        await handlePublishEvent()
         
     };
     
@@ -211,6 +217,10 @@ const HostEvent = () => {
             errors.tickets = "Tickets";
         }
         
+        if(eventDetails.eventTicketType === 'free' && freeTicket[0].count === 0 ) {
+            errors.tickets = "Free Ticket Count";
+        }
+        
         setFormErrors(errors);
         if (Object.keys(errors).length > 0) {
             const errorMessages = Object.values(errors).join(', ');
@@ -218,6 +228,8 @@ const HostEvent = () => {
         }
 
         if(eventDetails.eventTicketType === 'free') {
+            
+            
             setEventDetails((prevDetails) => ({
                     ...prevDetails,
                     tickets: freeTicket,
@@ -225,6 +237,7 @@ const HostEvent = () => {
 
             ));
         }
+        
         
         return Object.keys(errors).length === 0;
     };

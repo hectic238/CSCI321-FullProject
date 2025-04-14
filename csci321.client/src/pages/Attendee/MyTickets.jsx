@@ -42,9 +42,9 @@ import {
     LightMode,
     Map,
 } from "@mui/icons-material"
-import Navbar from "../components/Navbar.jsx"
-import banner from "../assets/exploreEvent.png"
-import background from "../assets/background.png"
+import Navbar from "@/components/Navbar.jsx"
+import banner from "@/assets/exploreEvent.png"
+import background from "@/assets/background.png"
 import { enrichOrdersWithEventDetails } from "@/components/Functions.jsx"
 import {APIWithToken} from "@/components/API.js";
 import {useAuth} from "react-oidc-context";

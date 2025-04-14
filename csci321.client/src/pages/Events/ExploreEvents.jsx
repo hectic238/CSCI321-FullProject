@@ -1,10 +1,9 @@
-import Navbar from '../components/Navbar';
+import Navbar from '@/components/Navbar';
 import './ExploreEvents.css';
 import React, {useEffect, useState} from 'react';
 import {useNavigate} from "react-router-dom";
 
-import EventCard from "../components/EventCard.jsx";
-import {fetchEventsByCategory, fetchEventSummaries} from "../components/Functions.jsx";
+import EventCard from "@/components/EventCard.jsx";
 import {getEventsByCategory, getEventsBySearchTerm} from "@/components/eventFunctions.jsx"; // Assuming your image is in src/assets
 
 function ExploreEvents() {
