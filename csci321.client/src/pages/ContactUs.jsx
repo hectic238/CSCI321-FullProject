@@ -2,17 +2,17 @@
 import Navbar from "../components/Navbar";
 import React, { useState, useEffect } from 'react';
 import "./about.css";
-import { getURL } from "@/components/URL.jsx";
-import { APIWithToken } from "@/components/API.js"; 
+
+import {sendMessage} from "@/components/messageFunctions.jsx";
+import {generateObjectId} from "@/components/Functions.jsx"; 
 
 function ContactUs() {
     const handleSubmit = async (e) => {
         e.preventDefault();
-        let baseurl = getURL();
-        let url = `${baseurl}/api/Message/submitMessage`
-        let response = await APIWithToken(url, 'POST', formData);
-        if (response.status === 200) {
-            alert("Message Submitted")
+        formData.messageId = generateObjectId()
+        const response = await sendMessage(formData)
+        if(response) {
+            alert(response.message);
         }
 
     }
@@ -22,6 +22,7 @@ function ContactUs() {
         lastName: "",
         email: "",
         message: "",
+        messageId: "",
     });
 
     const handleInputChange = (field, value) => {
