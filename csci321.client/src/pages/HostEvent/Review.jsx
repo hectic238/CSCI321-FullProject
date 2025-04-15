@@ -25,14 +25,6 @@ const Review = ({ eventDetails, isAuthenticated, user}) => {
         userId = '',
     } = eventDetails;
 
-
-
-    useEffect(() => {
-        if (isAuthenticated) {
-            eventDetails.userId = user.sub;
-        }
-    }, [eventDetails])
-
     return (
         <div className="review-page">
 

@@ -1,18 +1,26 @@
 ﻿import Navbar from "@/components/Navbar.jsx";
 import { useParams, useNavigate } from 'react-router-dom';
 import React, { useEffect, useState } from 'react';
-import {fetchEvent} from "@/components/Functions.jsx"; // Ant Design imports
+import {fetchEvent} from "@/components/Functions.jsx";
+import {getEvent} from "@/components/eventFunctions.jsx"; // Ant Design imports
 
 
 function EventStats() {
-    const { eventId } = useParams(); // Extract eventName and eventId from the URL
+    const { eventId } = useParams();
 
     const [eventDetails, setEventDetails] = useState(null);
 
     useEffect(() => {
-        fetchEvent(eventId).then(event => {
+        getEvent(eventId).then(event => {
             if (event) {
+                
+                console.log(event)
+                if(typeof event.tickets === "string") {
+                    event.tickets = JSON.parse(event.tickets);
+                }
+                
                 setEventDetails(event);
+                
             }
         });
     }, [eventId]);
@@ -22,11 +30,16 @@ function EventStats() {
     }
 
     const getTotalAttendees = () => {
-        return eventDetails.numberAttendees;
+        var totalAttendees = 0;
+        for(var ticket of eventDetails.tickets) {
+            totalAttendees += ticket.bought;
+        }
+        return totalAttendees;
     };
 
     const renderTicketStats = () => {
         if (eventDetails.eventTicketType === 'ticketed' && eventDetails.tickets) {
+            console.log(eventDetails.tickets);
             return eventDetails.tickets.map((ticket, index) => (
                 <div key={index} className="ticket-info">
                     <p><strong>Ticket Type:</strong> {ticket.name}</p>
@@ -36,8 +49,14 @@ function EventStats() {
                 </div>
             ));
         } else {
-            return <p>This event is free to attend.</p>;
-        }
+            //console.log(eventDetails)
+            return eventDetails.tickets.map((ticket, index) => (
+                <div key={index} className="ticket-info">
+                    <p><strong>Ticket Type:</strong> {ticket.name}</p>
+                    <p><strong>Attending:</strong> {ticket.bought}</p>
+                    <p><strong>Spaces Left:</strong> {ticket.count}</p>
+                </div>
+            ));        }
     };
     
     

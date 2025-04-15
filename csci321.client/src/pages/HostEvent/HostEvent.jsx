@@ -10,7 +10,7 @@ import Navbar from "../../components/Navbar.jsx";
 import Home from "@/pages/Home.jsx"; // Import your CSS file
 import {generateObjectId} from "@/components/Functions.jsx";
 import {useAuth0} from "@auth0/auth0-react";
-import {createEvent} from "@/components/eventFunctions.jsx";
+import {createEvent, updateEvent} from "@/components/eventFunctions.jsx";
 import {useAuth} from "react-oidc-context";
 
 const HostEvent = () => {
@@ -19,7 +19,7 @@ const HostEvent = () => {
 
 
     const location = useLocation();
-    const passedEvent = location.state || {};
+    const {passedEvent, editing} = location.state || {};
     const auth = useAuth();
 
     const navigate = useNavigate();
@@ -27,36 +27,43 @@ const HostEvent = () => {
     const [current, setCurrent] = useState(0);
     const [formErrors, setFormErrors] = useState({});  
     const [freeTicket, setFreeTicket] = useState([{ name: "Free Admission", price: 0, count: 0, soldOut: false, bought: 0 }]);
-    const [eventDetails, setEventDetails] = useState({
-        eventTicketType: '',
-        tickets:  [],
-        eventId:  generateObjectId(),
-        userId:  '',
-        title:  passedEvent.title || 'Sydney',
-        category:  'Music',
-        eventType:  'single',
-        startDate:  new Date().toISOString().split('T')[0],
-        startTime:  '10:00',
-        endTime:  '17:00',
-        location:  '123',
-        additionalInfo:  '123',
-        recurrenceFrequency:  '', 
-        recurrenceEndDate:  '',
-        numberAttendees: 0,
-        isDraft: false,
+    const [eventDetails, setEventDetails] = useState(() => {
+        const safeEvent = passedEvent || {};
+
+        return {
+            eventTicketType: safeEvent.eventTicketType || '',
+            tickets: safeEvent.tickets || [],
+            eventId: safeEvent.eventId || generateObjectId(),
+            userId: safeEvent.userId || '',
+            title: safeEvent.title || '',
+            category: safeEvent.category || '',
+            eventType: safeEvent.eventType || 'single',
+            startDate: safeEvent.startDate || '',
+            startTime: safeEvent.startTime || '',
+            endTime: safeEvent.endTime || '',
+            location: safeEvent.location || '',
+            additionalInfo: safeEvent.additionalInfo || '',
+            recurrenceFrequency: '',
+            recurrenceEndDate: '',
+            numberAttendees: safeEvent.numberAttendees || 0,
+            isDraft: safeEvent.isDraft || false,
+        };
     });
-
-
-    const [freeTicketCount, setFreeTicketCount] = useState(0);
-    const [tickets, setTickets] = useState(eventDetails.tickets || []);
-
-
+    
     useEffect(() => {
         if (passedEvent && Object.keys(passedEvent).length > 0) {
             setEventDetails(passedEvent);
+            if(passedEvent.eventTicketType === 'free') {
+                setFreeTicket(passedEvent.tickets);
+                console.log(passedEvent.tickets);
+            }
         }
     }, [passedEvent]);
-
+    
+    useEffect(() => {
+        console.log(freeTicket)
+    }, [freeTicket])
+    
     const handleFormChange = (newDetails) => {
         setEventDetails((prevDetails) => ({
             ...prevDetails,
@@ -77,17 +84,45 @@ const HostEvent = () => {
             [field]: value, 
         }));
     };
-
+    
     const handlePublishEvent = async () => {
+        eventDetails.isDraft = false;
+        await handleUploadEvent()
+    }
+
+    const handleUploadEvent = async () => {
         
         try {
+
             
-            console.log(eventDetails)
-             const response = await createEvent(eventDetails)
-             if(response) {
-                 alert(response.message);
-                 navigate('/home');
-             }
+            
+            if(editing) {
+
+                const updatedTickets = eventDetails.tickets.map(ticket => ({
+                    ...ticket,
+                    quantity: 0  // Add default quantity
+                }));
+
+                // Send this in your API request body:
+                const updatePayload = {
+                    ...eventDetails,
+                    tickets: updatedTickets
+                };
+                
+                const response = await updateEvent(updatePayload);
+                
+                if(response) {
+                    alert(response.message);
+                    navigate('/home');
+                }
+            }
+            else {
+                const response = await createEvent(eventDetails)
+                if(response) {
+                    alert(response.message);
+                    navigate('/home');
+                }
+            }
             
             
         } catch (error) {
@@ -99,7 +134,7 @@ const HostEvent = () => {
     const handleSaveDraft =  async () => {
         
         eventDetails.isDraft = true;
-        await handlePublishEvent()
+        await handleUploadEvent()
         
     };
     
@@ -116,6 +151,7 @@ const HostEvent = () => {
             content: <Banner
                 eventDetails={eventDetails}
                 onImageChange={handleImageChange}
+                editing={editing}
             />,
         },
         {
@@ -125,6 +161,7 @@ const HostEvent = () => {
                 handleTicketFormChange={handleTicketFormChange}
                 setEventDetails={setEventDetails}
                 setFreeTicket={setFreeTicket}
+                freeTicket={freeTicket}
             />,
         },
         {

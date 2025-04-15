@@ -27,13 +27,13 @@ const MyEvents = () => {
                     setUserEvents(events);
                 }
             })
-            /*
+            
             getUsersDraftEvents().then(events => {
                 if (events && events.length > 0) {
                     setDraftEvents(events);
                 }
             })
-            */
+            
              
         }
     }, []);

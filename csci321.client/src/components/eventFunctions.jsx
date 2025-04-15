@@ -25,7 +25,7 @@ export const getUsersDraftEvents = async () => {
         const response = await APIWithToken("event/fetchDraftsByUser", "GET")
 
         if (!response.ok) {
-            throw new Error("Failed to fetch userType");
+            throw new Error("Failed to users draft events");
         }
         const data = await response.json();
         return data;  // this will return all the users created events
@@ -89,6 +89,21 @@ export const getEvent = async (eventId) => {
         }
         const data = await response.json();
         return data;  // this will return a single event
+    } catch (error) {
+        console.error("Error:", error);
+    }
+}
+
+export const updateEvent = async (eventDetails) => {
+    try {
+
+        const response = await APIWithToken(`event/updateEventDetails/${eventDetails.eventId}`, "PUT", eventDetails)
+
+        if (!response.ok) {
+            throw new Error("Failed to updateEvent event");
+        }
+        const data = await response.json();
+        return data;  // this will return the updated Event
     } catch (error) {
         console.error("Error:", error);
     }

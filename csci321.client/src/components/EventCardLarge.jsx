@@ -41,7 +41,7 @@ function EventCardLarge({ event, isDraft }) {
     };
     const editEvent = () => {
         
-        navigate('/host', { state: event });
+        navigate('/host', { state: {passedEvent:event , editing: true} });
     };
 
     const viewStatistics = () => {

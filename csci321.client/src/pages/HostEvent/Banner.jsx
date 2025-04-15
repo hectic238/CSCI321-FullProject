@@ -1,7 +1,12 @@
 import React, { useState, useEffect } from 'react';
 
-const Banner = ({ eventDetails, onImageChange}) => {
-    const image = eventDetails.image || ''; // Get the image from eventDetails
+const Banner = ({ eventDetails, onImageChange, editing}) => {
+    
+    let image = null;
+    if(!editing) {
+        image = eventDetails.image || ''; // Get the image from eventDetails
+
+    }
 
 
     const handleImageChange = (e) => {

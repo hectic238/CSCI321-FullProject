@@ -2,16 +2,19 @@ import React, {useEffect, useState} from "react";
 import ticketedEvent from "../../assets/ticketedEvent.png"
 import freeEvent from "../../assets/freeEvent.png"
 
-function Ticketing ({eventDetails, handleTicketFormChange, setEventDetails, setFreeTicket}) {
+function Ticketing ({eventDetails, handleTicketFormChange, setEventDetails, setFreeTicket, freeTicket}) {
     const [tickets, setTickets] = useState(eventDetails.tickets || []);
     const [eventTicketType, setEventTicketType] = useState(eventDetails.eventTicketType || '');
     const [showPopup, setShowPopup] = useState(false);
-    const [freeTicketCount, setFreeTicketCount] = useState(0);
+    const [freeTicketCount, setFreeTicketCount] = useState(freeTicket[0].count || 0);
+    
 
 
     useEffect(() => {
         handleTicketFormChange('eventTicketType', eventTicketType); // Update the eventTicketType in eventDetails
-        if(eventTicketType === 'free') {
+        console.log(eventTicketType);
+        if(eventDetails.eventTicketType === 'free') {
+            console.log(freeTicket[0].count);
         }
     }, [eventTicketType]);
 
