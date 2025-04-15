@@ -1,7 +1,6 @@
 ﻿import Navbar from "@/components/Navbar.jsx";
 import { useParams, useNavigate } from 'react-router-dom';
 import React, { useEffect, useState } from 'react';
-import {fetchEvent} from "@/components/Functions.jsx";
 import {getEvent} from "@/components/eventFunctions.jsx"; // Ant Design imports
 
 

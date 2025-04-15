@@ -12,7 +12,6 @@ const { Search } = Input;
 import {useAuth0} from "@auth0/auth0-react";
 
 import {deleteCookie, getCookie, setCookie} from "@/components/Cookie.jsx";
-import {getUserTypeByUserId} from "@/components/Functions.jsx";
 
 import { useAuth } from "react-oidc-context";
 import {getUserTypeFromToken} from "@/components/userFunctions.jsx";

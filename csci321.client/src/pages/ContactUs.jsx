@@ -1,10 +1,10 @@
 ﻿import Header from "../components/Header";
 import Navbar from "../components/Navbar";
 import React, { useState, useEffect } from 'react';
-import "./about.css";
-
+import './ContactUs.css'
 import {sendMessage} from "@/components/messageFunctions.jsx";
-import {generateObjectId} from "@/components/Functions.jsx"; 
+import {generateObjectId} from "@/components/Functions.jsx";
+
 
 function ContactUs() {
     const handleSubmit = async (e) => {

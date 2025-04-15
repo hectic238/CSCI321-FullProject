@@ -16,7 +16,6 @@ import MyTickets from "@/pages/Attendee/MyTickets.jsx";
 import EventDetails from "@/pages/Events/EventDetails.jsx";
 import Checkout from './pages/Checkout/Checkout.jsx';
 import EventStatistics from './pages/Events/EventStats.jsx';
-import { RefreshToken } from './components/refreshToken';
 import ExternalEventDetails from "@/pages/Events/ExternalEventDetails.jsx";
 import ExploreEventPages from "@/pages/Events/ExploreEventPages.jsx";
 import CheckoutReturn from "@/pages/Checkout/CheckoutReturn.jsx";
@@ -24,15 +23,12 @@ import RedirectPage from "@/pages/Profile/RedirectPage.jsx";
 
 
 const App = () => {
-    const [accessToken, setAccessToken] = useState(localStorage.getItem("accessToken"));
     const [isLoggedOut, setIsLoggedOut] = useState(false);
     const location = useLocation();
 
 
     useEffect(() => {
-    if(accessToken) {
-       RefreshToken();
-     }
+    
 
         if (location.pathname === '/explore') {
             document.body.classList.add('scrollable'); 
@@ -54,7 +50,7 @@ const App = () => {
             document.body.classList.remove('no-scroll');
              
         };
-    }, [location.pathname, accessToken, isLoggedOut]);
+    }, [location.pathname, isLoggedOut]);
 
 
 

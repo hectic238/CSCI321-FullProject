@@ -1,6 +1,5 @@
 import React, {useEffect, useState} from 'react';
 import './Review.css';
-import {getUserIdFromToken} from "@/components/Functions.jsx"; // CSS for the Review Page
 
 
 const Review = ({ eventDetails, isAuthenticated, user}) => {

@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import {getURL} from "@/components/URL.jsx";
 
 
 const OrdersList = ({ orders, formatDate, formatTime }) => {
@@ -40,14 +39,13 @@ const OrdersList = ({ orders, formatDate, formatTime }) => {
 
 
     const addToCalendar = async (order) => {
-        const baseUrl = getURL();
         console.log(order);
         const { title, startDate, endDate, location, startTime, endTime } = order;
         
         const startDateTime = `${startDate}T${startTime}:00`; // +11:00 for AEDT (Australian Eastern Daylight Time)
         const endDateTime = `${startDate}T${endTime}:00`;
 
-        const response = await fetch(`${baseUrl}/api/calendar/generate-ics`, {
+        const response = await fetch(`/api/calendar/generate-ics`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

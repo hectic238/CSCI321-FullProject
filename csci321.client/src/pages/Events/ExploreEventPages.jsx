@@ -1,7 +1,6 @@
 import {useLocation, useParams, useSearchParams} from 'react-router-dom';
 import React, {useEffect, useState} from "react";
 import Navbar from "@/components/Navbar.jsx";
-import {fetchEventsByCategory, fetchEventSummaries} from "@/components/Functions.jsx";
 import banner from "@/assets/exploreEvent.png";
 import EventPageCard from "@/components/EventPageCard.jsx";
 import {getEventsByCategory, getEventsBySearchTerm} from "@/components/eventFunctions.jsx";

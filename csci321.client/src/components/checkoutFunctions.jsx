@@ -1,4 +1,3 @@
-import {getURL} from "@/components/URL.jsx";
 import {APIWithToken} from "@/components/API.js";
 
 export const generateCheckout = async (body) => {

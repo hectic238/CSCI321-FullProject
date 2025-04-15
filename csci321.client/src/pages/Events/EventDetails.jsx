@@ -3,7 +3,6 @@ import { useParams, useNavigate } from 'react-router-dom';
 import Navbar from "@/components/Navbar.jsx"; 
 import { Drawer, Button } from 'antd'; 
 import './EventDetails.css';
-import {fetchEvent, getUserIdFromToken, editEvent} from "@/components/Functions.jsx";
 import {getCookie} from "@/components/Cookie.jsx";
 import {getEvent} from "@/components/eventFunctions.jsx";
 import {useAuth} from "react-oidc-context";
@@ -19,7 +18,6 @@ const EventDetails = () => {
 
     const [isDrawerVisible, setIsDrawerVisible] = useState(false);
     const [sidebarVisible, setSidebarVisible] = useState(false);
-    const [userId, setUserId] = useState(null);
     
     const auth = useAuth();
     
@@ -86,13 +84,11 @@ const EventDetails = () => {
             eventDetails.numberAttendees += attendeeCount;
             eventDetails.tickets[0].count -= attendeeCount;
             eventDetails.tickets[0].bought += attendeeCount;
-            editEvent(eventDetails);
         }
     };
 
     useEffect(() => {
 
-        setUserId(getUserIdFromToken());
         getEvent(eventId).then(event => {
             if (event) {
                 // Parse tickets array
