@@ -1,4 +1,3 @@
-import { RefreshToken } from "../components/RefreshToken.jsx";
 import { getToken } from "@/components/getToken.jsx";
 
 export const APIWithToken = async (url, method, body = null) => {

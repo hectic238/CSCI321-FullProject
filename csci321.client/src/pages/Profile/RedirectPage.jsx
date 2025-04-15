@@ -1,8 +1,6 @@
 ﻿"use client"
 
 import {useEffect, useState} from "react"
-import {getURL} from "@/components/URL.jsx"
-import {setCookie} from "@/components/Cookie.jsx"
 import InterestedPage from "@/components/InterestedPage.jsx"
 import background from "../../assets/background.png"
 import logoSmall from "../../assets/logo_small.png"
