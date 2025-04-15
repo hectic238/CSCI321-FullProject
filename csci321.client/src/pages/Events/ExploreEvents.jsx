@@ -186,7 +186,7 @@ function ExploreEvents() {
 
                     <div className="events-grid">
                         {popularEvents.map(event => (
-                            <EventCard key={event.eventId} event={event}/>
+                            <EventCard key={event.eventId || event.id} event={event}/>
                         ))}
                     </div>
 
@@ -196,7 +196,7 @@ function ExploreEvents() {
                     </div>
                     <div className="events-grid">
                         {concerts.map(event => (
-                            <EventCard key={event.eventId} event={event}/>
+                            <EventCard key={event.eventId || event.id} event={event}/>
                         ))}
                     </div>
 
@@ -206,7 +206,7 @@ function ExploreEvents() {
                     </div>
                     <div className="events-grid">
                         {familyEvents.map(event => (
-                            <EventCard key={event.eventId} event={event}/>
+                            <EventCard key={event.eventId || event.id} event={event}/>
                         ))}
                     </div>
 
@@ -217,7 +217,7 @@ function ExploreEvents() {
                     </div>
                     <div className="events-grid">
                         {theatreEvents.map(event => (
-                            <EventCard key={event.eventId} event={event}/>
+                            <EventCard key={event.eventId || event.id} event={event}/>
                         ))}
                     </div>
                     
@@ -227,7 +227,7 @@ function ExploreEvents() {
                     </div>
                     <div className="events-grid">
                         {comedyEvents.map(event => (
-                            <EventCard key={event.eventId} event={event}/>
+                            <EventCard key={event.eventId || event.id} event={event}/>
                         ))}
                     </div>
 
