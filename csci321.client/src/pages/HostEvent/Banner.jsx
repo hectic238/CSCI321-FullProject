@@ -50,8 +50,9 @@ const Banner = ({ eventDetails, onImageChange, editing}) => {
                         </div>
                     )}
 
-                    <p>Feature Image must be at least 1170 pixels wide by 504 pixels high.</p>
+                    <p>Feature Image must be  1200 pixels wide by 400 pixels high.</p>
                     <p>Valid file formats: JPG, GIF, PNG.</p>
+                    <p>Max Size must be less than 512KB</p>
 
                 </form>
             </div>

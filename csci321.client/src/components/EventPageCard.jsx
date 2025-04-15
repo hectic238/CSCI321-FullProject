@@ -33,7 +33,7 @@ function EventPageCard({ event }) {
     if(event.source === 'local') {
         isFreeEvent = event.eventTicketType === 'free';
     }
-    
+
     return (
         <div key={event.eventId} className="event-page-card-large">
 

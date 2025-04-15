@@ -119,7 +119,6 @@ const ExploreEventPages = () => {
             websiteEvents = data.events;
             
             
-            
             setLastEvaluatedKey(data.lastEvaluatedKey);
             
             newWebsiteEvents = websiteEvents.map(event => ({
@@ -179,8 +178,11 @@ const ExploreEventPages = () => {
                 
             }
         }
+        
+        console.log(events)
+        console.log(newWebsiteEvents);
 
-        return [...events, ...newWebsiteEvents];
+        return [ ...newWebsiteEvents];
     }
     
     const loadEvents = async (searchTerm, category) => {
@@ -194,7 +196,6 @@ const ExploreEventPages = () => {
             
             if(category === "popular") {
                 const popularEvents = await fetchEvent("popular","popular",0,  " ");
-                console.log(popularEvents)
                 setEvents(popularEvents);
             }
             
