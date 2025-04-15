@@ -11,14 +11,39 @@ const Banner = ({ eventDetails, onImageChange, editing}) => {
 
     const handleImageChange = (e) => {
         const file = e.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                onImageChange(reader.result); // Update the parent component with the new image
-            };
-            reader.readAsDataURL(file);
+        if (!file) return;
+
+        const validTypes = ['image/jpeg', 'image/png', 'image/gif'];
+        const maxSize = 512 * 1024; // 512KB
+
+        // Check file type
+        if (!validTypes.includes(file.type)) {
+            alert("Only JPG, PNG, or GIF files are allowed.");
+            return;
         }
+
+        // Check file size
+        if (file.size > maxSize) {
+            alert("File size must be under 512KB.");
+            return;
+        }
+
+        // Check image dimensions
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            const img = new Image();
+            img.onload = () => {
+                if (img.width !== 1200 || img.height !== 400) {
+                    alert("Image must be exactly 1200x400 pixels.");
+                    return;
+                }
+                onImageChange(reader.result); // Pass valid image to parent
+            };
+            img.src = reader.result;
+        };
+        reader.readAsDataURL(file);
     };
+
 
     return (
         <div className="host-event-banner">
