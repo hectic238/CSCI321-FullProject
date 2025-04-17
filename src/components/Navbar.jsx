@@ -32,7 +32,7 @@ function Navbar() {
         const clientId = "71jdc4b1eh18i8d6f4194f7b1p";
         const logoutUri = import.meta.env.MODE === 'development'
             ? "https://localhost:5173/home"
-            : "https://main.dx3zghecu9fe3.amplifyapp.com/home";
+            : "https://aws-production.deyr091sxurr5.amplifyapp.com/home";
 
         const cognitoDomain = "https://ap-southeast-2i8rut828h.auth.ap-southeast-2.amazoncognito.com";
 
