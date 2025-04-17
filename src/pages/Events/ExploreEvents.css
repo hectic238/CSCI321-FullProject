@@ -1,0 +1,74 @@
+/* ExploreEvents.css */
+
+/* Ensure body and html can grow with content */
+html, body {
+    margin: 0;
+    padding: 0;
+    height: auto; /* Ensure auto height */
+}
+
+/* Full-width photo bar */
+.photo-bar {
+    width: 100%;
+    height: 200px;
+    overflow: hidden;
+}
+
+.top-banner {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.events-section {
+    margin: 20px;
+}
+
+.events-section h2 {
+    margin-top: 40px;
+    font-size: 24px;
+    text-align: left;
+}
+
+.explore-events .events-grid {
+    display: flex !important; /* Use flexbox to arrange items in a row */
+    flex-wrap: nowrap !important; /* Prevent items from wrapping to the next line */
+    flex-direction: row !important;
+    min-height: 0 !important;
+    justify-content: flex-start; /* Align items to the start */
+    gap: 15px; /* Space between cards */
+    padding: 10px 0;
+    overflow-x: auto; /* Allow horizontal scrolling if needed */
+    max-width: fit-content !important;
+    margin: 0 !important;
+}
+
+.event-card {
+    flex: 0 0 200px; /* Prevent flex items from shrinking, fixed width */
+    margin-bottom: 20px; /* Space at the bottom of each card */
+    border: 1px solid #ddd; /* Optional: Add a border for better visibility */
+    border-radius: 5px; /* Optional: Rounded corners */
+    overflow: hidden; /* Ensure content doesn't overflow */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Optional: Add shadow for depth */
+    height: 250px;
+    width: 250px;
+}
+
+/* Image in the event card */
+.event-image {
+    width: 100%; /* Make the image fill the card width */
+    height: auto; /* Maintain aspect ratio */
+}
+
+/* Event details styling */
+.event-details {
+    padding: 10px; /* Add padding for text */
+}
+
+.event-details h3 {
+    margin-top: 0;
+}
+
+.event-details p {
+    margin: 5px 0;
+}

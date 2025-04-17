@@ -1,0 +1,79 @@
+
+
+/* Ensure the background covers the entire viewport */
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+}
+
+.no-scroll {
+    overflow: hidden; /* Prevent scrolling */
+}
+
+.scrollable {
+    overflow: auto; /* Allow scrolling */
+}
+
+.main-content {
+    padding-top: 70px; /* Same as navbar height */
+}
+
+
+
+/* Set the background image and make it cover the entire page */
+.landing-page {
+    height: 100vh; /* Full height of the viewport */
+    width: 100vw; /* Full width of the viewport */
+    background-image: url("../assets/background.png"); /* Background image */
+    background-size: cover; /* Cover the entire page */
+    background-position: center; /* Center the image */
+    display: flex; /* Use flexbox to center the content */
+    justify-content: center; /* Center horizontally */
+    align-items: center; /* Center vertically */
+}
+
+/* Circle container for the logo, slogan, and button */
+.circle-container {
+    width: 350px; /* Increased circle diameter */
+    height: 350px;
+    border-radius: 50%; /* Makes the div a circle */
+    background-color: rgba(255, 255, 255, 0.9); /* Semi-transparent white background */
+    display: flex;
+    flex-direction: column; /* Stack the content vertically */
+    justify-content: center; /* Center vertically */
+    align-items: center; /* Center horizontally */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5); /* Optional shadow for the circle */
+    padding: 20px; /* Padding inside the circle */
+    text-align: center; /* Center-align the text */
+}
+
+/* Logo image */
+.homelogo {
+    width: 150px; /* Adjust logo size */
+    height: auto;
+    margin-bottom: 10px; /* Space between logo and slogan */
+}
+
+/* Slogan */
+.slogan {
+    font-size: 18px;
+    margin-bottom: 20px; /* Space between slogan and button */
+    color: #333;
+}
+
+/* Call-to-action button */
+.cta-button {
+    background-color: #FF5757;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+}
+
+.cta-button:hover {
+    color: white; /* Darker red on hover */
+}

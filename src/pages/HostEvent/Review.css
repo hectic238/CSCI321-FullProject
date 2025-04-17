@@ -1,0 +1,103 @@
+.review-page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-bottom: 30px;
+}
+
+.banner-image {
+    width: 100%;
+    height: auto;
+    margin-bottom: 20px;
+}
+
+h1 {
+    margin: 10px 0;
+    font-size: 28px;
+}
+
+.review-details-box img {
+    width: 100%;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 10px;
+    background-color: #ccc;
+    margin: 20px 0;
+    border-radius: 5px;
+
+}
+
+.progress {
+    height: 100%;
+    background-color: red;
+    border-radius: 5px;
+}
+
+.review-details-box {
+    width: 100%;
+    max-width: 800px;
+    padding: 20px;
+    border: 1px solid #ccc;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    text-align: left;
+
+}
+
+.review-details-box h2 {
+    margin-bottom: 10px;
+    font-size: 22px;
+}
+
+.review-details-box p {
+    margin: 5px 0;
+    font-size: 16px;
+}
+
+.review-buttons {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    max-width: 800px;
+}
+
+.review-buttons button {
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.review-buttons button:first-child {
+    background-color: #f0f0f0;
+    border: 1px solid #ccc;
+}
+
+.review-buttons button:nth-child(2) {
+    background-color: #f9d71c;
+    border: none;
+    color: white;
+}
+
+.review-buttons button:last-child {
+    background-color: red;
+    border: none;
+    color: white;
+}
+
+.ticket-section {
+    display: flex;
+    flex-direction: column;
+    gap: 5px; /* Space between rows */
+    margin-top: 20px;
+}
+
+
+
+
+
+
+
+
