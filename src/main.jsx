@@ -7,7 +7,7 @@ import { AuthProvider } from 'react-oidc-context'
 const redirectUri =
     import.meta.env.MODE === 'development'
         ? 'https://localhost:5173/redirect'
-        : 'https://main.dx3zghecu9fe3.amplifyapp.com/redirect'
+        : 'https://aws-production.deyr091sxurr5.amplifyapp.com/redirect'
 
 const cognitoAuthConfig = {
     authority: 'https://cognito-idp.ap-southeast-2.amazonaws.com/ap-southeast-2_i8rut828H',
