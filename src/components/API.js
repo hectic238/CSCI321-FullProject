@@ -21,6 +21,7 @@ export const APIWithToken = async (url, method, body = null) => {
         const baseUrl = "https://bfrc7mljh3.execute-api.ap-southeast-2.amazonaws.com/api/";
         const response = await fetch(baseUrl + url, options);
 
+        console.log(response);
         return response;
     } catch (e) {
         alert(`Error: ${e.message}`);

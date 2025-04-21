@@ -95,6 +95,9 @@ const EventDetails = () => {
             console.log(body);
 
             const orderData = await createOrder(body);
+            if(orderData) {
+                window.location.href = '/';           
+            }
         }
     };
 
