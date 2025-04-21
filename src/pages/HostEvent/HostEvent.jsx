@@ -6,8 +6,6 @@ import Ticketing from './Ticketing';
 import Review from "./Review.jsx";
 import { Button, message, Steps, theme } from 'antd';
 import banner from '../../assets/exploreEvent.png';
-import Navbar from "../../components/Navbar.jsx";
-import Home from "@/pages/Home.jsx"; // Import your CSS file
 import {generateObjectId} from "@/components/Functions.jsx";
 import {useAuth0} from "@auth0/auth0-react";
 import {createEvent, updateEvent} from "@/components/eventFunctions.jsx";
@@ -293,7 +291,6 @@ const HostEvent = () => {
 
     return (
         <>
-            <Navbar/>
             <img src={banner} alt="Banner" className="banner-image"/>
             <Steps style={{
                 width: '90%',

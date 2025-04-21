@@ -8,6 +8,7 @@ export const createOrder = async (body) => {
         if (!response.ok) {
             throw new Error("Failed to upload event");
         }
+        console.log(response);
         const data = await response.json();
         return data;  // this will return a message if the event was successfully created
     } catch (error) {

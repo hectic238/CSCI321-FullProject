@@ -1,5 +1,4 @@
 ﻿import Header from "../components/Header";
-import Navbar from "../components/Navbar";
 import React, { useState, useEffect } from 'react';
 import './ContactUs.css'
 import {sendMessage} from "@/components/messageFunctions.jsx";
@@ -39,7 +38,6 @@ function ContactUs() {
     return (
         <>
             <Header />
-            <Navbar />
             <div className="contact-container">
                 {/* Contact Header Section */}
                 <div className="contact-header">

@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import './MyEvents.css';
-import Navbar from "../../components/Navbar.jsx"; // Add necessary styles here
 import EventCardLarge from "../../components/EventCardLarge.jsx";
 import {getUsersDraftEvents, getUsersEvents} from "@/components/eventFunctions.jsx";
 import {useAuth} from "react-oidc-context";
-import EventCard from "@/components/EventCard.jsx";
 
 
 
@@ -50,7 +48,6 @@ const MyEvents = () => {
     
     return (
         <div>
-            <Navbar />
             
             <div className='events-grid'>
 

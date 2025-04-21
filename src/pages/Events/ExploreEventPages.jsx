@@ -1,6 +1,5 @@
 import {useLocation, useParams, useSearchParams} from 'react-router-dom';
 import React, {useEffect, useState} from "react";
-import Navbar from "@/components/Navbar.jsx";
 import banner from "@/assets/exploreEvent.png";
 import EventPageCard from "@/components/EventPageCard.jsx";
 import {
@@ -344,7 +343,6 @@ const ExploreEventPages = () => {
 
     return (
         <>
-            <Navbar/>
             <div className="explore-events">
                 {/* Photo Bar across the top */}
                 <div className="photo-bar">

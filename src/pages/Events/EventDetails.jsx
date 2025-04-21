@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import Navbar from "@/components/Navbar.jsx"; 
 import { Drawer, Button } from 'antd'; 
 import './EventDetails.css';
 import {getCookie} from "@/components/Cookie.jsx";
 import {getEvent, updateEvent} from "@/components/eventFunctions.jsx";
 import {useAuth} from "react-oidc-context";
 import {createOrder} from "@/components/orderFunctions.jsx";
+import {generateObjectId} from "@/components/Functions.jsx";
 
 const EventDetails = () => {
     const { eventName, eventId } = useParams(); 
@@ -83,11 +83,18 @@ const EventDetails = () => {
             eventDetails.tickets[0].bought += totalTickets;
             const data = await updateEvent(eventDetails);
             
+            
             const body = {
-                
+                orderId: generateObjectId(),
+                eventId: eventDetails.eventId,
+                totalPrice: 0,
+                eventDate: eventDetails.startDate,
+                tickets: selectedTickets,
             }
+            
+            console.log(body);
 
-            const orderData = await createOrder(eventDetails);
+            const orderData = await createOrder(body);
         }
     };
 
@@ -125,7 +132,6 @@ const EventDetails = () => {
 
     return (
         <div className="event-details-container">
-            <Navbar />
             <div className="event-header">
                 <img src={eventDetails.image} alt={eventDetails.title} className="event-image" />
                 <div className="event-info">
@@ -168,7 +174,6 @@ const EventDetails = () => {
                             <div key={ticket.name} className="ticket-item">
                                 <p>{ticket.name} {ticket.count < 1 ?
                                     <span style={{color: 'red'}}>(Sold Out)</span> : null}</p>
-                                <p>Price: ${ticket.price}</p>
                                 <div className="ticket-quantity">
                                     <button
                                         className="quantity-btn"
@@ -191,7 +196,6 @@ const EventDetails = () => {
                         ))}
                             <div className="total-section">
                                 <p>Total Tickets: {totalTickets}</p>
-                                <p>Total Price: ${totalPrice}</p>
                                 <Button
                                     onClick={handleAttendClick}
                                     disabled={totalTickets === 0 || isEventInPast || !auth.isAuthenticated}

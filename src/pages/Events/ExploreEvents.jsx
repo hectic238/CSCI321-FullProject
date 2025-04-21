@@ -1,4 +1,3 @@
-import Navbar from '@/components/Navbar';
 import './ExploreEvents.css';
 import React, {useEffect, useState} from 'react';
 import {useNavigate} from "react-router-dom";
@@ -183,7 +182,6 @@ function ExploreEvents() {
     return (
         <>
 
-            <Navbar/>
             <div className="explore-events">
                 
                 <div className="events-section">
