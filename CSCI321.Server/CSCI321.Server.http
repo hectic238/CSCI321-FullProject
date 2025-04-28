@@ -1,6 +1,0 @@
-@CSCI321.Server_HostAddress = http://localhost:5144
-
-GET {{CSCI321.Server_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###
