@@ -33,6 +33,7 @@ import {
 import {useAuth} from "react-oidc-context";
 import {getToken} from "@/components/getToken.jsx";
 import {APIWithToken} from "@/components/API.js";
+import Navbar from "@/components/Navbar.jsx";
 
 const RedirectPage = () => {
     const theme = useTheme()
