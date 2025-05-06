@@ -21,7 +21,7 @@ import ExternalEventDetails from "@/pages/Events/ExternalEventDetails.jsx";
 import ExploreEventPages from "@/pages/Events/ExploreEventPages.jsx";
 import CheckoutReturn from "@/pages/Checkout/CheckoutReturn.jsx";
 import RedirectPage from "@/pages/Profile/RedirectPage.jsx";
-
+import TailoredEvents from "@/pages/Events/TailoredEvents.jsx";
 
 const App = () => {
     const [isLoggedOut, setIsLoggedOut] = useState(false);
@@ -113,6 +113,7 @@ const App = () => {
                     />
                     
                     <Route path="/redirect" element={<RedirectPage />} />
+                    <Route path="/events" element={<TailoredEvents />} />
                 </Routes>
             <Footer />
             </main>

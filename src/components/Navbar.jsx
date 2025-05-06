@@ -184,6 +184,9 @@ function Navbar() {
 
 
                             <div className="attendee-actions">
+                                <nav>
+                                    <a href="/events" className="cta-button">Personalised Events</a>
+                                </nav>
                                 
                                 <Link to="/myTickets" className="attendee-btn">
                                     <img src={ticketIcon} alt="Tickets" className="attendee-icon"/>
