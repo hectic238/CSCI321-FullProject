@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import Home from './pages/Home';
 import ContactUs from './pages/ContactUs.jsx';
 import {Footer} from "./components/Footer.jsx";
+import Navbar from "./components/Navbar.jsx";
 import { useEffect, useState } from 'react';
 import HostEventDetails from './pages/HostEvent/Details';
 import HostEventBanner from './pages/HostEvent/Banner'; 
@@ -58,6 +59,7 @@ const App = () => {
     return (
         <div>
             <main className="main-content">
+            <Navbar/>
                 <Routes>
                     <Route index element={<Home />} />
                     <Route path="/home" element={<Home />} />

@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import Navbar from "@/components/Navbar.jsx"; 
 import { Drawer, Button } from 'antd'; 
 import './EventDetails.css';
 import {getCookie} from "@/components/Cookie.jsx";
-import {getEvent} from "@/components/eventFunctions.jsx";
+import {getEvent, updateEvent} from "@/components/eventFunctions.jsx";
 import {useAuth} from "react-oidc-context";
+import {createOrder} from "@/components/orderFunctions.jsx";
+import {generateObjectId} from "@/components/Functions.jsx";
 
 const EventDetails = () => {
     const { eventName, eventId } = useParams(); 
@@ -75,15 +76,28 @@ const EventDetails = () => {
         
     };
 
-    const handleAttendeeCountChange = (increment) => {
-        setAttendeeCount(prev => Math.max(0, prev + increment));
-    };
-
-    const handleAttendClick = () => {
+    const handleAttendClick = async () => {
         if (!isEventInPast) {
-            eventDetails.numberAttendees += attendeeCount;
-            eventDetails.tickets[0].count -= attendeeCount;
-            eventDetails.tickets[0].bought += attendeeCount;
+            eventDetails.numberAttendees += totalTickets;
+            eventDetails.tickets[0].count -= totalTickets;
+            eventDetails.tickets[0].bought += totalTickets;
+            const data = await updateEvent(eventDetails);
+            
+            
+            const body = {
+                orderId: generateObjectId(),
+                eventId: eventDetails.eventId,
+                totalPrice: 0,
+                eventDate: eventDetails.startDate,
+                tickets: selectedTickets,
+            }
+            
+            console.log(body);
+
+            const orderData = await createOrder(body);
+            if(orderData) {
+                window.location.href = '/';           
+            }
         }
     };
 
@@ -121,7 +135,6 @@ const EventDetails = () => {
 
     return (
         <div className="event-details-container">
-            <Navbar />
             <div className="event-header">
                 <img src={eventDetails.image} alt={eventDetails.title} className="event-image" />
                 <div className="event-info">
@@ -160,30 +173,52 @@ const EventDetails = () => {
 
                 <div className="ticket-info">
                     {eventDetails.eventTicketType === 'free' ? (
-                        <div className="general-admission">
-                            <div>Free Event</div>
-                            <div>
-                                <button onClick={() => handleAttendeeCountChange(-1)}>-</button>
-                                <span>{attendeeCount}</span>
-                                <button onClick={() => handleAttendeeCountChange(1)}>+</button>
-                            </div>
-                            <Button
-                                onClick={handleAttendClick}
-                                disabled={isEventInPast}
-                            >
-                                Attend
-                            </Button>
+                        <div>{eventDetails.tickets.map((ticket, index) => (
+                            <div key={ticket.name} className="ticket-item">
+                                <p>{ticket.name} {ticket.count < 1 ?
+                                    <span style={{color: 'red'}}>(Sold Out)</span> : null}</p>
+                                <div className="ticket-quantity">
+                                    <button
+                                        className="quantity-btn"
+                                        onClick={() => handleRemoveTicket(ticket)}
+                                        disabled={ticket.count < 1 || isEventInPast}
+                                    >
+                                        -
+                                    </button>
+                                    <span>{selectedTickets.find(t => t.name === ticket.name)?.quantity || 0}</span>
 
-                            {isEventInPast && (
-                                <p className="event-message">
-                                    This event has already happened. Tickets can no longer be purchased or attended.
-                                </p>
-                            )}
+                                    <button
+                                        className="quantity-btn"
+                                        onClick={() => handleAddTicket(ticket)}
+                                        disabled={ticket.count < 1 || isEventInPast}
+                                    >
+                                        +
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
+                            <div className="total-section">
+                                <p>Total Tickets: {totalTickets}</p>
+                                <Button
+                                    onClick={handleAttendClick}
+                                    disabled={totalTickets === 0 || isEventInPast || !auth.isAuthenticated}
+                                    style={{width: "100px"}}
+                                >
+                                    Checkout
+                                </Button>
+
+                                {isEventInPast && (
+                                    <p className="event-message">
+                                        This event has already happened. Tickets can no longer be purchased or attended.
+                                    </p>
+                                )}
+                            </div>
                         </div>
                     ) : (
                         <div>{eventDetails.tickets.map((ticket, index) => (
                             <div key={ticket.name} className="ticket-item">
-                                <p>{ticket.name} {ticket.count < 1 ? <span style={{ color: 'red' }}>(Sold Out)</span> : null}</p>
+                                <p>{ticket.name} {ticket.count < 1 ?
+                                    <span style={{color: 'red'}}>(Sold Out)</span> : null}</p>
                                 <p>Price: ${ticket.price}</p>
                                 <div className="ticket-quantity">
                                     <button

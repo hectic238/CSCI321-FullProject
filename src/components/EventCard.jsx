@@ -21,8 +21,8 @@ const formatTime = (timeString) => {
     const ampm = hours >= 12 ? 'PM' : 'AM'; // Determine AM/PM
     return `${formattedHours}:${minutes} ${ampm}`; // Return formatted time
 };
-function EventCard({ event }) {
 
+function EventCard({ event }) {
     let isSoldOut;
     let totalTicketsLeft;
     let isLimitedSpace;
@@ -83,7 +83,17 @@ function EventCard({ event }) {
                         <Link to={`/event/${event.title.replace(/\s+/g, '-')}/${event.eventId}`}><h3>{event.title}</h3>
                         </Link>
                         <p><strong>Date:</strong> {formatDate(event.startDate)}</p>
-                        <p><strong>Time:</strong> {formatTime(event.startTime) + " - " + formatTime(event.endTime)}</p>
+                        <p>
+                            <strong>Time:</strong> 
+                            {formatTime(event.startTime)}
+                            {
+                                event.endTime !== "" ? (
+                                    " - " + formatTime(event.endTime)
+                                ) : (
+                                    ""
+                                )
+                            }
+                        </p>
                         <p><strong>Location:</strong> {event.location}</p>
                     
                     </div>

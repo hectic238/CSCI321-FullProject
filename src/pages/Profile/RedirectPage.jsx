@@ -4,7 +4,6 @@ import {useEffect, useState} from "react"
 import InterestedPage from "@/components/InterestedPage.jsx"
 import background from "../../assets/background.png"
 import logoSmall from "../../assets/logo_small.png"
-import Navbar from "../../components/Navbar"
 import dayjs from "dayjs"
 import {MuiTelInput} from "mui-tel-input"
 import {AdapterDayjs} from "@mui/x-date-pickers/AdapterDayjs"
@@ -34,6 +33,7 @@ import {
 import {useAuth} from "react-oidc-context";
 import {getToken} from "@/components/getToken.jsx";
 import {APIWithToken} from "@/components/API.js";
+import Navbar from "@/components/Navbar.jsx";
 
 const RedirectPage = () => {
     const theme = useTheme()

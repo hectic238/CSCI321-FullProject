@@ -364,8 +364,5 @@ FodyWeavers.xsd
 
 # env variables!!
 
-./CSCI321.Server/appsettings.json
-./CSCI321.Server/appsettings.Development.json
-
-./csci321.client/.env.development
-./csci321.client/.env.production
+./.env.development
+./.env.production
