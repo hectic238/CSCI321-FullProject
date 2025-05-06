@@ -237,17 +237,63 @@ const ExploreEventPages = () => {
                 const concertsData = await fetchEvent("category",'music');
                 setEvents(concertsData);
             }
+            else if(category === "Music") {
+                const concertsData = await fetchEvent("category",'Music');
+                setEvents(concertsData);
+            }
             else if(category === "theatre") {
                 const theatreEventsData = await fetchEvent("category",'theatre');
                 setEvents(theatreEventsData);
             }
+            
             else if(category === "family") {
                 const familyEventsData = await fetchEvent("category",'family');
                 setEvents(familyEventsData);
             }
+            
             else if(category === "comedy") {
                 const comedyEventsData = await fetchEvent("category",'comedy');
                 setEvents(comedyEventsData);
+            }
+            else if(category === "Family") {
+                const familyEventsData = await fetchEvent("category",'Family');
+                setEvents(familyEventsData);
+            }
+            else if(category === "Art") {
+                const theatreEventsData = await fetchEvent("category",'Art');
+                setEvents(theatreEventsData);
+            }
+            else if(category === "Comedy") {
+                const comedyEventsData = await fetchEvent("category",'Comedy');
+                setEvents(comedyEventsData);
+            }
+            else if(category === "Food") {
+                const FoodEventsData = await fetchEvent("category",'Food');
+                setEvents(FoodEventsData);
+            }
+            else if(category === "Sports") {
+                const SportsEventsData = await fetchEvent("category",'Sports');
+                setEvents(SportsEventsData);
+            }
+            else if(category === "Business") {
+                const BusinessEventsData = await fetchEvent("category",'Business');
+                setEvents(BusinessEventsData);
+            }
+            else if(category === "Technology") {
+                const TechnologyEventsData = await fetchEvent("category",'Technology');
+                setEvents(TechnologyEventsData);
+            }
+            else if(category === "Charity") {
+                const CharityEventsData = await fetchEvent("category",'Charity');
+                setEvents(CharityEventsData);
+            }
+            else if(category === "Education") {
+                const EducationEventsData = await fetchEvent("category",'Education');
+                setEvents(EducationEventsData);
+            }
+            else if(category === "Travel") {
+                const TravelEventsData = await fetchEvent("category",'Travel');
+                setEvents(TravelEventsData);
             }
             
         } catch (error) {
@@ -293,6 +339,10 @@ const ExploreEventPages = () => {
                     const newEvents = await fetchEvent("category",'music', nextPage, "", updatedCount);
                     setEvents(prevEvents => [...prevEvents, ...newEvents]); 
                 }
+                else if(category.categoryName === "Music") {
+                    const newEvents = await fetchEvent("category",'music', nextPage, "", updatedCount);
+                    setEvents(prevEvents => [...prevEvents, ...newEvents]);
+                }
                 else if(category.categoryName === "theatre") {
                     const newEvents = await fetchEvent("category",'theatre', nextPage, "", updatedCount);
                     setEvents(prevEvents => [...prevEvents, ...newEvents]); 
@@ -304,6 +354,42 @@ const ExploreEventPages = () => {
                 else if(category.categoryName === "comedy") {
                     const newEvents = await fetchEvent("category",'comedy', nextPage, "", updatedCount);
                     setEvents(prevEvents => [...prevEvents, ...newEvents]); 
+                }
+                else if(category.categoryName === "Art") {
+                    const newEvents = await fetchEvent("category",'Art', nextPage, "", updatedCount);
+                    setEvents(prevEvents => [...prevEvents, ...newEvents]);
+                }
+                else if(category.categoryName === "Comedy") {
+                    const newEvents = await fetchEvent("category",'Comedy', nextPage, "", updatedCount);
+                    setEvents(prevEvents => [...prevEvents, ...newEvents]);
+                }
+                else if(category.categoryName === "Food") {
+                    const newEvents = await fetchEvent("category",'Food', nextPage, "", updatedCount);
+                    setEvents(prevEvents => [...prevEvents, ...newEvents]);
+                }
+                else if(category.categoryName === "Sports") {
+                    const newEvents = await fetchEvent("category",'Sports', nextPage, "", updatedCount);
+                    setEvents(prevEvents => [...prevEvents, ...newEvents]);
+                }
+                else if(category.categoryName === "Business") {
+                    const newEvents = await fetchEvent("category",'Business', nextPage, "", updatedCount);
+                    setEvents(prevEvents => [...prevEvents, ...newEvents]);
+                }
+                else if(category.categoryName === "Technology") {
+                    const newEvents = await fetchEvent("category",'Technology', nextPage, "", updatedCount);
+                    setEvents(prevEvents => [...prevEvents, ...newEvents]);
+                }
+                else if(category.categoryName === "Charity") {
+                    const newEvents = await fetchEvent("category",'Charity', nextPage, "", updatedCount);
+                    setEvents(prevEvents => [...prevEvents, ...newEvents]);
+                }
+                else if(category.categoryName === "Education") {
+                    const newEvents = await fetchEvent("category",'Education', nextPage, "", updatedCount);
+                    setEvents(prevEvents => [...prevEvents, ...newEvents]);
+                }
+                else if(category.categoryName === "Travel") {
+                    const newEvents = await fetchEvent("category",'Travel', nextPage, "", updatedCount);
+                    setEvents(prevEvents => [...prevEvents, ...newEvents]);
                 }
 
             } catch (error) {
