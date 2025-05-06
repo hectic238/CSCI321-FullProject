@@ -37,7 +37,6 @@ import {
     AccessTime,
 } from "@mui/icons-material"
 import background from "@/assets/background.png"
-import Navbar from "@/components/Navbar"
 import { getCookie } from "@/components/Cookie.jsx"
 import {fetchExternalEvent} from "@/components/eventFunctions.jsx";
 
@@ -133,7 +132,6 @@ const ExternalEventDetails = () => {
             try {
                 setLoading(true)
                 const response = await fetchExternalEvent({ eventId });
-                console.log(response);
                 setEventDetails(response);
                 document.title = `${response.name} | PLANIT`;
                 setLoading(false);
@@ -217,7 +215,6 @@ const ExternalEventDetails = () => {
                     },
                 }}
             >
-                <Navbar sx={{ position: "sticky", top: 0, zIndex: 1100, mb: 2 }} />
                 <Container
                     maxWidth="lg"
                     sx={{
@@ -264,7 +261,6 @@ const ExternalEventDetails = () => {
                     },
                 }}
             >
-                <Navbar sx={{ position: "sticky", top: 0, zIndex: 1100, mb: 2 }} />
                 <Container
                     maxWidth="lg"
                     sx={{
@@ -330,7 +326,6 @@ const ExternalEventDetails = () => {
                 },
             }}
         >
-            <Navbar sx={{ position: "sticky", top: 0, zIndex: 1100, mb: 2 }} />
 
             <Container
                 maxWidth="lg"

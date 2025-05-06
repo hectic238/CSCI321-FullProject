@@ -42,7 +42,6 @@ import {
     LightMode,
     Map,
 } from "@mui/icons-material"
-import Navbar from "@/components/Navbar.jsx"
 import banner from "@/assets/exploreEvent.png"
 import background from "@/assets/background.png"
 import {APIWithToken} from "@/components/API.js";
@@ -468,7 +467,6 @@ const MyTickets = () => {
                         mb: 2,
                     }}
                 >
-                    <Navbar />
                 </Box>
                 <Container
                     maxWidth="lg"
@@ -533,7 +531,6 @@ const MyTickets = () => {
                     width: "100%",
                 }}
             >
-                <Navbar />
             </Box>
 
             <Container

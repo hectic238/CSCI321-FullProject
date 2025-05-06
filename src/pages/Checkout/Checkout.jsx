@@ -1,6 +1,5 @@
 ﻿import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import Navbar from "@/components/Navbar.jsx";
 import {EmbeddedCheckout, Elements, EmbeddedCheckoutProvider} from "@stripe/react-stripe-js";
 import {loadStripe} from "@stripe/stripe-js";
 import {useAuth0} from "@auth0/auth0-react";
@@ -69,7 +68,6 @@ const Checkout = () => {
 
     return (
         <Elements stripe={stripePromise}>
-            <Navbar />
 
             <div>
                 <div style={{ display: "flex", justifyContent: "center" }}>

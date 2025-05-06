@@ -1,5 +1,4 @@
-﻿import Navbar from "@/components/Navbar.jsx";
-import { useParams, useNavigate } from 'react-router-dom';
+﻿import { useParams, useNavigate } from 'react-router-dom';
 import React, { useEffect, useState } from 'react';
 import {getEvent} from "@/components/eventFunctions.jsx"; // Ant Design imports
 
@@ -62,7 +61,6 @@ function EventStats() {
 
     return (
         <div className="event-details-container">
-            <Navbar />
             <div className="event-header">
                 <img src={eventDetails.image} alt={eventDetails.title} className="event-image" />
                 <div className="event-info">

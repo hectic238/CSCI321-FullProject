@@ -1,6 +1,5 @@
 ﻿import {useEffect, useState} from 'react';
 import {useLocation} from 'react-router-dom';
-import Navbar from "@/components/Navbar.jsx";
 import {getEvent} from "@/components/eventFunctions.jsx";
 import {fetchSessionStatus} from "@/components/checkoutFunctions.jsx";
 
@@ -73,7 +72,6 @@ const CheckoutReturn = () => {
     return (
 
         <div>
-            <Navbar/>
             <h1>Payment Successful!</h1>
             <p style={{
                 maxWidth: "700px",
