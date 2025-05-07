@@ -30,7 +30,7 @@
     flex-direction: column !important; /* Arrange children in a column */
     justify-content: flex-start; /* Align items at the start (top) */
     align-items: center; /* Center items horizontally */
-    
+
     padding: 20px; /* Optional padding */
     box-sizing: border-box; /* Include padding in height calculations */
 }
@@ -248,8 +248,8 @@ input[type="text"] {
 }
 
 input[type="number"] {
-      width: 100px; /* Make inputs responsive to column width */
-      padding: 5px;
+    width: 100px; /* Make inputs responsive to column width */
+    padding: 5px;
     box-sizing: border-box;
 
 }

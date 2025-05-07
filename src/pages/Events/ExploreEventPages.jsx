@@ -31,14 +31,30 @@ const ExploreEventPages = () => {
     const [noMorePages, setNoMorePages] = useState(false);
     const [searchParams] = useSearchParams();
 
-    
+    // build the dynamic heading text
+    const displayNames = {
+        popular: 'Popular Events',
+        music:   'Concerts',
+        theatre: 'Theatre',
+        family:  'Family',
+        comedy:  'Comedy',
+    };
+    let headingText = 'Results';
+    if (isSearch) {
+        const q = searchParams.get("q") || '';
+        headingText = `Search: "${q}"`;
+    } else if (isCategory) {
+        headingText = displayNames[category.categoryName]
+            || (category.categoryName.charAt(0).toUpperCase() + category.categoryName.slice(1));
+    }
+
     const [ticketmasterEventsPage, setTicketmasterEventsPage] = useState(0);
-    
+
     const fetchTicketMasterEvents = async (size = 10, page = 0) => {
         setTicketMasterEventsFetched(true);
 
         let params;
-        
+
         if(category.categoryName === "popular") {
             params = `?dmaId=702&size=${size}&page=${page}&apikey=${API_KEY}`;
         }
@@ -48,9 +64,9 @@ const ExploreEventPages = () => {
         else {
             params = `?dmaId=702&classificationName=${category.categoryName}&size=${size}&page=${page}&apikey=${API_KEY}`;
         }
-        
+
         const url = `${API_URL}${params}`;
-        
+
         try {
             const response = await fetch(url);
             if (!response.ok) {
@@ -67,8 +83,8 @@ const ExploreEventPages = () => {
             setError(err.message);
         }
     };
-    
-    
+
+
     const calculateTotalPage = async (size, searchTerm) => {
         let params;
 
@@ -83,8 +99,8 @@ const ExploreEventPages = () => {
         }
 
         const url = `${API_URL}${params}`;
-        
-        
+
+
         const response = await fetch(url);
         if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`);
@@ -92,18 +108,18 @@ const ExploreEventPages = () => {
         const data = await response.json();
 
         setTotalPages(data.page.totalPages);
-        
+
 
     }
-    
+
     const fetchEvent = async (type, category,page, searchTerm) => {
         // Fetch local events, 
-        
-        
+
+
         let websiteEvents = [];
-        
+
         let newWebsiteEvents = [];
-        
+
         if(!noMoreWebsiteEvents) {
             let data;
             if (type === "popular") {
@@ -119,13 +135,13 @@ const ExploreEventPages = () => {
                     tickets: typeof event.tickets === "string" ? JSON.parse(event.tickets) : event.tickets
                 }));
             }
-            
-            
+
+
             websiteEvents = data.events;
-            
-            
+
+
             setLastEvaluatedKey(data.lastEvaluatedKey);
-            
+
             newWebsiteEvents = websiteEvents.map(event => ({
                 ...event,
                 source: 'local'  // Mark these events as 'local'
@@ -135,39 +151,39 @@ const ExploreEventPages = () => {
                 ...event,
                 source: 'local'  // Mark these events as 'local'
             })));
-            
+
         }
 
-        
+
         const pageBody = {
             size: PAGE_SIZE,
             category: category,
             searchTerm: searchTerm,
             isSearch: isSearch
         }
-        
+
         const pages = await calculateTotalPages(pageBody);
-        
+
         setTotalPages(pages.totalPages)
-        
+
         //await calculateTotalPage(PAGE_SIZE, searchTerm);
 
 
         // Fetch PAGE_SIZE amount of ticketmaster events, then splice the remainder from the front of the ticketmaster array
-        
+
         const numberWebsiteEvents = newWebsiteEvents.length;
-        
+
         let ticketMasterEvents = [];
-        
+
         let newTicketMasterEvents = [];
-        
+
         // If the website events doesnt equal 5 then fetch ticketmasterEvents
-        
+
         if(numberWebsiteEvents !== 5) {
 
             setNoMoreWebsiteEvents(true)
             // fetch 5 ticketmaster events and store in array
-            
+
             const body = {
                 size: 5,
                 page: ticketmasterEventsPage,
@@ -177,16 +193,16 @@ const ExploreEventPages = () => {
             }
 
             const ticketData = await getTicketmasterEvents(body);
-            
+
             if(ticketData) {
                 setTicketMasterEventsFetched(true);
             }
-            
+
             setTotalPages(ticketData.page.totalPages - 1);
             ticketMasterEvents = ticketData._embedded?.events;
 
             //ticketMasterEvents = await fetchTicketMasterEvents(5, ticketmasterEventsPage);
-            
+
             setTicketmasterEventsPage(ticketmasterEventsPage + 1);
 
             if (Array.isArray(ticketMasterEvents)) {
@@ -196,44 +212,44 @@ const ExploreEventPages = () => {
                     ...event,
                     source: 'ticketmaster'  // Mark these events as 'ticketmaster'
                 }));
-                
+
                 // store these new events at the end of the allTicketMasterEvents array to get ready to splice
-                
+
                 const availableEvents = [...allAvailableEvents, ...newTicketMasterEvents];
-                
+
                 // splice the availableEvents array with the neccessary amount of events to fill the page
                 const ticketmasterEventsNeeded = PAGE_SIZE - numberWebsiteEvents;
-                
-                
+
+
                 const splicedTicketmasterEvents = availableEvents.splice(0, ticketmasterEventsNeeded);
-                
+
                 setAllAvailableEvents(availableEvents);
-                
+
                 return [...newWebsiteEvents, ...splicedTicketmasterEvents];
-                
+
             }
         }
-        
+
         console.log(events)
         console.log(newWebsiteEvents);
 
         return [ ...newWebsiteEvents];
     }
-    
+
     const loadEvents = async (searchTerm, category) => {
         try {
-            
+
             if(isSearch) {
                 const searchedEvents = await fetchEvent("popular","popular", 0,searchTerm);
                 setEvents(searchedEvents);
                 return;
             }
-            
+
             if(category === "popular") {
                 const popularEvents = await fetchEvent("popular","popular",0,  " ");
                 setEvents(popularEvents);
             }
-            
+
             if(category === "music") {
                 const concertsData = await fetchEvent("category",'music');
                 setEvents(concertsData);
@@ -250,12 +266,12 @@ const ExploreEventPages = () => {
                 const comedyEventsData = await fetchEvent("category",'comedy');
                 setEvents(comedyEventsData);
             }
-            
+
         } catch (error) {
             console.error('Error fetching events:', error);
         }
     };
-    
+
     const handleViewMore = async () => {
         if(loading) return;
         setLoading(true);
@@ -264,8 +280,8 @@ const ExploreEventPages = () => {
                 setNoMorePages(true);
                 return;
             }
-            
-            
+
+
             const updatedCount = currentWebsiteEventCount + 5;
             setCurrentWebsiteEventCount(updatedCount);
             let nextPage = 0;
@@ -273,7 +289,7 @@ const ExploreEventPages = () => {
                 nextPage = page + 1;
                 setPage(nextPage);
             }
-            
+
 
             try {
                 if(isSearch) {
@@ -282,47 +298,48 @@ const ExploreEventPages = () => {
                     setEvents(prevEvents => [...prevEvents, ...searchedEvents]);
                     setLoading(false);
                     return;
-                    
+
                 }
-                
+
                 if(category.categoryName === "popular") {
                     const newEvents = await fetchEvent("popular", "popular", nextPage, " ", updatedCount);
-                    setEvents(prevEvents => [...prevEvents, ...newEvents]); 
-                    
+                    setEvents(prevEvents => [...prevEvents, ...newEvents]);
+
                 }
+
                 if(category.categoryName === "music") {
                     const newEvents = await fetchEvent("category",'music', nextPage, "", updatedCount);
-                    setEvents(prevEvents => [...prevEvents, ...newEvents]); 
+                    setEvents(prevEvents => [...prevEvents, ...newEvents]);
                 }
                 else if(category.categoryName === "theatre") {
                     const newEvents = await fetchEvent("category",'theatre', nextPage, "", updatedCount);
-                    setEvents(prevEvents => [...prevEvents, ...newEvents]); 
+                    setEvents(prevEvents => [...prevEvents, ...newEvents]);
                 }
                 else if(category.categoryName === "family") {
                     const newEvents = await fetchEvent("category",'family', nextPage, "", updatedCount);
-                    setEvents(prevEvents => [...prevEvents, ...newEvents]); 
+                    setEvents(prevEvents => [...prevEvents, ...newEvents]);
                 }
                 else if(category.categoryName === "comedy") {
                     const newEvents = await fetchEvent("category",'comedy', nextPage, "", updatedCount);
-                    setEvents(prevEvents => [...prevEvents, ...newEvents]); 
+                    setEvents(prevEvents => [...prevEvents, ...newEvents]);
                 }
 
             } catch (error) {
                 console.error('Error fetching events:', error);
             }
 
-            
+
         } catch (error) {
             console.error("Error loading more events:", error);
         }
         setPage(page + 1);
-        
+
         setLoading(false);
     }
-    
-    
+
+
     useEffect( () => {
-        
+
         if(isSearch) {
 
             const searchTerm = searchParams.get("q");
@@ -339,44 +356,45 @@ const ExploreEventPages = () => {
 
             loadEvents(searchTerm, category2);
         }
-        
+
     }, [])
 
     return (
         <>
             <Navbar/>
-            <div className="explore-events">
+            <div className="explore-events explore-event-pages">
                 {/* Photo Bar across the top */}
                 <div className="photo-bar">
                     <img src={banner} alt="Event Banner" className="top-banner"/>
                 </div>
-                    <div className="events-section" style={{"display":"flex","alignItems":"center","justifyContent":"center"}}>
-                        <div>
-                            {events.map(event => (
-                                <EventPageCard key={event.eventId} event={event}/>
-                            ))}
+                <h1 className="results-title">{headingText}</h1>
+                <div className="events-section" style={{"display":"flex","alignItems":"center","justifyContent":"center"}}>
+                    <div>
+                        {events.map(event => (
+                            <EventPageCard key={event.eventId} event={event}/>
+                        ))}
 
-                            <div style={{"margin":"10px", "justifyContent":"center","display":"flex" }}>
+                        <div style={{"margin":"10px", "justifyContent":"center","display":"flex" }}>
 
-                                {noMorePages ? (
-                                    <div>
-                                        No More Pages
-                                    </div>
-                                ) : (
-                                    <button onClick={handleViewMore} disabled={loading || noMorePages}
-                                            style={{
-                                                "backgroundColor": loading ? "gray" : noMorePages ? "gray" : "red",
-                                                "width": "200px"
-                                            }}>
-                                        {loading ? "Loading..." : "View More"}
-                                    </button>
-                                )
-                                }
+                            {noMorePages ? (
+                                <div>
+                                    No More Pages
+                                </div>
+                            ) : (
+                                <button onClick={handleViewMore} disabled={loading || noMorePages}
+                                        style={{
+                                            "backgroundColor": loading ? "gray" : noMorePages ? "gray" : "red",
+                                            "width": "200px"
+                                        }}>
+                                    {loading ? "Loading..." : "View More"}
+                                </button>
+                            )
+                            }
 
 
-                            </div>
                         </div>
                     </div>
+                </div>
             </div>
         </>
     )
