@@ -59,7 +59,11 @@ function EventCardLarge({ event, isDraft }) {
             <div className="event-Card-Column-details" style={{width: "50%"}}>
                 <h3>{event.title}</h3>
                 <p><strong>Date:</strong> {formatDate(event.startDate)}</p>
-                <p><strong>Time:</strong> {formatTime(event.startTime) + " - " + formatTime(event.endTime)}</p>
+                <p>
+                    <strong>Time:</strong>{" "}
+                    {formatTime(event.startTime)}
+                    {event.endTime !== "" && ` - ${formatTime(event.endTime)}`}
+                </p>
                 <p><strong>Location:</strong> {event.location}</p>
             </div>
 
@@ -82,10 +86,6 @@ function EventCardLarge({ event, isDraft }) {
                     <button onClick={editEvent} className="edit-button">Edit Event Details</button>
                     </div>
                 )}
-                {
-                    <button onClick={() => handleAddToCalendar(event)}>Add to Calendar</button>
-
-                }
             </div>
         </div>
     );

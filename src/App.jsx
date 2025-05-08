@@ -2,6 +2,8 @@ import './App.css'
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import Home from './pages/Home';
 import ContactUs from './pages/ContactUs.jsx';
+import AboutUs from './pages/AboutUs.jsx'; 
+import PrivacyPolicy from './pages/PrivacyPolicy.jsx'; 
 import {Footer} from "./components/Footer.jsx";
 import Navbar from "./components/Navbar.jsx";
 import { useEffect, useState } from 'react';
@@ -64,6 +66,8 @@ const App = () => {
                     <Route index element={<Home />} />
                     <Route path="/home" element={<Home />} />
                     <Route path="/contactUs" element={<ContactUs />} />
+                    <Route path="/aboutUs" element={<AboutUs />} /> {/* Make sure the route is defined */}
+                    <Route path="/privacypolicy" element={<PrivacyPolicy />} /> {/* Make sure the route is defined */}
                     <Route path="/host" element={
                         <PrivateRoute allowedUserType="organiser">
                             <HostEvent />
