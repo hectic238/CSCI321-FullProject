@@ -1,10 +1,16 @@
-
-import {Link, useNavigate} from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import './Navbar.css';
+
 import logoSmall from '../assets/logo_small.png';
-import ticketIcon from '../assets/ticketicon.png'; 
-import starIcon from '../assets/staricon.png'; 
-import profileIcon from '../assets/profileicon.png'; 
+import ticketIcon from '../assets/ticket.svg'; 
+import starIcon from '../assets/star.svg'; 
+import profileIcon from '../assets/profile.svg'; 
+import exploreIcon from '../assets/explore.svg';
+import contactIcon from '../assets/contact.svg';
+import loginIcon from '../assets/login.svg';
+import hostIcon from '../assets/host.svg';
+
+import personalisedIcon from '../assets/personalised.svg';
 import {useEffect, useRef, useState} from "react";
 import ProfileDropdown from "./ProfileDropdown.jsx"; 
 import {Button, Input, Space} from 'antd';
@@ -15,6 +21,7 @@ import {deleteCookie, getCookie, setCookie} from "@/components/Cookie.jsx";
 
 import { useAuth } from "react-oidc-context";
 import {getUserTypeFromToken} from "@/components/userFunctions.jsx";
+import { Padding } from "@mui/icons-material";
 
 function Navbar() {
     
@@ -136,14 +143,14 @@ function Navbar() {
         };
     }, [dropdownRef]);
 
+    const location = useLocation();
+    
     return (
         <div className="navbar" style={{
             backgroundColor: "#f5f5f5",
             color: "black",
             borderBottom: "1px solid #ccc"
-
         }}>
-
 
             {/* Left Container with Logo and Search Bar */}
             <div className="navbar-left">
@@ -154,102 +161,115 @@ function Navbar() {
 
                 {/* Search Bar */}
                 <Search
-                    placeholder="Search for events here"
+                    className="navbar-search"
+                    placeholder="Search events..."
                     onSearch={onSearch}
-                    style={{
-                        flex: 1,
-                        margin: 0,
-                        padding: 8,
-                        borderradius: 30,
-                        border: 1,
-                        width: 100,
-                        maxWidth: 300,
-                    }}
                 />
             </div>
             {/* Buttons */}
             <div className="nav-links">
                 <div className="attendee-actions">
-                    <nav>
-                        <a href="/home#exploreEvents" className="cta-button">Explore Events</a>
-                    </nav>
-                    <Link to="/contactUs">Contact Us</Link>
+                    <Link to="/home#exploreEvents" className={location.pathname === "/home" && location.hash === "#exploreEvents" ? "navbar-cta-button active" : "navbar-cta-button"} id="full-button">
+                        <img src={exploreIcon} alt="Explore" className="icon" style={{paddingRight: "5px"}}/>
+                        Explore Events
+                    </Link>
+                    <Link to="/home#exploreEvents" className={location.pathname === "/home" && location.hash === "#exploreEvents" ? "navbar-cta-button active" : "navbar-cta-button"} id="mobile-button" style={{display: "none"}}>
+                        <img src={exploreIcon} alt="Explore" className="icon"/>
+                    </Link>
+
+                    <Link to="/contactUs" className={location.pathname === "/contactUs" ? "navbar-cta-button active" : "navbar-cta-button"} id="full-button">
+                        <img src={contactIcon} alt="Contact" className="icon" style={{paddingRight: "5px"}}/>
+                        Contact Us
+                    </Link>
+                    <Link to="/contactUs" className={location.pathname === "/contactUs" ? "navbar-cta-button active" : "navbar-cta-button"} id="mobile-button" style={{display: "none"}}>
+                        <img src={contactIcon} alt="Contact" className="icon"/>
+                    </Link>
                 </div>
-
-
+                {/* Conditional Rendering based on User Type */}
                 {userType ? (
                     <>
-                        {/* Conditionally render based on user type */}
                         {userType === 'attendee' && (
-
-
                             <div className="attendee-actions">
-                                
-                                <Link to="/myTickets" className="attendee-btn">
-                                    <img src={ticketIcon} alt="Tickets" className="attendee-icon"/>
-                                    <span>Tickets</span>
+                                <Link to="/events" className={location.pathname === "/events" ? "navbar-cta-button active" : "navbar-cta-button"} id="full-button">
+                                    <img src={personalisedIcon} alt="Personalised Events" className="icon" style={{paddingRight: "5px"}}/>
+                                    Personalised Events
+                                </Link>
+                                <Link to="/events" className={location.pathname === "/events" ? "navbar-cta-button active" : "navbar-cta-button"} id="mobile-button" style={{display: "none"}}>
+                                    <img src={personalisedIcon} alt="Personalised Events" className="icon"/>
                                 </Link>
 
+                                <Link to="/myTickets" className={location.pathname === "/myTickets" ? "navbar-cta-button active" : "navbar-cta-button"} id="full-button">
+                                    <img src={ticketIcon} alt="Tickets" className="icon" style={{paddingRight: "5px"}}/>
+                                    Tickets
+                                </Link>
+                                <Link to="/myTickets" className={location.pathname === "/myTickets" ? "navbar-cta-button active" : "navbar-cta-button"} id="mobile-button" style={{display: "none"}}>
+                                    <img src={ticketIcon} alt="Tickets" className="icon"/>
+                                </Link>
                             </div>
 
                         )}
                         {userType === 'organiser' && (
                             <div className="attendee-actions">
-                                <Link to="/host">Host Events</Link>
-                                
-
-                                <Link to="/myEvents" className="attendee-btn">
-                                    <img src={starIcon} alt="My Events" className="attendee-icon"/>
-                                    <span>My Events</span>
+                                <Link to="/host" className={location.pathname === "/host" ? "navbar-cta-button active" : "navbar-cta-button"} id="full-button">
+                                    <img src={hostIcon} alt="Host Events" className="icon" style={{paddingRight: "5px"}}/>
+                                    Host Events
+                                </Link>
+                                <Link to="/host" className={location.pathname === "/host" ? "navbar-cta-button active" : "navbar-cta-button"} id="mobile-button" style={{display: "none"}}>
+                                    <img src={hostIcon} alt="Host Events" className="icon"/>
                                 </Link>
 
-                                
-
-
+                                <Link to="/myEvents" className={location.pathname === "/myEvents" ? "navbar-cta-button active" : "navbar-cta-button"} id="full-button">
+                                    <img src={starIcon} alt="My Events" className="icon" style={{paddingRight: "5px"}}/>
+                                    My Events
+                                </Link>
+                                <Link to="/myEvents" className={location.pathname === "/myEvents" ? "navbar-cta-button active" : "navbar-cta-button"} id="mobile-button" style={{display: "none"}}>
+                                    <img src={starIcon} alt="My Events" className="icon"/>
+                                </Link>
                             </div>
                         )}
-
                     </>
                 ) : (
                     <>
                         {!auth.isAuthenticated && (
                             <div style={{display: "flex", justifyContent: "space-between"}}>
                                 <Button
-                                    id="qsLoginBtn"
-
-                                    color="primary"
+                                    id="full-button"
+                                    className="navbar-link-button"
                                     block
-                                    onClick={() => auth.signinRedirect()  }                              >
+                                    onClick={() => auth.signinRedirect()}>
+                                    <img src={loginIcon} alt="Login" style={{paddingRight: "5px"}}/>
                                     Log in / Sign Up
                                 </Button>
-                                
+                                <Button
+                                    id="mobile-button"
+                                    className="navbar-link-button"
+                                    style={{display: "none"}}
+                                    onClick={() => auth.signinRedirect()}>
+                                    <img src={loginIcon} alt="Login"/>
+                                </Button>
                             </div>
                         )}
-
-
                     </>
                 )}
                 {auth.isAuthenticated && (
                     <div>
-
-                        <Link className="attendee-btn" onClick={toggleDropdown}>
-                            <img src={profileIcon} alt="Profile" className="attendee-icon"/>
-                            <span>Profile</span>
+                        <Link onClick={toggleDropdown} className={location.pathname === "/profile" ? "navbar-cta-button active" : "navbar-cta-button"} id="full-button">
+                            <img src={profileIcon} alt="Profile" className="icon" style={{paddingRight: "5px"}}/>
+                            Profile
+                        </Link>
+                        <Link onClick={toggleDropdown} className={location.pathname === "/profile" ? "navbar-cta-button active" : "navbar-cta-button"} id="mobile-button" style={{display: "none"}}>
+                            <img src={profileIcon} alt="Tickets" className="icon"/>
                         </Link>
 
-
                         {dropdownOpen && (
-                            <div ref={dropdownRef}>
-                                <ProfileDropdown onLogout={() => signOutRedirect()}/>
+                            <div ref={dropdownRef} style={{ position: 'absolute', top: '100%', right: 0 }}>
+                                <ProfileDropdown onLogout={() => signOutRedirect()} />
                             </div>
                         )}
                     </div>
                 )}
-
             </div>
         </div>
-
-
     )
 }
 

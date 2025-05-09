@@ -17,14 +17,17 @@ export const Footer = () => {
         }}>
             <h2 style={{ marginBottom: "10px" }}>PlanIt</h2>
             <div style={{ display: "flex", justifyContent: "center", gap: "20px", marginBottom: "10px" }}>
-                <button style={{
-                    backgroundColor: "#444",
-                    color: "white",
-                    border: "none",
-                    padding: "10px 20px",
-                    cursor: "pointer",
-                    borderRadius: "5px"
-                }}>
+                <button
+                    style={{
+                        backgroundColor: "#444",
+                        color: "white",
+                        border: "none",
+                        padding: "10px 20px",
+                        cursor: "pointer",
+                        borderRadius: "5px"
+                    }}
+                    onClick={() => navigate("/aboutUs")}
+                >
                     About Us
                 </button>
                 <button style={{
@@ -45,7 +48,9 @@ export const Footer = () => {
                     padding: "10px 20px",
                     cursor: "pointer",
                     borderRadius: "5px"
-                }}>
+                }}
+                 onClick={() => navigate("/PrivacyPolicy")}
+                >
                     Privacy Policy
                 </button>
             </div>
