@@ -119,6 +119,10 @@
     transition: transform 0.2s ease-in-out;
 }
 
+.navbar-cta-button.active {
+    background-color: #ff5757 !important;
+    border-color: black !important;
+}
 
 .navbar-link-button:hover {
     background-color: #ff5757;

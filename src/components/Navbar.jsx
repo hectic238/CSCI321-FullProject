@@ -1,4 +1,4 @@
-import {Link, useNavigate} from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import './Navbar.css';
 
 import logoSmall from '../assets/logo_small.png';
@@ -143,6 +143,7 @@ function Navbar() {
         };
     }, [dropdownRef]);
 
+    const location = useLocation();
     
     return (
         <div className="navbar" style={{
@@ -168,19 +169,19 @@ function Navbar() {
             {/* Buttons */}
             <div className="nav-links">
                 <div className="attendee-actions">
-                    <Link to="/home#exploreEvents" className="navbar-cta-button" id="full-button">
+                    <Link to="/home#exploreEvents" className={location.pathname === "/home" && location.hash === "#exploreEvents" ? "navbar-cta-button active" : "navbar-cta-button"} id="full-button">
                         <img src={exploreIcon} alt="Explore" className="icon" style={{paddingRight: "5px"}}/>
                         Explore Events
                     </Link>
-                    <Link to="/home#exploreEvents" className="navbar-cta-button" id="mobile-button" style={{display: "none"}}>
+                    <Link to="/home#exploreEvents" className={location.pathname === "/home" && location.hash === "#exploreEvents" ? "navbar-cta-button active" : "navbar-cta-button"} id="mobile-button" style={{display: "none"}}>
                         <img src={exploreIcon} alt="Explore" className="icon"/>
                     </Link>
 
-                    <Link to="/contactUs" className="navbar-cta-button" id="full-button">
+                    <Link to="/contactUs" className={location.pathname === "/contactUs" ? "navbar-cta-button active" : "navbar-cta-button"} id="full-button">
                         <img src={contactIcon} alt="Contact" className="icon" style={{paddingRight: "5px"}}/>
                         Contact Us
                     </Link>
-                    <Link to="/contactUs" className="navbar-cta-button" id="mobile-button" style={{display: "none"}}>
+                    <Link to="/contactUs" className={location.pathname === "/contactUs" ? "navbar-cta-button active" : "navbar-cta-button"} id="mobile-button" style={{display: "none"}}>
                         <img src={contactIcon} alt="Contact" className="icon"/>
                     </Link>
                 </div>
@@ -189,19 +190,19 @@ function Navbar() {
                     <>
                         {userType === 'attendee' && (
                             <div className="attendee-actions">
-                                <Link to="/events" className="navbar-cta-button" id="full-button">
+                                <Link to="/events" className={location.pathname === "/events" ? "navbar-cta-button active" : "navbar-cta-button"} id="full-button">
                                     <img src={personalisedIcon} alt="Personalised Events" className="icon" style={{paddingRight: "5px"}}/>
                                     Personalised Events
                                 </Link>
-                                <Link to="/events" className="navbar-cta-button" id="mobile-button" style={{display: "none"}}>
+                                <Link to="/events" className={location.pathname === "/events" ? "navbar-cta-button active" : "navbar-cta-button"} id="mobile-button" style={{display: "none"}}>
                                     <img src={personalisedIcon} alt="Personalised Events" className="icon"/>
                                 </Link>
 
-                                <Link to="/myTickets" className="navbar-cta-button" id="full-button">
+                                <Link to="/myTickets" className={location.pathname === "/myTickets" ? "navbar-cta-button active" : "navbar-cta-button"} id="full-button">
                                     <img src={ticketIcon} alt="Tickets" className="icon" style={{paddingRight: "5px"}}/>
                                     Tickets
                                 </Link>
-                                <Link to="/myTickets" className="navbar-cta-button" id="mobile-button" style={{display: "none"}}>
+                                <Link to="/myTickets" className={location.pathname === "/myTickets" ? "navbar-cta-button active" : "navbar-cta-button"} id="mobile-button" style={{display: "none"}}>
                                     <img src={ticketIcon} alt="Tickets" className="icon"/>
                                 </Link>
                             </div>
@@ -209,19 +210,19 @@ function Navbar() {
                         )}
                         {userType === 'organiser' && (
                             <div className="attendee-actions">
-                                <Link to="/host" className="navbar-cta-button" id="full-button">
+                                <Link to="/host" className={location.pathname === "/host" ? "navbar-cta-button active" : "navbar-cta-button"} id="full-button">
                                     <img src={hostIcon} alt="Host Events" className="icon" style={{paddingRight: "5px"}}/>
                                     Host Events
                                 </Link>
-                                <Link to="/host" className="navbar-cta-button" id="mobile-button" style={{display: "none"}}>
+                                <Link to="/host" className={location.pathname === "/host" ? "navbar-cta-button active" : "navbar-cta-button"} id="mobile-button" style={{display: "none"}}>
                                     <img src={hostIcon} alt="Host Events" className="icon"/>
                                 </Link>
 
-                                <Link to="/myEvents" className="navbar-cta-button" id="full-button">
+                                <Link to="/myEvents" className={location.pathname === "/myEvents" ? "navbar-cta-button active" : "navbar-cta-button"} id="full-button">
                                     <img src={starIcon} alt="My Events" className="icon" style={{paddingRight: "5px"}}/>
                                     My Events
                                 </Link>
-                                <Link to="/events" className="navbar-cta-button" id="mobile-button" style={{display: "none"}}>
+                                <Link to="/myEvents" className={location.pathname === "/myEvents" ? "navbar-cta-button active" : "navbar-cta-button"} id="mobile-button" style={{display: "none"}}>
                                     <img src={starIcon} alt="My Events" className="icon"/>
                                 </Link>
                             </div>
@@ -252,11 +253,11 @@ function Navbar() {
                 )}
                 {auth.isAuthenticated && (
                     <div>
-                        <Link onClick={toggleDropdown} className="navbar-cta-button" id="full-button">
+                        <Link onClick={toggleDropdown} className={location.pathname === "/profile" ? "navbar-cta-button active" : "navbar-cta-button"} id="full-button">
                             <img src={profileIcon} alt="Profile" className="icon" style={{paddingRight: "5px"}}/>
                             Profile
                         </Link>
-                        <Link onClick={toggleDropdown} className="navbar-cta-button" id="mobile-button" style={{display: "none"}}>
+                        <Link onClick={toggleDropdown} className={location.pathname === "/profile" ? "navbar-cta-button active" : "navbar-cta-button"} id="mobile-button" style={{display: "none"}}>
                             <img src={profileIcon} alt="Tickets" className="icon"/>
                         </Link>
 
