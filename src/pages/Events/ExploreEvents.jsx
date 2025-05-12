@@ -185,58 +185,68 @@ function ExploreEvents() {
 
             <Navbar/>
             <div className="explore-events">
-                
+
                 <div className="events-section">
                     <div style={{"flexDirection": "row","display": "flex","justifyContent": "space-between","alignItems": "center","maxHeight": "75px"}}>
-                        <h2>Popular Events</h2>
-                        <button style={{"width": "200px","height":"50px","backgroundColor":"red"}} onClick={() => navigate('/explore/category/popular')}>View More</button>
+                        <h2 style={{ display: "inline-block", borderBottom: "3px solid #ff5757", paddingBottom: "4px", fontWeight: "bold", fontSize: "1.5rem", marginTop: "5px" }}>
+                            Popular Events
+                        </h2>
+                        <button style={{backgroundColor: "#ff5757", color: "black", padding: "0.5rem 1.5rem", borderRadius: "9999px", border: "none", fontSize: "0.875rem", fontWeight: "500", cursor: "pointer", transition: "background-color 0.2s",}} onClick={() => navigate('/explore/category/popular')}>View More</button>
                     </div>
 
 
                     <div className="events-grid">
                         {popularEvents.map(event => (
-                            <EventCard key={event.eventId || event.id} event={event}/>
+                            <EventCard key={event.id} event={event}/>
                         ))}
                     </div>
 
                     <div style={{"flexDirection": "row","display": "flex","justifyContent": "space-between","alignItems": "center","maxHeight": "75px"}}>
-                        <h2>Concerts</h2>
-                        <button style={{"width": "200px","height":"50px","backgroundColor":"red"}} onClick={() => navigate('/explore/category/music')}>View More</button>
+                        <h2 style={{ display: "inline-block", borderBottom: "3px solid #ff5757", paddingBottom: "4px", fontWeight: "bold", fontSize: "1.5rem", marginTop: "5px" }}>
+                            Concerts
+                        </h2>
+                        <button style={{backgroundColor: "#ff5757", color: "black", padding: "0.5rem 1.5rem", borderRadius: "9999px", border: "none", fontSize: "0.875rem", fontWeight: "500", cursor: "pointer", transition: "background-color 0.2s",}} onClick={() => navigate('/explore/category/music')}>View More</button>
                     </div>
                     <div className="events-grid">
                         {concerts.map(event => (
-                            <EventCard key={event.eventId || event.id} event={event}/>
+                            <EventCard key={event.id} event={event}/>
                         ))}
                     </div>
 
                     <div style={{"flexDirection": "row","display": "flex","justifyContent": "space-between","alignItems": "center","maxHeight": "75px"}}>
-                        <h2>Family</h2>
-                        <button style={{"width": "200px","height":"50px","backgroundColor":"red"}} onClick={() => navigate('/explore/category/family')}>View More</button>
+                        <h2 style={{ display: "inline-block", borderBottom: "3px solid #ff5757", paddingBottom: "4px", fontWeight: "bold", fontSize: "1.5rem", marginTop: "5px" }}>
+                            Family
+                        </h2>
+                        <button style={{backgroundColor: "#ff5757", color: "black", padding: "0.5rem 1.5rem", borderRadius: "9999px", border: "none", fontSize: "0.875rem", fontWeight: "500", cursor: "pointer", transition: "background-color 0.2s",}} onClick={() => navigate('/explore/category/family')}>View More</button>
                     </div>
                     <div className="events-grid">
                         {familyEvents.map(event => (
-                            <EventCard key={event.eventId || event.id} event={event}/>
+                            <EventCard key={event.id} event={event}/>
                         ))}
                     </div>
 
 
                     <div style={{"flexDirection": "row","display": "flex","justifyContent": "space-between","alignItems": "center","maxHeight": "75px"}}>
-                        <h2>Theatre</h2>
-                        <button style={{"width": "200px","height":"50px","backgroundColor":"red"}} onClick={() => navigate('/explore/category/theatre')}>View More</button>
+                        <h2 style={{ display: "inline-block", borderBottom: "3px solid #ff5757", paddingBottom: "4px", fontWeight: "bold", fontSize: "1.5rem", marginTop: "5px" }}>
+                            Theatre
+                        </h2>
+                        <button style={{backgroundColor: "#ff5757", color: "black", padding: "0.5rem 1.5rem", borderRadius: "9999px", border: "none", fontSize: "0.875rem", fontWeight: "500", cursor: "pointer", transition: "background-color 0.2s",}} onClick={() => navigate('/explore/category/theatre')}>View More</button>
                     </div>
                     <div className="events-grid">
                         {theatreEvents.map(event => (
-                            <EventCard key={event.eventId || event.id} event={event}/>
+                            <EventCard key={event.id} event={event}/>
                         ))}
                     </div>
-                    
+
                     <div style={{"flexDirection": "row","display": "flex","justifyContent": "space-between","alignItems": "center","maxHeight": "75px"}}>
-                        <h2>Comedy</h2>
-                        <button style={{"width": "200px","height":"50px","backgroundColor":"red"}} onClick={() => navigate('/explore/category/comedy')}>View More</button>
+                        <h2 style={{ display: "inline-block", borderBottom: "3px solid #ff5757", paddingBottom: "4px", fontWeight: "bold", fontSize: "1.5rem", marginTop: "5px" }}>
+                            Comedy
+                        </h2>
+                        <button style={{backgroundColor: "#ff5757", color: "black", padding: "0.5rem 1.5rem", borderRadius: "9999px", border: "none", fontSize: "0.875rem", fontWeight: "500", cursor: "pointer", transition: "background-color 0.2s",}} onClick={() => navigate('/explore/category/comedy')}>View More</button>
                     </div>
                     <div className="events-grid">
                         {comedyEvents.map(event => (
-                            <EventCard key={event.eventId || event.id} event={event}/>
+                            <EventCard key={event.id} event={event}/>
                         ))}
                     </div>
 

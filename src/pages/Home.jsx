@@ -16,18 +16,19 @@ const Home = () => {
             <Navbar/>
             <div className="landing-page">
                 <div className="circle-container">
-                    <img src={logoSmall} alt="Logo" className="homelogo"/>
-                    <nav>
-                        <h1 className="slogan">WHERE EVERY EVENT FALLS INTO PLACE</h1>
-
-                        <a href="#exploreEvents" className="cta-button">Find Events</a>
-                    </nav>
+                    <img src={logoSmall || "/placeholder.svg"} alt="Logo" className="homelogo" />
+                    <h1 className="planit-title">PLANIT</h1>
+                    <p className="planit-tagline">
+                        WHERE EVERY EVENT FALLS INTO
+                        <br />
+                        PLACE
+                    </p>
+                    <a href="#exploreEvents" className="find-events-button">Find events</a>
                 </div>
-
             </div>
 
             <section id="exploreEvents">
-                <ExploreEvents/>
+                <ExploreEvents />
             </section>
         </>
     )
