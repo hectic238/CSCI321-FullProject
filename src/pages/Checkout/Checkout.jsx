@@ -1,39 +1,38 @@
-﻿import React, { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
-import Navbar from "@/components/Navbar.jsx";
-import { Elements, EmbeddedCheckoutProvider, EmbeddedCheckout } from "@stripe/react-stripe-js";
-import { loadStripe } from "@stripe/stripe-js";
-import { useAuth } from "react-oidc-context";
-import { generateCheckout } from "@/components/checkoutFunctions.jsx";
-import { CalendarToday, AccessTime, LocationOn } from '@mui/icons-material';
+﻿import React, { useEffect, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import Navbar from '@/components/Navbar.jsx';
+import { Elements, EmbeddedCheckoutProvider, EmbeddedCheckout } from '@stripe/react-stripe-js';
+import { loadStripe } from '@stripe/stripe-js';
+import { useAuth } from 'react-oidc-context';
+import { generateCheckout } from '@/components/checkoutFunctions.jsx';
+import {
+    Box,
+    Container,
+    Paper,
+    Typography,
+    CardMedia,
+} from '@mui/material';
+import {
+    CalendarToday,
+    AccessTime,
+    LocationOn,
+} from '@mui/icons-material';
+import background from '@/assets/background.png';
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_KEY);
 
 const Checkout = () => {
     const auth = useAuth();
-    const location = useLocation();
-    const selectedTickets = location.state?.selectedTickets;
-    const event = location.state?.eventDetails;
+    const navigate = useNavigate();
+    const { state } = useLocation();
+    const selectedTickets = state?.selectedTickets;
+    const event = state?.eventDetails;
 
     const [clientSecret, setClientSecret] = useState(null);
 
-    const iconStyle = {
-        color: '#FF5757',
-        verticalAlign: 'middle',
-        marginRight: '8px',
-    };
-
-    const infoItemStyle = {
-        display: 'flex',
-        alignItems: 'flex-start',
-        margin: '4px 0',
-        fontSize: '1rem',
-        marginLeft: '30px',     // keeps all <p> in line
-    };
-
     useEffect(() => {
-        const fetchCheckout = async () => {
-            if (!auth.isAuthenticated) return;
+        if (!auth.isAuthenticated || !event) return;
+        (async () => {
             const body = {
                 products: selectedTickets,
                 eventId: event.eventId,
@@ -41,75 +40,110 @@ const Checkout = () => {
             };
             const { clientSecret } = await generateCheckout(body);
             setClientSecret(clientSecret);
-        };
-        fetchCheckout();
+        })();
     }, [auth, event, selectedTickets]);
 
-    if (!clientSecret) return <div>Loading checkout...</div>;
+    if (!clientSecret) {
+        return (
+            <Typography variant="body1" align="center" sx={{ mt: 6 }}>
+                Loading checkout…
+            </Typography>
+        );
+    }
 
     return (
-        <Elements stripe={stripePromise}>
-            <Navbar />
+        <Box sx={{ minHeight: '100vh', backgroundColor: '#f5f5f5' }}>
+            <Navbar sx={{ position: 'sticky', top: 0, zIndex: 1100 }} />
 
-            {/* Event header banner */}
-            <div style={{ display: "flex", justifyContent: "center", margin: "24px 0" }}>
-                <div style={{
-                    display: "flex",
-                    alignItems: "flex-start",
-                    gap: "30px",
-                    width: "90%",
-                    maxWidth: "1100px"
-                }}>
-                    <img
-                        src={event.image}
+            {/* HEADER SECTION WITH BACKGROUND IMAGE */}
+            <Box
+                component="header"
+                sx={{
+                    position: 'relative',
+                    backgroundImage: `url(${background})`,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                    height: { xs: 200, md: 300 },
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    mb: 4,
+                }}
+            >
+                {/* Overlay */}
+                <Box
+                    sx={{
+                        position: 'absolute',
+                        inset: 0,
+                        backgroundColor: 'rgba(0,0,0,0.4)',
+                        zIndex: 0,
+                    }}
+                />
+
+                {/* Content card */}
+                <Paper
+                    elevation={0}
+                    sx={{
+                        position: 'relative',
+                        zIndex: 1,
+                        display: 'flex',
+                        alignItems: 'flex-start',
+                        gap: 3,
+                        width: '90%',
+                        maxWidth: '1100px',
+                        p: 3,
+                        bgcolor: 'rgba(255,255,255,0.85)',
+                        borderRadius: 2,
+                    }}
+                >
+                    <CardMedia
+                        component="img"
+                        image={event.image}
                         alt={event.title}
-                        style={{
-                            width: "35%",
-                            height: "auto",
-                            objectFit: "cover",
-                            borderRadius: "8px",
-                            flexShrink: 0
+                        sx={{
+                            width: '35%',
+                            objectFit: 'cover',
+                            borderRadius: 2,
+                            flexShrink: 0,
                         }}
                     />
 
-                    <div style={{
-                        flex: 1,
-                        display: "flex",
-                        flexDirection: "column",
-                        gap: "8px",
-                        marginTop: 0,
-                    }}>
-                        {/* only change: added marginLeft to h1 */}
-                        <h1 style={{
-                            margin: 0,
-                            fontSize: '2rem',
-                            lineHeight: 1.2,
-                            marginBottom: '20px',
-                            textAlign: 'left'
-                        }}>
+                    <Box sx={{ flex: 1 }}>
+                        <Typography
+                            variant="h4"
+                            fontWeight="bold"
+                            gutterBottom
+                            sx={{ textAlign: 'left' }}
+                        >
                             {event.title}
-                        </h1>
+                        </Typography>
+                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                            <CalendarToday sx={{ mr: 1, color: '#FF5757' }} />
+                            <Typography variant="body1">{event.startDate}</Typography>
+                        </Box>
+                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                            <AccessTime sx={{ mr: 1, color: '#FF5757' }} />
+                            <Typography variant="body1">
+                                {event.startTime} – {event.endTime}
+                            </Typography>
+                        </Box>
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                            <LocationOn sx={{ mr: 1, color: '#FF5757' }} />
+                            <Typography variant="body1">{event.location}</Typography>
+                        </Box>
+                    </Box>
+                </Paper>
+            </Box>
 
-                        <p style={infoItemStyle}>
-                            <CalendarToday style={iconStyle} />
-                            {event.startDate}
-                        </p>
-                        <p style={infoItemStyle}>
-                            <AccessTime style={iconStyle} />
-                            {event.startTime} – {event.endTime}
-                        </p>
-                        <p style={infoItemStyle}>
-                            <LocationOn style={iconStyle} />
-                            {event.location}
-                        </p>
-                    </div>
-                </div>
-            </div>
-
-            <EmbeddedCheckoutProvider stripe={stripePromise} options={{ clientSecret }}>
-                <EmbeddedCheckout />
-            </EmbeddedCheckoutProvider>
-        </Elements>
+            {/* EMBEDDED STRIPE CHECKOUT */}
+            <Elements stripe={stripePromise}>
+                <Container maxWidth="lg" sx={{ mb: 4 }}>
+                    <EmbeddedCheckoutProvider stripe={stripePromise} options={{ clientSecret }}>
+                        <EmbeddedCheckout />
+                    </EmbeddedCheckoutProvider>
+                </Container>
+            </Elements>
+        </Box>
     );
 };
 
