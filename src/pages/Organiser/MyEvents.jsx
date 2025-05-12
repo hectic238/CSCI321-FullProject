@@ -51,21 +51,11 @@ const MyEvents = () => {
     return (
         <div>
             <Navbar />
-
+            
             <div className='events-grid'>
 
                 <div className="buttons">
-                    <h1 style={{
-                        textAlign: "center",
-                        display: "inline-block",
-                        borderBottom: "3px solid #ff5757",
-                        paddingBottom: "4px",
-                        fontWeight: "bold",
-                        fontSize: "2rem",
-                        marginBottom: "10px" ,
-                    }}>
-                        My Events
-                    </h1>
+                    <h1>My Events</h1>
                     <div className="button-grid">
                         <button onClick={() => setCurrentTab('active')}
                                 className={currentTab === 'active' ? 'active-tab' : ''}>Active
@@ -83,26 +73,26 @@ const MyEvents = () => {
                 {/* Render events based on the selected tab */}
                 <div className="event-list">
                     {currentTab === 'active' && activeEvents.length === 0 && (
-                        <p>No Active Events</p>
-                    )}
-                    {currentTab === 'active' && activeEvents.map(event => (
-                        <EventCardLarge key={event.eventId} event={event} isDraft={false}/>
-                    ))}
-
-                    {currentTab === 'draft' && draftEvents.length === 0 && (
-                        <p>No Draft Events</p>
-                    )}
-                    {currentTab === 'draft' && draftEvents.map(event => (
-                        <EventCardLarge key={event.eventId} event={event} isDraft={true} />
-                    ))}
-
-                    {currentTab === 'past' && pastEvents.length === 0 && (
-                        <p>No Past Events</p>
-                    )}
-                    {currentTab === 'past' && pastEvents.map(event => (
-                        <EventCardLarge key={event.eventId} event={event} isDraft={false} />
-                    ))}
-                </div>
+                    <p>No Active Events</p>
+                )}
+                {currentTab === 'active' && activeEvents.map(event => (
+                    <EventCardLarge key={event.eventId} event={event} isDraft={false}/>
+                ))}
+                
+                {currentTab === 'draft' && draftEvents.length === 0 && (
+                    <p>No Draft Events</p>
+                )}
+                {currentTab === 'draft' && draftEvents.map(event => (
+                    <EventCardLarge key={event.eventId} event={event} isDraft={true} />
+                ))}
+                
+                {currentTab === 'past' && pastEvents.length === 0 && (
+                    <p>No Past Events</p>
+                )}
+                {currentTab === 'past' && pastEvents.map(event => (
+                    <EventCardLarge key={event.eventId} event={event} isDraft={false} />
+                ))}
+            </div>
             </div>
         </div>
     );

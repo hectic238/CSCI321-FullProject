@@ -2,7 +2,10 @@ import './App.css'
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import Home from './pages/Home';
 import ContactUs from './pages/ContactUs.jsx';
+import AboutUs from './pages/AboutUs.jsx'; 
+import PrivacyPolicy from './pages/PrivacyPolicy.jsx'; 
 import {Footer} from "./components/Footer.jsx";
+import Navbar from "./components/Navbar.jsx";
 import { useEffect, useState } from 'react';
 import HostEventDetails from './pages/HostEvent/Details';
 import HostEventBanner from './pages/HostEvent/Banner'; 
@@ -20,7 +23,7 @@ import ExternalEventDetails from "@/pages/Events/ExternalEventDetails.jsx";
 import ExploreEventPages from "@/pages/Events/ExploreEventPages.jsx";
 import CheckoutReturn from "@/pages/Checkout/CheckoutReturn.jsx";
 import RedirectPage from "@/pages/Profile/RedirectPage.jsx";
-
+import TailoredEvents from "@/pages/Events/TailoredEvents.jsx";
 
 const App = () => {
     const [isLoggedOut, setIsLoggedOut] = useState(false);
@@ -58,10 +61,13 @@ const App = () => {
     return (
         <div>
             <main className="main-content">
+            <Navbar/>
                 <Routes>
                     <Route index element={<Home />} />
                     <Route path="/home" element={<Home />} />
                     <Route path="/contactUs" element={<ContactUs />} />
+                    <Route path="/aboutUs" element={<AboutUs />} /> {/* Make sure the route is defined */}
+                    <Route path="/privacypolicy" element={<PrivacyPolicy />} /> {/* Make sure the route is defined */}
                     <Route path="/host" element={
                         <PrivateRoute allowedUserType="organiser">
                             <HostEvent />
@@ -111,6 +117,7 @@ const App = () => {
                     />
                     
                     <Route path="/redirect" element={<RedirectPage />} />
+                    <Route path="/events" element={<TailoredEvents />} />
                 </Routes>
             <Footer />
             </main>

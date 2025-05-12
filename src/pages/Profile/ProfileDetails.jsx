@@ -32,11 +32,11 @@ import {
     CardContent,
 } from "@mui/material"
 import background from "../../assets/background.png"
-import Navbar from "../../components/Navbar"
 import InterestedPage from "../../components/InterestedPage"
 import OrdersList from "../../components/OrdersList.jsx"
 import { APIWithToken } from "../../components/API"
 import {useAuth} from "react-oidc-context";
+import {Check} from "@mui/icons-material";
 
 // Extend dayjs with plugins
 dayjs.extend(utc)
@@ -104,7 +104,6 @@ const ProfileDetails = () => {
                 }
             }))
             
-            console.log(updatedOrders)
             setOrders(updatedOrders)
             
         } catch (error) {
@@ -164,6 +163,9 @@ const ProfileDetails = () => {
             fetchOrders();
         }
     }, [auth.isAuthenticated])
+    
+    
+   
     
     if (!userDetails) {
         return (
@@ -227,7 +229,6 @@ const ProfileDetails = () => {
                     width: "100%",
                 }}
             >
-                <Navbar />
             </Box>
 
             <Container
