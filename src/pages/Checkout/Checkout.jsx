@@ -1,148 +1,157 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import {EmbeddedCheckout, Elements, EmbeddedCheckoutProvider} from "@stripe/react-stripe-js";
-import {loadStripe} from "@stripe/stripe-js";
-import {useAuth0} from "@auth0/auth0-react";
+import { Elements, EmbeddedCheckoutProvider, EmbeddedCheckout } from '@stripe/react-stripe-js';
+import { loadStripe } from '@stripe/stripe-js';
+import { useAuth } from 'react-oidc-context';
+import { generateCheckout } from '@/components/checkoutFunctions.jsx';
+import {
+    Box,
+    Container,
+    Paper,
+    Typography,
+    CardMedia,
+} from '@mui/material';
+import {
+    CalendarToday,
+    AccessTime,
+    LocationOn,
+} from '@mui/icons-material';
+import background from '@/assets/background.png';
+
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_KEY);
-import {useAuth} from "react-oidc-context";
-import { generateCheckout } from "@/components/checkoutFunctions.jsx";
-import { CalendarToday, AccessTime, LocationOn } from '@mui/icons-material';
 
 const Checkout = () => {
-    const {user, isAuthenticated} = useAuth0();
-    const location = useLocation();
-    const selectedTickets = location.state?.selectedTickets;
-    const event = location.state?.eventDetails;
     const auth = useAuth();
+    const navigate = useNavigate();
+    const { state } = useLocation();
+    const selectedTickets = state?.selectedTickets;
+    const event = state?.eventDetails;
 
     const [clientSecret, setClientSecret] = useState(null);
 
-    const iconStyle = {
-        color: '#FF5757',
-        verticalAlign: 'middle',
-        marginRight: '8px',
-    };
-
-    const infoItemStyle = {
-        display: 'flex',
-        alignItems: 'flex-start',
-        margin: '4px 0',
-        fontSize: '1rem',
-        marginLeft: '30px',     // keeps all <p> in line
-    };
-
     useEffect(() => {
+        // ❗ SAFETY CHECK for `auth.user` and `event`
+        if (!auth.isAuthenticated || !auth.user || !event) return;
 
-        const fetchCheckoutSession = async () => {
-            console.log(auth.user)
-            //sessionStorage.clear();
-            if(auth.isAuthenticated) {
+        const fetchCheckout = async () => {
+            const body = {
+                products: selectedTickets,
+                eventId: event.eventId,
+                userId: auth.user.profile.sub,
+            };
 
-                const body = {
-                    products: selectedTickets,
-                    eventId: event.eventId,
-                    userId: auth.user.profile.sub,
-                };
+            const data = await generateCheckout(body);
+            console.log("generateCheckout response:", data); // ✅ LOG IT
 
-                console.log(body);
-
-                const data = await generateCheckout(body)
-
-                console.log(data);
+            if (data?.clientSecret) {
                 setClientSecret(data.clientSecret);
-
-                try {
-                    // const response = await fetch(`${getURL()}/create-checkout-session`, {
-                    //     method: "POST",
-                    //     headers: {
-                    //         "Content-Type": "application/json",
-                    //     },
-                    //     body: JSON.stringify({
-                    //         products: selectedTickets,
-                    //         eventId: event.eventId,
-                    //         userId: auth.user.profile.sub,
-                    //     }),
-                    // });
-                    //
-                    // const data = await response.json();
-                    // setClientSecret(data.clientSecret);
-                } catch (error) {
-                    console.error("Error fetching checkout session:", error);
-                }
+            } else {
+                console.error("No clientSecret found in response.");
             }
         };
 
-        fetchCheckoutSession();
+        fetchCheckout();
     }, []);
 
     if (!clientSecret) {
-        return <div>Loading checkout...</div>;
+        return (
+            <Typography variant="body1" align="center" sx={{ mt: 6 }}>
+                Loading checkout…
+            </Typography>
+        );
     }
-    
-    return (
-        <Elements stripe={stripePromise}>
-            <div>
-            {/* Event header banner */}
-                <div style={{ display: "flex", justifyContent: "center", margin: "24px 0" }}>
-                    <div style={{
-                        display: "flex",
-                        alignItems: "flex-start",
-                        gap: "30px",
-                        width: "90%",
-                        maxWidth: "1100px"
-                    }}>
-                        <img
-                            src={event.image}
-                            alt={event.title}
-                            style={{
-                                width: "35%",
-                                height: "auto",
-                                objectFit: "cover",
-                                borderRadius: "8px",
-                                flexShrink: 0
-                            }}
-                        />
-    
-                        <div style={{
-                            flex: 1,
-                            display: "flex",
-                            flexDirection: "column",
-                            gap: "8px",
-                            marginTop: 0,
-                        }}>
-                            {/* only change: added marginLeft to h1 */}
-                            <h1 style={{
-                                margin: 0,
-                                fontSize: '2rem',
-                                lineHeight: 1.2,
-                                marginBottom: '20px',
-                                textAlign: 'left'
-                            }}>
-                                {event.title}
-                            </h1>
-    
-                            <p style={infoItemStyle}>
-                                <CalendarToday style={iconStyle} />
-                                {event.startDate}
-                            </p>
-                            <p style={infoItemStyle}>
-                                <AccessTime style={iconStyle} />
-                                {event.startTime} – {event.endTime}
-                            </p>
-                            <p style={infoItemStyle}>
-                                <LocationOn style={iconStyle} />
-                                {event.location}
-                            </p>
-                        </div>
-                    </div>
-                </div>
-                <EmbeddedCheckoutProvider stripe={stripePromise} options={{ clientSecret }}>
-                    <EmbeddedCheckout />
-                </EmbeddedCheckoutProvider>
 
-                
-            </div>
-        </Elements>
+    return (
+        <Box sx={{ minHeight: '100vh', backgroundColor: '#f5f5f5' }}>
+
+
+            {/* HEADER SECTION WITH BACKGROUND IMAGE */}
+            <Box
+                component="header"
+                sx={{
+                    position: 'relative',
+                    backgroundImage: `url(${background})`,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                    height: { xs: 200, md: 300 },
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    mb: 4,
+                }}
+            >
+                <Box
+                    sx={{
+                        position: 'absolute',
+                        inset: 0,
+                        backgroundColor: 'rgba(0,0,0,0.4)',
+                        zIndex: 0,
+                    }}
+                />
+
+                <Paper
+                    elevation={0}
+                    sx={{
+                        position: 'relative',
+                        zIndex: 1,
+                        display: 'flex',
+                        alignItems: 'flex-start',
+                        gap: 3,
+                        width: '90%',
+                        maxWidth: '1100px',
+                        p: 3,
+                        bgcolor: 'rgba(255,255,255,0.85)',
+                        borderRadius: 2,
+                    }}
+                >
+                    <CardMedia
+                        component="img"
+                        image={event.image}
+                        alt={event.title}
+                        sx={{
+                            width: '35%',
+                            objectFit: 'cover',
+                            borderRadius: 2,
+                            flexShrink: 0,
+                        }}
+                    />
+
+                    <Box sx={{ flex: 1 }}>
+                        <Typography
+                            variant="h4"
+                            fontWeight="bold"
+                            gutterBottom
+                            sx={{ textAlign: 'left' }}
+                        >
+                            {event.title}
+                        </Typography>
+                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                            <CalendarToday sx={{ mr: 1, color: '#FF5757' }} />
+                            <Typography variant="body1">{event.startDate}</Typography>
+                        </Box>
+                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                            <AccessTime sx={{ mr: 1, color: '#FF5757' }} />
+                            <Typography variant="body1">
+                                {event.startTime} – {event.endTime}
+                            </Typography>
+                        </Box>
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                            <LocationOn sx={{ mr: 1, color: '#FF5757' }} />
+                            <Typography variant="body1">{event.location}</Typography>
+                        </Box>
+                    </Box>
+                </Paper>
+            </Box>
+
+            {/* STRIPE EMBEDDED CHECKOUT */}
+            <Elements stripe={stripePromise}>
+                <Container maxWidth="lg" sx={{ mb: 4 }}>
+                    <EmbeddedCheckoutProvider stripe={stripePromise} options={{ clientSecret }}>
+                        <EmbeddedCheckout />
+                    </EmbeddedCheckoutProvider>
+                </Container>
+            </Elements>
+        </Box>
     );
 };
 
