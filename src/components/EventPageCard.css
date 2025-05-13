@@ -2,91 +2,325 @@
 .event-list {
     display: flex;
     flex-direction: column; /* Arrange cards in a single column */
-    align-items: center; /* Center the cards horizontally */
-    gap: 16px; /* Space between the cards */
+    align-items: center;    /* Center the cards horizontally */
+    gap: 16px;              /* Space between the cards */
 }
 
-/* Styles for the event card */
+/* Main box wrapping the events list & view more button */
+.events-box {
+    border: 2px solid #ccc;
+    padding: 10px;
+    margin: 10px;
+    border-radius: 10px;
+    background-color: #fff;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+}
+
+/* ONLY on ExploreEventPages: white wrapper with red border */
+.explore-event-pages .events-section > div {
+    border: 2px solid #FF5757;
+    border-radius: 10px;
+    padding: 20px;
+    background-color: #fff;
+    padding-bottom: 10px;
+}
+
+/* ============================= */
+/*   Revamped large‑card styles  */
+/* ============================= */
 .event-page-card-large {
-    width: 900px; /* Set a consistent width */
-    height: 200px; /* Set a consistent height */
-    border: 1px solid #ddd; /* Optional: border for visual separation */
-    border-radius: 8px; /* Optional: rounded corners */
-    overflow: hidden; /* Prevent overflow */
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Optional: subtle shadow for depth */
-    display: flex; /* Use flex to arrange internal elements */
-    flex-direction: row; /* Stack children vertically */
-    align-items: center; /* Center align items vertically */
+    background-color: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-left: 6px solid #FF5757;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    width: 900px;
+    height: 150px;
+    display: flex;
+    align-items: center;
+    padding: 8px 20px 12px 20px;
+    padding-bottom: 30px !important;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    position: relative;
 }
 
-/* Styles for the event image */
-.event-image {
-    width: 100%; /* Fixed width for the image */
-    height: 100%; /* Full height of the card */
-    object-fit: cover; /* Ensure the image covers the area without distortion */
+.event-page-card-large:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
 }
 
-/* Styles for event details */
-.event-page-Card-Column-image {
-    margin-left:20px;
-    padding: 10px; /* Padding inside the card */
-}
-
-.event-page-card-large-column-image {
-    margin-left:20px;
-    padding: 10px; /* Padding inside the card */
-
-    max-width:200px;
-}
-
-.event-page-Card-Column-details {
-    padding: 10px; /* Padding inside the card */
-    text-align: left;
-}
-
-.event-page-Card-Column-buttons {
-    flex-direction: row;
-    margin-right:20px;
-}
-
-.event-page-card {
-    width: 250px; /* Set a consistent width */
-    height: 450px; /* Set a consistent height */
-    border: 1px solid #ddd; /* Optional: border for visual separation */
-    border-radius: 8px; /* Optional: rounded corners */
-    overflow: hidden; /* Prevent overflow */
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Optional: subtle shadow for depth */
-    flex-direction: row; /* Stack children vertically */
-    align-items: center; /* Center align items vertically */
-    flex:none;
-}
-
-.edit-image {
+/* Image container: rounded crop + hover zoom */
+.event-page-Card-Column-image,
+.event-page-page-card-large-column-image {
     width: 20%;
+    margin-right: 20px;
+    border-radius: 8px;
+    overflow: hidden;
+}
+.event-page-Card-Column-image img,
+.event-page-page-card-large-column-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+.event-page-Card-Column-image img:hover,
+.event-page-page-card-large-column-image img:hover {
+    transform: scale(1.05);
 }
 
-.edit-button {
-    background-color: black;
+/* Headings & text in details */
+.event-page-Card-Column-details h3 {
+    font-size: 1.4rem;
+    color: #FF5757;
+    margin-bottom: 8px;
+    transition: color 0.3s ease;
+}
+.event-page-Card-Column-details h3:hover {
+    color: #FF8F66;
+}
+
+.event-page-Card-Column-details p {
+    color: #333 !important;
+    margin: 4px 0;
+    line-height: 1.3;
+}
+
+/* 1) Darken the “No More Pages” text */
+.explore-event-pages .events-section > div > div {
+    color: #333 !important;
+    font-weight: 600;
+    text-align: center;
+}
+
+/* ================================ */
+/*   ExploreEventPages “View More”  */
+/* ================================ */
+.explore-event-pages .events-section button {
+    width: 150px !important;
+    padding: 15px 20px 12px 20px;
+    font-size: 18px !important;
+    line-height: 1 !important;
+    margin: 30px auto !important;
+    background-color: #FF5757 !important;
+    border: 1px solid #FF5757 !important;
+    color: white !important;
+    border-radius: 6px !important;
+    cursor: pointer !important;
+    transition: none !important;
+}
+.explore-event-pages .events-section button:hover,
+.explore-event-pages .events-section button:focus {
+    background-color: transparent !important;
+    color: #FF5757 !important;
+    border-color: #FF5757 !important;
+}
+
+/* ================= */
+/*   Results title   */
+/* ================= */
+.results-title {
+    font-size: 36px;
+    font-weight: bold;
+    color: #ffffff;
+    text-align: center;
+    margin: 40px auto;
+    padding: 20px 40px;
+    background: linear-gradient(135deg, #FF5757, #FF8F66);
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    max-width: 80%;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-bottom: 4px solid #FF5757;
+}
+
+
+/* ================= */
+/*    Tag styles     */
+/* ================= */
+
+/* move the free‑event tag into the top‑right corner */
+.event-page-card-large .free-event-tag {
+    position: absolute;
+    top: 12px;    /* adjust as needed */
+    right: 12px;  /* adjust as needed */
+    margin: 0;    /* remove any default margins */
+    padding: 6px 12px;        /* you can tweak this for size */
+    border-radius: 4px;       /* optional: tighten the corners */
+    z-index: 2;               /* sit above other content */
+}
+/* Sold Out & Limited Space sit just to the left of Free */
+.event-page-card-large .sold-out-tag,
+.event-page-card-large .limited-space-tag {
+    position: absolute;
+    top: 12px;              /* same vertical alignment */
+    right: 140px;           /* adjust this value—should equal (free-tag-width + free-tag-right-offset + gap) */
+}
+
+/* 1) Ensure the “Free Event” tag text is pure white */
+.event-page-card-large .free-event-tag,
+.event-page-card-large .free-event-tag p,
+.event-page-card-large .free-event-tag p strong {
+    color: #fff !important;
+}
+
+.free-event-tag {
+    background-color: green;
     color: white;
+    padding: 5px;
+    margin-top: 10px;
+    text-align: center;
+    font-weight: bold;
 }
-
 .sold-out-tag {
     background-color: red;
     color: white;
     padding: 5px;
+    margin-top: 10px;
     text-align: center;
     font-weight: bold;
-    margin-top: 10px;
 }
-
 .limited-space-tag {
     background-color: yellow;
     color: black;
     padding: 5px;
+    margin-top: 10px;
     text-align: center;
     font-weight: bold;
-    margin-top: 10px;
+}
+
+/* ===================== */
+/*  Other existing CSS   */
+/* ===================== */
+/* Preserve text colors inside .events-box */
+.events-box p,
+.events-box span,
+.events-box li,
+.events-box a,
+.events-box div {
+    color: black;
+}
+
+/* Ensure images cover their containers */
+.event-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Column‐specific padding */
+.event-page-Card-Column-image,
+.event-page-page-card-large-column-image {
+    margin-left: 20px;
+    padding: 10px;
+}
+.event-page-Card-Column-details {
+    padding: 10px;
+    text-align: left;
 }
 
 
+/* EventCard.jsx */
 
+/* 1. The card itself: fixed width & height, flex column */
+.event-card {
+    position: relative;
+    width: 300px;        /* same for every card */
+    height: 480px;       /* same for every card — tweak as needed */
+    margin: 10px;
+    padding: 0 20px 10px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    background: #fff;
+    overflow: hidden;    /* hide any overflow if text is too long */
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* 2) On hover, lift & slightly zoom */
+.event-card:hover {
+    transform: translateY(-5px) scale(1.03);
+    box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+}
+
+/* 2. Make your image fill its slot consistently */
+.event-card img {
+    width: 100%;
+    height: 140px;       /* matches your inline before */
+    object-fit: cover;   /* avoid stretching */
+    border-radius: 4px;
+}
+
+/* 3. The content area below the image */
+.card-content {
+    flex: 1;             /* takes up all remaining space */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    margin-top: 0;
+    padding-top: 0 !important;
+}
+
+/* 4. Force all titles to occupy the same height */
+.event-card h3 {
+    font-size: 1.1rem;
+    line-height: 1.2;
+    min-height: 2.4em;   /* two lines worth of text */
+    margin-bottom: 0.5em;
+    color: #FF5757;
+}
+
+/* 5. Push date/time/location down toward the bottom */
+.card-content > p:last-of-type {
+    margin-top: auto;
+}
+
+.event-card p,
+.event-card p strong {
+    color: #000;
+}
+
+/* 1) Make room on the left for the icon */
+.event-card .card-content p {
+    position: relative;
+    padding-left: 28px;    /* icon width + some breathing room */
+}
+
+/* 2) Hide the old “Date:”, “Time:” and “Location:” text */
+.event-card .card-content p strong {
+    display: none;
+}
+
+/* 3) Inject icons before each line */
+.event-card .card-content p:nth-of-type(1)::before {
+    content: url('/icons/calendar.png');
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.event-card .card-content p:nth-of-type(2)::before {
+    content: url('/icons/clock.png');
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.event-card .card-content p:nth-of-type(3)::before {
+    content: url('/icons/location.png');
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+}
