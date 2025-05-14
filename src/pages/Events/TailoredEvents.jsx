@@ -4,7 +4,7 @@ import {useAuth} from "react-oidc-context";
 import EventCard from "@/components/EventCard.jsx";
 import {useNavigate} from "react-router-dom";
 import {getEventsByCategory, getEventsBySearchTerm, getTicketmasterEvents} from "@/components/eventFunctions.jsx";
-
+import background from '@/assets/background.png';
 
 const TailoredEvents = () => {
 
@@ -198,36 +198,100 @@ const TailoredEvents = () => {
             checkCategories();
         }
     }, [userDetails]);
-    
+
 
 
     return (
-        <div>
-            <h2>Tailored Events</h2>
-            {categories.length > 0 ? (
-                <ul>
-                    {categories.map((category, index) => (
-                        
-                        <div key={index} className="explore-events">
-                        
+        <div style={{
+            // Set the background image for the entire component
+            backgroundImage: `url(${background})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundAttachment: 'fixed', // Optional: keeps the background fixed while scrolling
+            padding: '20px', // Add some padding around the content
+            minHeight: '100vh', // Make sure it covers the full viewport height
+            // Add a dark background color that will show if the image is transparent or doesn't load
+            backgroundColor: '#121212', // Dark background color
+        }}>
+            {/* Keep your existing banner with its styling */}
+            <h2 style={{
+                // Text styling
+                fontSize: '36px',
+                fontWeight: 'bold',
+                color: '#ffffff',
+                textAlign: 'center',
+                textTransform: 'uppercase',
+                letterSpacing: '1px',
 
-                            <div style={{"flexDirection": "row","display": "flex","justifyContent": "space-between","alignItems": "center","maxHeight": "75px"}}>
-                                <h2>{category}</h2>
-                                <button style={{"width": "200px","height":"50px","backgroundColor":"red"}} onClick={() => navigate(`/explore/category/${category}`)}>View More</button>
+                // Container styling
+                position: 'relative',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                maxWidth: '80%',
+                margin: '40px auto 32px auto',
+                padding: '20px 40px',
+
+                // Background styling - keep the gradient background for the banner
+                background: 'linear-gradient(135deg, #FF5757, #FF8F66)',
+
+                // Effects
+                borderRadius: '10px',
+                boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
+                borderBottom: '4px solid #FF5757',
+            }}>
+                EVENTS FOR YOU
+            </h2>
+
+            {/* Changed to a dark semi-transparent container */}
+            <div style={{
+                backgroundColor: 'rgba(18, 18, 18, 0.85)', // Semi-transparent dark background
+                borderRadius: '10px',
+                padding: '20px',
+                maxWidth: '90%',
+                margin: '0 auto',
+                color: '#ffffff', // Change text color to white for better contrast
+            }}>
+                {categories.length > 0 ? (
+                    <ul>
+                        {categories.map((category, index) => (
+                            <div key={index} className="explore-events">
+                                <div style={{"flexDirection": "row","display": "flex","justifyContent": "space-between","alignItems": "center","maxHeight": "75px"}}>
+                                    <h2 style={{
+                                        display: "inline-block",
+                                        borderBottom: "3px solid #ff5757",
+                                        paddingBottom: "4px",
+                                        fontWeight: "bold",
+                                        fontSize: "1.5rem",
+                                        marginTop: "5px",
+                                        color: "#ffffff" // Ensure heading is white
+                                    }}>
+                                        {category}
+                                    </h2>
+                                    <button style={{
+                                        backgroundColor: "#ff5757",
+                                        color: "black",
+                                        padding: "0.5rem 1.5rem",
+                                        borderRadius: "9999px",
+                                        border: "none",
+                                        fontSize: "0.875rem",
+                                        fontWeight: "500",
+                                        cursor: "pointer",
+                                        transition: "background-color 0.2s",
+                                    }} onClick={() => navigate(`/explore/category/${category}`)}>View More</button>
+                                </div>
+                                <div className="events-grid">
+                                    {(eventsByCategory[category] || []).map(event => (
+                                        <EventCard key={event.eventId || event.id} event={event} />
+                                    ))}
+                                </div>
                             </div>
-                            <div className="events-grid">
-                                {(eventsByCategory[category] || []).map(event => (
-                                    <EventCard key={event.eventId || event.id} event={event} />
-                                ))}
-                            </div>
-
-
-                        </div>
-                    ))}
-                </ul>
-            ) : (
-                <p>No categories found based on your interests.</p>
-            )}
+                        ))}
+                    </ul>
+                ) : (
+                    <p style={{ color: "#ffffff" }}>No categories found based on your interests.</p>
+                )}
+            </div>
         </div>
     );
 }
