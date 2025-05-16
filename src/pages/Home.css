@@ -56,24 +56,38 @@ html, body {
     margin-bottom: 10px; /* Space between logo and slogan */
 }
 
-/* Slogan */
-.slogan {
-    font-size: 18px;
-    margin-bottom: 20px; /* Space between slogan and button */
-    color: #333;
+/* PLANIT title */
+.planit-title {
+    font-size: 3rem; /* 48px */
+    font-weight: bold;
+    letter-spacing: 0.1em;
+    margin: 0 0 5px 0;
+    color: black;
 }
 
-/* Call-to-action button */
-.cta-button {
-    background-color: #FF5757;
-    color: white;
-    padding: 10px 20px;
-    border-radius: 5px;
-    text-decoration: none;
-    font-size: 16px;
-    transition: background-color 0.3s ease;
+/* Tagline */
+.planit-tagline {
+    font-size: 0.875rem; /* 14px */
+    font-weight: bold;
+    color: #ff5757;
+    margin-bottom: 2rem; /* 32px - space before button */
+    letter-spacing: 0.05em;
+    line-height: 1.4;
 }
 
-.cta-button:hover {
-    color: white; /* Darker red on hover */
+/* Find events button */
+.find-events-button {
+    background-color: #ff5757;
+    color: black;
+    padding: 0.5rem 1.5rem;
+    border-radius: 9999px; /* Full rounded */
+    border: none;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.find-events-button:hover {
+    background-color: #ff4747;
 }

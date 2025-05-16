@@ -29,13 +29,13 @@ const Review = ({ eventDetails, isAuthenticated, user}) => {
 
             {/* Event Title */}
 
-            <h1>Review Event</h1>
+            <h1 class="underlined-bold-heading">Review Event</h1>
 
 
             {/* Event Details Summary */}
             <div className="review-details-box">
                 <img src={image}/>
-                <h1>{title}</h1>
+                <h1 class="underlined-bold-heading">{title}</h1>
 
                 <h2>Date & Time</h2>
                 <p><strong>Event Type:</strong> {eventType === 'single' ? 'Single Event' : 'Recurring Event'}</p>
