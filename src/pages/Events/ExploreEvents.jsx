@@ -1,260 +1,188 @@
-import Navbar from '@/components/Navbar';
-import './ExploreEvents.css';
-import React, {useEffect, useState} from 'react';
-import {useNavigate} from "react-router-dom";
+"use client"
 
-import EventCard from "@/components/EventCard.jsx";
-import {getEventsByCategory, getEventsBySearchTerm, getTicketmasterEvents} from "@/components/eventFunctions.jsx"; // Assuming your image is in src/assets
+import { useEffect, useState } from "react"
+import EventCard from "@/components/EventCard.jsx"
+import { getEventsByCategory, getEventsBySearchTerm, getTicketmasterEvents } from "@/components/eventFunctions.jsx"
+import Navbar from "@/components/Navbar"
+import "./ExploreEvents.css"
+import { useNavigate } from "react-router-dom"
+import { Box, Container, Paper, Typography, Divider, CircularProgress, FormControlLabel, Switch } from "@mui/material"
+import { DarkMode, LightMode } from "@mui/icons-material"
 
-function ExploreEvents() {
-    const [popularEvents, setPopularEvents] = useState([]); 
-    const [concerts, setConcerts] = useState([]); 
-    const [theatreEvents, setTheatreEvents] = useState([]); 
-    const [familyEvents, setFamilyEvents] = useState([]); 
-    const [comedyEvents, setComedyEvents] = useState([]); 
-    const [events, setEvents] = useState([]);
-    const [combinedEvents, setCombinedEvents] = useState([]);
-    const [error, setError] = useState([]);
-    
-    const navigate = useNavigate();
+// Configuration for the 5 categories
+const categoriesConfig = [
+    { key: "popular", title: "Popular Events", type: "popular", category: "popular", path: "/explore/category/popular" },
+    { key: "concerts", title: "Concerts", type: "category", category: "music", path: "/explore/category/music" },
+    { key: "theatre", title: "Theatre", type: "category", category: "theatre", path: "/explore/category/theatre" },
+    { key: "family", title: "Family", type: "category", category: "family", path: "/explore/category/family" },
+    { key: "comedy", title: "Comedy", type: "category", category: "comedy", path: "/explore/category/comedy" },
+]
+const PAGE_SIZE = 5
 
-    
-    const PAGE_SIZE = 5;
-    const [modifiedWebsiteEvents, setModifiedWebsiteEvents] = useState([]);
+export default function ExploreEvents({ category, searchTerm }) {
+    // State hooks
+    const [popularEvents, setPopularEvents] = useState([])
+    const [concerts, setConcerts] = useState([])
+    const [theatreEvents, setTheatreEvents] = useState([])
+    const [familyEvents, setFamilyEvents] = useState([])
+    const [comedyEvents, setComedyEvents] = useState([])
+    const [darkMode, setDarkMode] = useState(localStorage.getItem("darkMode") === "true")
+    const [loading, setLoading] = useState(true)
+    const [lastEvaluatedKey, setLastEvaluatedKey] = useState(null)
+    const [noMoreWebsiteEvents, setNoMoreWebsiteEvents] = useState(false)
+    const [ticketmasterEventsPage, setTicketmasterEventsPage] = useState(0)
+    const navigate = useNavigate()
 
-    const [lastEvaluatedKey, setLastEvaluatedKey] = useState(null);
-    const [noMoreWebsiteEvents, setNoMoreWebsiteEvents] = useState(false);
-
-
-    const [ticketmasterEventsPage, setTicketmasterEventsPage] = useState(0);
+    // Helper to fetch Ticketmaster events
     const fetchTicketMasterEvents = async (size = 10, page = 0, category = "") => {
-        const API_URL = "https://app.ticketmaster.com/discovery/v2/events.json";
-        
-        
-        const API_KEY = `${import.meta.env.VITE_TICKETMASTER_KEY}`;
-        
-        let params;
-        
-        if(category === "popular") {
-            params = `?dmaId=702&size=${size}&page=${page}&apikey=${API_KEY}`;
-        }
-        else {
-            params = `?dmaId=702&classificationName=${category}&size=${size}&page=${page}&apikey=${API_KEY}`;
-        }
-        // DMAID only shows Events from NSW and ACT
-
+        const API_URL = "https://app.ticketmaster.com/discovery/v2/events.json"
+        const API_KEY = `${import.meta.env.VITE_TICKETMASTER_KEY}`
+        const params = category === "popular"
+            ? `?dmaId=702&size=${size}&page=${page}&apikey=${API_KEY}`
+            : `?dmaId=702&classificationName=${category}&size=${size}&page=${page}&apikey=${API_KEY}`
         try {
-            const response = await fetch(`${API_URL}${params}`);
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
-            }
-
-            const data = await response.json();
-            
-            return data._embedded?.events;
-            
+            const response = await fetch(`${API_URL}${params}`)
+            if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`)
+            const data = await response.json()
+            return data._embedded?.events
         } catch (err) {
-            console.error("Failed to fetch events:", err);
-            setError(err.message);
+            console.error("Failed to fetch events:", err)
         }
-    };
-
-    const fetchEvent = async (type, category, searchTerm) => {
-        // Fetch local events, 
-
-        
-
-        let websiteEvents = [];
-
-        let newWebsiteEvents = [];
-
-        if(!noMoreWebsiteEvents) {
-            
-            let data;
-            
-            if (type === "popular") {
-                data = await getEventsBySearchTerm(" ", lastEvaluatedKey, PAGE_SIZE);
-            } else if (type === "category") {
-                data = await getEventsByCategory(category, lastEvaluatedKey, PAGE_SIZE);
-            }
-
-            if (data?.events?.length) {
-                data.events = data.events.map(event => ({
-                    ...event,
-                    tickets: typeof event.tickets === "string" ? JSON.parse(event.tickets) : event.tickets
-                }));
-            }
-            
-
-            websiteEvents = data.events;
-            
-            setLastEvaluatedKey(data.lastEvaluatedKey);
-
-            newWebsiteEvents = websiteEvents.map(event => ({
-                ...event,
-                source: 'local'  // Mark these events as 'local'
-            }));
-
-            setModifiedWebsiteEvents(websiteEvents.map(event => ({
-                ...event,
-                source: 'local'  // Mark these events as 'local'
-            })));
-
-            if(websiteEvents.length === 0) {
-                setNoMoreWebsiteEvents(true)
-            }
-        }
-
-        // Fetch PAGE_SIZE amount of ticketmaster events, then splice the remainder from the front of the ticketmaster array
-
-        const numberWebsiteEvents = newWebsiteEvents.length;
-        
-        let ticketMasterEvents = [];
-
-        let newTicketMasterEvents = [];
-
-        // If the website events doesnt equal 5 then fetch ticketmasterEvents
-
-        if(numberWebsiteEvents !== 5) {
-            
-            // fetch 5 ticketmaster events and store in array
-            const body = {
-                size: 5- numberWebsiteEvents,
-                page: ticketmasterEventsPage,
-                category: category
-            }
-            
-            const response = await getTicketmasterEvents(body);
-
-            ticketMasterEvents = response._embedded.events;
-            //ticketMasterEvents = await fetchTicketMasterEvents(5 - numberWebsiteEvents, ticketmasterEventsPage, category);
-            
-            setTicketmasterEventsPage(ticketmasterEventsPage + 1);
-
-            if (Array.isArray(ticketMasterEvents)) {
-
-                // change ticketmasterEvents into new format with the source variable
-                newTicketMasterEvents = ticketMasterEvents.map(event => ({
-                    ...event,
-                    source: 'ticketmaster'  // Mark these events as 'ticketmaster'
-                }));
-
-                // store these new events at the end of the allTicketMasterEvents array to get ready to splice
-                
-                return [...newWebsiteEvents, ...newTicketMasterEvents];
-
-            }
-        }
-
-        return [...events, ...newWebsiteEvents];
     }
+
+    // Original fetchEvent logic
+    const fetchEvent = async (type, category, searchTerm) => {
+        let websiteEvents = []
+        let newWebsiteEvents = []
+        if (!noMoreWebsiteEvents) {
+            const data = type === "popular"
+                ? await getEventsBySearchTerm(" ", lastEvaluatedKey, PAGE_SIZE)
+                : await getEventsByCategory(category, lastEvaluatedKey, PAGE_SIZE)
+            if (data?.events?.length) {
+                data.events = data.events.map((evt) => ({
+                    ...evt,
+                    tickets: typeof evt.tickets === "string" ? JSON.parse(evt.tickets) : evt.tickets,
+                }))
+            }
+            websiteEvents = data.events || []
+            setLastEvaluatedKey(data.lastEvaluatedKey)
+            newWebsiteEvents = websiteEvents.map((evt) => ({ ...evt, source: "local" }))
+            if (!websiteEvents.length) setNoMoreWebsiteEvents(true)
+        }
+        const deficit = PAGE_SIZE - newWebsiteEvents.length
+        let tmWrapped = []
+        if (deficit > 0) {
+            const resp = await getTicketmasterEvents({ size: deficit, page: ticketmasterEventsPage, category })
+            const tm = resp._embedded?.events || []
+            tmWrapped = tm.map((e) => ({ ...e, source: "ticketmaster" }))
+            setTicketmasterEventsPage((p) => p + 1)
+        }
+        return [...newWebsiteEvents, ...tmWrapped]
+    }
+
+    // Sequential load
     const loadEvents = async () => {
         try {
-            const popularEvents = await fetchEvent("popular","popular", "");
-            setPopularEvents(popularEvents);
-
-            const concertsData = await fetchEvent("category",'music');
-            setConcerts(concertsData);
-
-            const theatreEventsData = await fetchEvent("category",'theatre');
-            setTheatreEvents(theatreEventsData);
-
-            const familyEventsData = await fetchEvent("category",'family');
-            setFamilyEvents(familyEventsData);
-
-            const comedyEventsData = await fetchEvent("category",'comedy');
-            setComedyEvents(comedyEventsData);
-
-
-            // Add more categories as needed
-        } catch (error) {
-            console.error('Error fetching events:', error);
+            setPopularEvents(await fetchEvent("popular", "popular", ""))
+            setConcerts(await fetchEvent("category", "music", ""))
+            setTheatreEvents(await fetchEvent("category", "theatre", ""))
+            setFamilyEvents(await fetchEvent("category", "family", ""))
+            setComedyEvents(await fetchEvent("category", "comedy", ""))
+        } catch (e) {
+            console.error(e)
+        } finally {
+            setLoading(false)
         }
-    };
+    }
 
-        useEffect(() => {
-            document.title = "Explore Events | PLANIT";
+    useEffect(() => {
+        document.title = "Explore Events | PLANIT"
+        loadEvents()
+    }, [])
 
-            loadEvents();
-        }, []);
+    useEffect(() => {
+        if (darkMode) document.body.classList.add("dark")
+        else document.body.classList.remove("dark")
+        localStorage.setItem("darkMode", darkMode.toString())
+    }, [darkMode])
 
-    
-    
+    const handleDarkModeToggle = () => setDarkMode((d) => !d)
+
+    // Styles for grid layout
+    const eventsContainerStyle = (list) => ({
+        display: "grid",
+        gridTemplateColumns: "repeat(5, 1fr)",
+        gap: "4px",
+        overflowX: list.length > PAGE_SIZE ? "auto" : "hidden",
+        paddingBottom: "10px",
+        minHeight: list.length ? "300px" : "60px",
+        width: "100%",
+        boxSizing: "border-box",
+        ...(list.length > PAGE_SIZE && { gridAutoFlow: "column", gridAutoColumns: "minmax(210px, 1fr)" }),
+    })
+    const cardWrapperStyle = { height: "300px", width: "100%", display: "flex", justifyContent: "center", alignItems: "center" }
+    const innerCardStyle = { width: "100%", height: "100%" }
+    const noEventsStyle = { textAlign: "center", color: darkMode ? "#cccccc" : "#666666", fontStyle: "italic" }
+
+    const stateMap = {
+        popular: popularEvents,
+        concerts,
+        theatre: theatreEvents,
+        family: familyEvents,
+        comedy: comedyEvents,
+    }
+
     return (
         <>
-
-            <Navbar/>
-            <div className="explore-events">
-
-                <div className="events-section">
-                    <div style={{"flexDirection": "row","display": "flex","justifyContent": "space-between","alignItems": "center","maxHeight": "75px"}}>
-                        <h2 style={{ display: "inline-block", borderBottom: "3px solid #ff5757", paddingBottom: "4px", fontWeight: "bold", fontSize: "1.5rem", marginTop: "5px" }}>
-                            Popular Events
-                        </h2>
-                        <button style={{backgroundColor: "#ff5757", color: "black", padding: "0.5rem 1.5rem", borderRadius: "9999px", border: "none", fontSize: "0.875rem", fontWeight: "500", cursor: "pointer", transition: "background-color 0.2s",}} onClick={() => navigate('/explore/category/popular')}>View More</button>
-                    </div>
-
-
-                    <div className="events-grid">
-                        {popularEvents.map(event => (
-                            <EventCard key={event.id} event={event}/>
-                        ))}
-                    </div>
-
-                    <div style={{"flexDirection": "row","display": "flex","justifyContent": "space-between","alignItems": "center","maxHeight": "75px"}}>
-                        <h2 style={{ display: "inline-block", borderBottom: "3px solid #ff5757", paddingBottom: "4px", fontWeight: "bold", fontSize: "1.5rem", marginTop: "5px" }}>
-                            Concerts
-                        </h2>
-                        <button style={{backgroundColor: "#ff5757", color: "black", padding: "0.5rem 1.5rem", borderRadius: "9999px", border: "none", fontSize: "0.875rem", fontWeight: "500", cursor: "pointer", transition: "background-color 0.2s",}} onClick={() => navigate('/explore/category/music')}>View More</button>
-                    </div>
-                    <div className="events-grid">
-                        {concerts.map(event => (
-                            <EventCard key={event.id} event={event}/>
-                        ))}
-                    </div>
-
-                    <div style={{"flexDirection": "row","display": "flex","justifyContent": "space-between","alignItems": "center","maxHeight": "75px"}}>
-                        <h2 style={{ display: "inline-block", borderBottom: "3px solid #ff5757", paddingBottom: "4px", fontWeight: "bold", fontSize: "1.5rem", marginTop: "5px" }}>
-                            Family
-                        </h2>
-                        <button style={{backgroundColor: "#ff5757", color: "black", padding: "0.5rem 1.5rem", borderRadius: "9999px", border: "none", fontSize: "0.875rem", fontWeight: "500", cursor: "pointer", transition: "background-color 0.2s",}} onClick={() => navigate('/explore/category/family')}>View More</button>
-                    </div>
-                    <div className="events-grid">
-                        {familyEvents.map(event => (
-                            <EventCard key={event.id} event={event}/>
-                        ))}
-                    </div>
-
-
-                    <div style={{"flexDirection": "row","display": "flex","justifyContent": "space-between","alignItems": "center","maxHeight": "75px"}}>
-                        <h2 style={{ display: "inline-block", borderBottom: "3px solid #ff5757", paddingBottom: "4px", fontWeight: "bold", fontSize: "1.5rem", marginTop: "5px" }}>
-                            Theatre
-                        </h2>
-                        <button style={{backgroundColor: "#ff5757", color: "black", padding: "0.5rem 1.5rem", borderRadius: "9999px", border: "none", fontSize: "0.875rem", fontWeight: "500", cursor: "pointer", transition: "background-color 0.2s",}} onClick={() => navigate('/explore/category/theatre')}>View More</button>
-                    </div>
-                    <div className="events-grid">
-                        {theatreEvents.map(event => (
-                            <EventCard key={event.id} event={event}/>
-                        ))}
-                    </div>
-
-                    <div style={{"flexDirection": "row","display": "flex","justifyContent": "space-between","alignItems": "center","maxHeight": "75px"}}>
-                        <h2 style={{ display: "inline-block", borderBottom: "3px solid #ff5757", paddingBottom: "4px", fontWeight: "bold", fontSize: "1.5rem", marginTop: "5px" }}>
-                            Comedy
-                        </h2>
-                        <button style={{backgroundColor: "#ff5757", color: "black", padding: "0.5rem 1.5rem", borderRadius: "9999px", border: "none", fontSize: "0.875rem", fontWeight: "500", cursor: "pointer", transition: "background-color 0.2s",}} onClick={() => navigate('/explore/category/comedy')}>View More</button>
-                    </div>
-                    <div className="events-grid">
-                        {comedyEvents.map(event => (
-                            <EventCard key={event.id} event={event}/>
-                        ))}
-                    </div>
-
-
-                </div>
-            </div>
+            <Navbar />
+            {/* Dark grey background outside the white box */}
+            <Box sx={{ minHeight: "100vh", backgroundColor: darkMode ? "#1a1a1a" : "#2a2a2a" }}>
+                <Container maxWidth="lg" sx={{ pt: 2, pb: 2 }}>
+                    <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 1 }}>
+                        <FormControlLabel
+                            control={<Switch checked={darkMode} onChange={handleDarkModeToggle} />}
+                            label={darkMode ? <LightMode /> : <DarkMode />}
+                        />
+                    </Box>
+                    <Paper sx={{ p: 2, backgroundColor: darkMode ? "#1a1a1a" : "#ffffff", borderRadius: 2, boxShadow: darkMode ? "0 4px 20px rgba(0,0,0,0.5)" : "0 4px 20px rgba(0,0,0,0.1)" }}>
+                        {loading ? (
+                            <Box sx={{ display: "flex", justifyContent: "center", p: 2 }}>
+                                <CircularProgress color="inherit" />
+                            </Box>
+                        ) : (
+                            categoriesConfig.map((cfg, idx) => {
+                                const list = stateMap[cfg.key] || []
+                                return (
+                                    <Box key={cfg.key} sx={{ mb: idx < categoriesConfig.length - 1 ? 2 : 0 }}>
+                                        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mt: idx === 0 ? 1 : 3, mb: 1 }}>
+                                            <Typography variant="h6" fontWeight="bold" color="#FF5757" sx={{ textDecoration: "underline" }}>
+                                                {cfg.title}
+                                            </Typography>
+                                            <button className="view-more-btn" onClick={() => navigate(cfg.path)}>
+                                                View More
+                                            </button>
+                                        </Box>
+                                        <Box sx={eventsContainerStyle(list)}>
+                                            {list.length ? (
+                                                list.map((evt, i) => (
+                                                    <Box key={evt.eventId || evt.id || i} sx={cardWrapperStyle}>
+                                                        <Box sx={innerCardStyle}>
+                                                            <EventCard event={evt} darkMode={darkMode} />
+                                                        </Box>
+                                                    </Box>
+                                                ))
+                                            ) : (
+                                                <Typography sx={noEventsStyle}>No events found.</Typography>
+                                            )}
+                                        </Box>
+                                        {idx < categoriesConfig.length - 1 && <Divider sx={{ mt: 2, mb: 2, borderColor: darkMode ? "#333" : "#e0e0e0" }} />}
+                                    </Box>
+                                )
+                            })
+                        )}
+                    </Paper>
+                </Container>
+            </Box>
         </>
     )
 }
-
-export default ExploreEvents;

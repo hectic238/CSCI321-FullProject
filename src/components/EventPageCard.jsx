@@ -1,114 +1,353 @@
-import React from "react";
-import { Link } from 'react-router-dom';
-import './EventPageCard.css';
-import { useNavigate, useParams } from "react-router-dom";
-import { CalendarToday, AccessTime, LocationOn } from '@mui/icons-material';
+"use client"
+import { Card, CardContent, Typography, Box, Chip } from "@mui/material"
+import LocationOnIcon from "@mui/icons-material/LocationOn"
+import AccessTimeIcon from "@mui/icons-material/AccessTime"
+import CalendarMonthIcon from "@mui/icons-material/CalendarMonth"
+import { useTheme } from "@mui/material/styles"
+import { useNavigate } from "react-router-dom"
 
+const EventPageCard = ({ event }) => {
+    const theme = useTheme()
+    const darkMode = theme.palette.mode === "dark"
+    const navigate = useNavigate()
 
-const formatDate = (dateString) => {
-    const date = new Date(dateString);
-
-    // Options for formatting
-    const options = { day: 'numeric', month: 'long', year: 'numeric' };
-
-    // Get formatted date
-    return date.toLocaleDateString('en-GB', options);
-};
-
-const formatTime = (timeString) => {
-    if (timeString === undefined) {
-        return '';
-    }
-    const [hours, minutes] = timeString.split(':');
-    const formattedHours = hours % 12 || 12; // Convert to 12-hour format
-    const ampm = hours >= 12 ? 'PM' : 'AM'; // Determine AM/PM
-    return `${formattedHours}:${minutes} ${ampm}`; // Return formatted time
-};
-
-function EventPageCard({ event }) {
-    let isFreeEvent;
-    const navigate = useNavigate();
-    const params = useParams();
-
-    if (event.source === 'local') {
-        isFreeEvent = event.eventTicketType === 'free';
+    // Handle card click to navigate to event details
+    const handleCardClick = () => {
+        if (event.source === "ticketmaster") {
+            navigate(`/event/${event.id}`)
+        } else {
+            navigate(`/event/${event.title}/${event.eventId || event.id}`)
+        }
     }
 
-    const iconStyle = {
-        verticalAlign: 'middle',
-        marginRight: '8px',
-        color: '#FF5757'
-    };
+    // Format date if it exists
+    const formattedDate = event.startDate
+        ? new Date(event.startDate).toLocaleDateString("en-US", {
+            month: "short",
+            day: "numeric",
+            year: "numeric",
+        })
+        : event.dates?.start?.localDate
+            ? new Date(event.dates.start.localDate).toLocaleDateString("en-US", {
+                month: "short",
+                day: "numeric",
+                year: "numeric",
+            })
+            : "Date TBA"
+
+    // Get event location
+    const location =
+        event.source === "ticketmaster"
+            ? event._embedded?.venues?.[0]?.name || "Location TBA"
+            : event.location || "Location TBA"
+
+    // Get event time
+    const time =
+        event.source === "ticketmaster"
+            ? event.dates?.start?.localTime
+                ? new Date(`2000-01-01T${event.dates.start.localTime}`).toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                })
+                : "Time TBA"
+            : event.startTime || "Time TBA"
+
+    // Get image URL based on event source
+    const imageUrl =
+        event.source === "ticketmaster"
+            ? event.images && event.images.length > 0
+                ? event.images[0].url
+                : "/placeholder.svg"
+            : event.image || "/placeholder.svg"
+
+    // Check if event is free
+    const isFree =
+        event.isFree === true ||
+        (event.tickets && Array.isArray(event.tickets) && event.tickets.some((ticket) => ticket && ticket.price === 0)) ||
+        (event.priceRanges && event.priceRanges[0] && event.priceRanges[0].min === 0)
+
+    // Check if event is sold out
+    const isSoldOut =
+        event.isSoldOut === true ||
+        (event.tickets &&
+            Array.isArray(event.tickets) &&
+            event.tickets.every((ticket) => ticket.count === 0 || ticket.soldOut === true))
+
+    // Check if event has limited space
+    const hasLimitedSpace =
+        event.hasLimitedSpace === true ||
+        (event.tickets &&
+            Array.isArray(event.tickets) &&
+            event.tickets.some((ticket) => ticket.count > 0 && ticket.count < 10))
+
+    // Get event category
+    const category = (() => {
+        if (event.source === "ticketmaster" && event.classifications && event.classifications.length > 0) {
+            const classification = event.classifications[0]
+            return classification.segment?.name || classification.genre?.name || "Event"
+        }
+        return event.category || event.eventCategory || "Event"
+    })()
+
+    // Get price range
+    const priceRange = (() => {
+        if (isFree) return null
+
+        if (event.priceRanges && event.priceRanges.length > 0) {
+            return `$${event.priceRanges[0].min}${event.priceRanges[0].max > event.priceRanges[0].min ? ` - $${event.priceRanges[0].max}` : ""}`
+        }
+
+        if (event.tickets && Array.isArray(event.tickets) && event.tickets.length > 0) {
+            const prices = event.tickets
+                .filter((ticket) => ticket && typeof ticket.price !== "undefined" && ticket.price !== null)
+                .map((ticket) => Number(ticket.price))
+
+            if (prices.length > 0) {
+                const min = Math.min(...prices)
+                const max = Math.max(...prices)
+                return min === max ? `$${min}` : `$${min} - $${max}`
+            }
+        }
+
+        return null
+    })()
 
     return (
-        <div key={event.eventId} className="event-page-card-large">
+        <Card
+            onClick={handleCardClick}
+            sx={{
+                width: "100%",
+                borderRadius: "8px",
+                backgroundColor: darkMode ? "#2a2a2a" : "white",
+                border: `1px solid ${darkMode ? "#444" : "#e0e0e0"}`,
+                borderLeft: `4px solid #FF5757`,
+                cursor: "pointer",
+                transition: "transform 0.2s ease, box-shadow 0.2s ease",
+                "&:hover": {
+                    transform: "translateY(-3px)",
+                    boxShadow: darkMode ? "0 4px 12px rgba(0,0,0,0.3)" : "0 4px 12px rgba(0,0,0,0.1)",
+                },
+                display: "flex",
+                height: "110px",
+                padding: 0,
+                overflow: "hidden",
+                position: "relative",
+            }}
+        >
+            {/* Image section */}
+            <Box
+                sx={{
+                    width: "150px",
+                    minWidth: "150px",
+                    height: "100%",
+                    position: "relative",
+                    overflow: "hidden",
+                }}
+            >
+                <img
+                    src={imageUrl || "/placeholder.svg"}
+                    alt={event.title || event.name}
+                    style={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "cover",
+                        display: "block",
+                    }}
+                />
+            </Box>
 
-            {event.source === 'local' ? (
-                <>
-                    <div className="event-page-Card-Column-image" style={{ width: "20%" }}>
-                        <img src={event.image} alt={event.title} className="event-image" />
-                    </div>
+            {/* Content section */}
+            <Box sx={{ display: "flex", flexDirection: "column", width: "100%", overflow: "hidden" }}>
+                <CardContent
+                    sx={{
+                        padding: "8px 10px",
+                        "&:last-child": { paddingBottom: "8px" },
+                        flex: 1,
+                        display: "flex",
+                        flexDirection: "column",
+                    }}
+                >
+                    {/* Title and price */}
+                    <Box sx={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", mb: 0.5 }}>
+                        <Typography
+                            variant="h5"
+                            component="div"
+                            sx={{
+                                fontSize: "1.15rem",
+                                lineHeight: 1.2,
+                                fontWeight: "700",
+                                color: "#FF5757",
+                                textAlign: "left",
+                                marginRight: 1,
+                                flex: 1,
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                                display: "-webkit-box",
+                                WebkitLineClamp: 1,
+                                WebkitBoxOrient: "vertical",
+                            }}
+                        >
+                            {event.title || event.name}
+                        </Typography>
 
-                    <div className="event-page-Card-Column-details" style={{ width: "500px", marginLeft: "20px" }}>
-                        <Link to={`/event/${event.title.replace(/\s+/g, '-')}/${event.eventId}`}>
-                            <h3>{event.title}</h3>
-                        </Link>
-                        <p>
-                            <CalendarToday style={iconStyle} />
-                            {formatDate(event.startDate)}
-                        </p>
-                        <p>
-                            <AccessTime style={iconStyle} />
-                            {formatTime(event.startTime)} - {formatTime(event.endTime)}
-                        </p>
-                        <p>
-                            <LocationOn style={iconStyle} />
-                            {event.location}
-                        </p>
-                    </div>
+                        <Box sx={{ display: "flex", gap: 0.5, flexWrap: "wrap", alignItems: "center" }}>
+                            {/* Free Event tag */}
+                            {isFree && (
+                                <Chip
+                                    label="Free"
+                                    size="small"
+                                    sx={{
+                                        backgroundColor: "green",
+                                        color: "white",
+                                        fontSize: "0.65rem",
+                                        height: "20px",
+                                        fontWeight: "bold",
+                                        display: "inline-flex",
+                                    }}
+                                />
+                            )}
 
-                    <div className="event-page-Card-Column-details" style={{ width: "25%" }}>
-                        <p><strong>Hosted By PLANIT</strong></p>
+                            {/* Price range */}
+                            {!isFree && priceRange && (
+                                <Chip
+                                    label={priceRange}
+                                    size="small"
+                                    sx={{
+                                        backgroundColor: "#6b21a8",
+                                        color: "white",
+                                        fontSize: "0.65rem",
+                                        height: "20px",
+                                        fontWeight: "bold",
+                                        display: "inline-flex",
+                                    }}
+                                />
+                            )}
+                        </Box>
+                    </Box>
 
-                        {isFreeEvent && (
-                            <div className="free-event-tag">
-                                <p><strong>Free Event</strong></p>
-                            </div>
-                        )}
-                    </div>
-                </>
-            ) : (
-                <>
-                    <div className="event-page-card-large-column-image" style={{ width: "20%" }}>
-                        <img src={event.images[0].url} alt={event.name} className="event-image" />
-                    </div>
+                    {/* Event details */}
+                    <Box sx={{ mb: 0.5 }}>
+                        <Box sx={{ display: "flex", alignItems: "center", gap: "2px", mb: 0.5 }}>
+                            <CalendarMonthIcon
+                                sx={{
+                                    fontSize: "0.85rem",
+                                    marginRight: "2px",
+                                    color: "#FF5757",
+                                }}
+                            />
+                            <Typography
+                                variant="body2"
+                                sx={{
+                                    fontSize: "0.75rem",
+                                    whiteSpace: "nowrap",
+                                    overflow: "hidden",
+                                    textOverflow: "ellipsis",
+                                }}
+                            >
+                                {formattedDate}
+                            </Typography>
+                        </Box>
 
-                    <div className="event-page-Card-Column-details" style={{ width: "500px", marginLeft: "20px" }}>
-                        <Link to={`/event/${event.id}`}>
-                            <h3>{event.name}</h3>
-                        </Link>
-                        <p>
-                            <CalendarToday style={iconStyle} />
-                            {formatDate(event.dates.start.localDate)}
-                        </p>
-                        <p>
-                            <AccessTime style={iconStyle} />
-                            {formatTime(event.dates.start.localTime)}
-                        </p>
-                        <p>
-                            <LocationOn style={iconStyle} />
-                            {event._embedded.venues[0].address.line1}, {event._embedded.venues[0].city.name}, {event._embedded.venues[0].state.stateCode}
-                        </p>
-                    </div>
+                        <Box sx={{ display: "flex", alignItems: "center", gap: "2px", mb: 0.5 }}>
+                            <AccessTimeIcon
+                                sx={{
+                                    fontSize: "0.85rem",
+                                    marginRight: "2px",
+                                    color: "#FF5757",
+                                }}
+                            />
+                            <Typography
+                                variant="body2"
+                                sx={{
+                                    fontSize: "0.75rem",
+                                    whiteSpace: "nowrap",
+                                    overflow: "hidden",
+                                    textOverflow: "ellipsis",
+                                }}
+                            >
+                                {time}
+                            </Typography>
+                        </Box>
 
-                    <div className="event-page-Card-Column-details" style={{ width: "25%" }}>
-                        <p><strong>Hosted By Ticketmaster</strong></p>
-                    </div>
-                </>
+                        <Box sx={{ display: "flex", alignItems: "center", gap: "2px", mb: 0.5 }}>
+                            <LocationOnIcon
+                                sx={{
+                                    fontSize: "0.85rem",
+                                    marginRight: "2px",
+                                    color: "#FF5757",
+                                }}
+                            />
+                            <Typography
+                                variant="body2"
+                                sx={{
+                                    fontSize: "0.75rem",
+                                    whiteSpace: "nowrap",
+                                    overflow: "hidden",
+                                    textOverflow: "ellipsis",
+                                }}
+                            >
+                                {location}
+                            </Typography>
+                        </Box>
+                    </Box>
+                </CardContent>
+            </Box>
+
+            {event.source === "ticketmaster" && (
+                <Chip
+                    label="Sold on Ticketmaster"
+                    size="small"
+                    sx={{
+                        position: "absolute",
+                        bottom: 5,
+                        right: 5,
+                        backgroundColor: "#026CDF",
+                        color: "white",
+                        fontSize: "0.65rem",
+                        height: "20px",
+                        fontWeight: "500",
+                        zIndex: 2,
+                    }}
+                />
             )}
 
-        </div>
-    );
+            {isSoldOut && (
+                <Chip
+                    label="Sold Out"
+                    size="small"
+                    sx={{
+                        position: "absolute",
+                        bottom: 5,
+                        right: event.source === "ticketmaster" ? 140 : 5,
+                        backgroundColor: "red",
+                        color: "white",
+                        fontSize: "0.65rem",
+                        height: "20px",
+                        fontWeight: "bold",
+                        zIndex: 2,
+                    }}
+                />
+            )}
+
+            {!isSoldOut && hasLimitedSpace && (
+                <Chip
+                    label="Limited Space"
+                    size="small"
+                    sx={{
+                        position: "absolute",
+                        bottom: 5,
+                        right: event.source === "ticketmaster" ? 140 : 5,
+                        backgroundColor: "orange",
+                        color: "black",
+                        fontSize: "0.65rem",
+                        height: "20px",
+                        fontWeight: "bold",
+                        zIndex: 2,
+                    }}
+                />
+            )}
+        </Card>
+    )
 }
 
-export default EventPageCard;
+export default EventPageCard
