@@ -32,7 +32,7 @@ const Details = ({ eventDetails, onFormChange}) => {
 
         setDetails({ ...details, [name]: value });
     };
-    
+
 
     return (
         <div className="host-event-details">
@@ -43,7 +43,7 @@ const Details = ({ eventDetails, onFormChange}) => {
                 borderBottom: '2px solid #ccc',
                 paddingBottom: '0.75rem',
                 marginBottom: '1.5rem',
-                color: '#333',
+                color: '#ff4d4f',
             }}>Create a New Event</h1>
 
             <div className="events-grid">
@@ -163,3 +163,4 @@ const Details = ({ eventDetails, onFormChange}) => {
 };
 
 export default Details;
+

@@ -72,3 +72,13 @@ button:hover {
     box-sizing: border-box; /* Include padding in height calculations */
     margin: auto; /* Center horizontally */
 }
+.My-event-card {
+    position: relative;
+    z-index: 1;
+    background-color: white;
+    padding: 30px;
+    border-radius: 16px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+    width: 100%;
+    max-width: 800px;
+}
