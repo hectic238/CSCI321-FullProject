@@ -1,30 +1,51 @@
-/* ProfileDropdown.css */
-
 .profile-dropdown {
-    position: absolute;
-    top: 50px; /* Adjust based on your navbar height */
-    right: 10px; /* Adjust for spacing from the right */
     background-color: white;
     border: 1px solid #ccc;
-    border-radius: 5px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-    z-index: 1000; /* Ensure it's on top */
-    display: block; /* Make sure display is set to block */
+    border-radius: 8px;
+    padding: 10px 16px;
+    min-width: 180px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    opacity: 0;
+    transform: translateY(-10px);
+    animation: fadeInSlideDown 0.5s ease forwards;
 }
 
+@keyframes fadeInSlideDown {
+    to {
+        opacity: 1;
+        transform: translateY(10px);
+    }
+}
 
 .profile-dropdown ul {
-    list-style: none; /* Remove default list styling */
-    padding: 0; /* Remove padding */
-    margin: 0; /* Remove margin */
-    color: black;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.profile-dropdown span {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 10px;
+    color: #333;
 }
 
 .profile-dropdown li {
-    padding: 10px; /* Padding for items */
-    cursor: pointer; /* Change cursor on hover */
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    cursor: pointer;
+    padding: 8px 0;
+    color: #333;
+    transition: background-color 0.2s ease, padding-left 0.2s ease;
 }
 
 .profile-dropdown li:hover {
-    background-color: #f0f0f0; /* Highlight on hover */
+    background-color: #f0f0f0;
+    padding-left: 4px;
+}
+
+.profile-dropdown img {
+    padding-right: 10px;
 }

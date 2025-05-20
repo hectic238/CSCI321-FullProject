@@ -1,92 +1,207 @@
-/* Styles for the event list container */
-.event-list {
-    display: flex;
-    flex-direction: column; /* Arrange cards in a single column */
-    align-items: center; /* Center the cards horizontally */
-    gap: 16px; /* Space between the cards */
+/* Remove the box around the explore event pages section */
+.explore-event-pages .events-section > div {
+    border: none;
+    border-radius: 0;
+    padding: 0;
+    background-color: transparent;
+    box-shadow: none;
 }
 
-/* Styles for the event card */
+.dark .explore-event-pages .events-section > div {
+    background-color: transparent;
+    box-shadow: none;
+}
+
+/* Remove the event count heading styles */
+.events-section h5 {
+    display: none;
+}
+
+/* Improve the appearance of the "No more events" message without the container */
+.events-section > div > div:last-child {
+    margin-top: 20px;
+    padding: 10px;
+    background-color: transparent;
+    border-radius: 8px;
+    font-weight: 500;
+    text-align: center;
+}
+
+.dark .events-section > div > div:last-child {
+    background-color: transparent;
+}
+
+/* Adjust the event grid layout */
+.event-grid {
+    width: 100%;
+    margin: 0 !important;
+}
+
+/* Ensure each grid item has proper spacing */
+.event-grid .MuiGrid-item {
+    padding: 8px !important;
+}
+
+/* Improve card styling */
 .event-page-card-large {
-    width: 900px; /* Set a consistent width */
-    height: 200px; /* Set a consistent height */
-    border: 1px solid #ddd; /* Optional: border for visual separation */
-    border-radius: 8px; /* Optional: rounded corners */
-    overflow: hidden; /* Prevent overflow */
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Optional: subtle shadow for depth */
-    display: flex; /* Use flex to arrange internal elements */
-    flex-direction: row; /* Stack children vertically */
-    align-items: center; /* Center align items vertically */
+    background-color: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-left: 4px solid #ff5757; /* Thinner accent border */
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    width: 100%; /* Make cards responsive */
+    height: 110px; /* Reduced height from 150px */
+    display: flex;
+    align-items: center;
+    padding: 8px 16px; /* Reduced horizontal padding */
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    position: relative;
+    margin-bottom: 4px; /* Add a small margin at the bottom */
 }
 
-/* Styles for the event image */
-.event-image {
-    width: 100%; /* Fixed width for the image */
-    height: 100%; /* Full height of the card */
-    object-fit: cover; /* Ensure the image covers the area without distortion */
+/* Dark mode for large card */
+.dark .event-page-card-large {
+    background-color: #2a2a2a;
+    border-color: #333;
+    border-left: 4px solid #ff5757;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
 
-/* Styles for event details */
-.event-page-Card-Column-image {
-    margin-left:20px;
-    padding: 10px; /* Padding inside the card */
+/* Enhance hover effect */
+.event-page-card-large:hover {
+    transform: translateY(-3px); /* Reduced from -5px for subtler effect */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
 }
 
-.event-page-card-large-column-image {
-    margin-left:20px;
-    padding: 10px; /* Padding inside the card */
-
-    max-width:200px;
+/* Reduce spacing in card details */
+.event-page-Card-Column-details h3 {
+    font-size: 1.2rem; /* Slightly smaller */
+    color: #ff5757;
+    margin-bottom: 4px; /* Reduced from 8px */
+    transition: color 0.3s ease;
 }
 
-.event-page-Card-Column-details {
-    padding: 10px; /* Padding inside the card */
+.event-page-Card-Column-details p {
+    color: #333 !important;
+    margin: 2px 0; /* Reduced from 4px */
+    line-height: 1.2; /* Tighter line height */
+    font-size: 0.9rem; /* Slightly smaller text */
+}
+
+/* Ensure images in event cards take full height and width */
+.event-page-card-large img,
+.event-grid .MuiCard-root img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    margin: 0; /* Remove any margin */
+    padding: 0; /* Remove any padding */
+}
+
+/* Ensure content is left-aligned */
+.event-grid .MuiCardContent-root {
     text-align: left;
+    padding: 8px 10px;
 }
 
-.event-page-Card-Column-buttons {
-    flex-direction: row;
-    margin-right:20px;
+/* Make cards take full width of their container */
+.event-grid .MuiCard-root {
+    width: 100%;
 }
 
-.event-page-card {
-    width: 250px; /* Set a consistent width */
-    height: 450px; /* Set a consistent height */
-    border: 1px solid #ddd; /* Optional: border for visual separation */
-    border-radius: 8px; /* Optional: rounded corners */
-    overflow: hidden; /* Prevent overflow */
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Optional: subtle shadow for depth */
-    flex-direction: row; /* Stack children vertically */
-    align-items: center; /* Center align items vertically */
-    flex:none;
+/* Ensure the image container takes full height and has no gaps */
+.event-grid .MuiCard-root > div:first-of-type {
+    height: 100%;
+    padding: 0;
+    margin: 0;
+    overflow: hidden;
+    width: 150px;
+    min-width: 150px;
 }
 
-.edit-image {
-    width: 20%;
+/* Add a subtle transition to the image on hover */
+.event-grid .MuiCard-root > div:first-of-type img {
+    transition: transform 0.3s ease;
 }
 
-.edit-button {
-    background-color: black;
-    color: white;
+.event-grid .MuiCard-root:hover > div:first-of-type img {
+    transform: scale(1.05);
 }
 
-.sold-out-tag {
-    background-color: red;
-    color: white;
-    padding: 5px;
-    text-align: center;
-    font-weight: bold;
-    margin-top: 10px;
+/* Style for event status chips */
+.MuiChip-root {
+    font-size: 0.65rem !important;
+    height: 20px !important;
+    font-weight: 600 !important;
 }
 
-.limited-space-tag {
-    background-color: yellow;
-    color: black;
-    padding: 5px;
-    text-align: center;
-    font-weight: bold;
-    margin-top: 10px;
+/* Ticketmaster chip */
+.MuiChip-root[label="Ticketmaster"],
+.MuiChip-root[label="Sold on Ticketmaster"] {
+    background-color: #026cdf !important;
+    color: white !important;
 }
 
+/* Free Event chip */
+.MuiChip-root[label="Free"],
+.MuiChip-root[label="Free Event"] {
+    background-color: green !important;
+    color: white !important;
+}
 
+/* Sold Out chip */
+.MuiChip-root[label="Sold Out"] {
+    background-color: red !important;
+    color: white !important;
+}
 
+/* Limited Space chip */
+.MuiChip-root[label="Limited Space"] {
+    background-color: orange !important;
+    color: black !important;
+}
+
+/* Price chip */
+.MuiChip-root[label*="$"] {
+    background-color: #6b21a8 !important;
+    color: white !important;
+}
+
+/* Add a subtle hover effect to event cards */
+.event-grid .MuiCard-root:hover {
+    border-left-width: 6px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 960px) {
+    .event-grid .MuiGrid-item {
+        padding: 6px !important;
+    }
+}
+
+@media (max-width: 600px) {
+    .event-grid .MuiGrid-item {
+        padding: 4px !important;
+    }
+
+    .event-grid .MuiCard-root > div:first-of-type {
+        width: 120px;
+        min-width: 120px;
+    }
+
+    .event-grid .MuiCardContent-root {
+        padding: 6px 8px;
+    }
+}
+
+/* View More button styling */
+.events-section button {
+    margin-top: 24px !important;
+    margin-bottom: 8px !important;
+}
+
+/* Loading indicator styling */
+.events-section button[disabled] {
+    color: #ff5757 !important;
+}
