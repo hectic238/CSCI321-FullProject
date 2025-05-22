@@ -85,10 +85,10 @@ const HostEvent = () => {
 
     const handlePublishEvent = async () => {
         eventDetails.isDraft = false;
-        await handleUploadEvent()
+        await handleUploadEvent(false)
     }
 
-    const handleUploadEvent = async () => {
+    const handleUploadEvent = async (isDraft) => {
 
         try {
 
@@ -116,8 +116,12 @@ const HostEvent = () => {
             }
             else {
                 const response = await createEvent(eventDetails)
-                if(response) {
-                    alert(response.message);
+                if (response) {
+                    let message = "Successfully created event"
+                    if (isDraft) {
+                        message = "Successfully created draft"
+                    }
+                    alert(message);
                     navigate('/home');
                 }
             }
@@ -132,7 +136,7 @@ const HostEvent = () => {
     const handleSaveDraft =  async () => {
 
         eventDetails.isDraft = true;
-        await handleUploadEvent()
+        await handleUploadEvent(true)
 
     };
 
