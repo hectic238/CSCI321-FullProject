@@ -388,40 +388,35 @@ const ExternalEventDetails = () => {
                                     </Box>
                                 </Box>
 
-                                <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
-                                    <CalendarToday sx={{ mr: 1, color: "#ff4d4f" }} />
-                                    <Typography variant="body1">{formatDate(eventDetails?.dates?.start?.localDate)}</Typography>
-                                </Box>
-
-                                <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
-                                    <AccessTime sx={{ mr: 1, color: "#ff4d4f" }} />
-                                    <Typography variant="body1">{formatTime(eventDetails?.dates?.start?.localTime)}</Typography>
-                                </Box>
-
                                 <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
-                                    <LocationOn sx={{ mr: 1, color: "#ff4d4f" }} />
-                                    <Typography variant="body1">
-                                        {eventDetails?._embedded?.venues?.[0]?.address?.line1},{" "}
-                                        {eventDetails?._embedded?.venues?.[0]?.city?.name},{" "}
-                                        {eventDetails?._embedded?.venues?.[0]?.state?.stateCode}
-                                    </Typography>
-                                </Box>
+                                    <div>    
+                                        <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
+                                            <CalendarToday sx={{ mr: 1, color: "#ff4d4f" }} />
+                                            <Typography variant="body1">{formatDate(eventDetails?.dates?.start?.localDate)}</Typography>
+                                        </Box>
 
-                                <Button
-                                    variant="outlined"
-                                    startIcon={<Info />}
-                                    onClick={() => setInfoDialogOpen(true)}
-                                    sx={{
-                                        borderColor: "#ff4d4f",
-                                        color: "#ff4d4f",
-                                        "&:hover": {
-                                            borderColor: "#ff7875",
-                                            backgroundColor: "rgba(255, 77, 79, 0.04)",
-                                        },
-                                    }}
-                                >
-                                    More Info
-                                </Button>
+                                        <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
+                                            <AccessTime sx={{ mr: 1, color: "#ff4d4f" }} />
+                                            <Typography variant="body1">{formatTime(eventDetails?.dates?.start?.localTime)}</Typography>
+                                        </Box>
+                                        <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+                                            <LocationOn sx={{ mr: 1, color: "#ff4d4f" }} />
+                                            <Typography variant="body1">
+                                                {eventDetails?._embedded?.venues?.[0]?.address?.line1},{" "}
+                                                {eventDetails?._embedded?.venues?.[0]?.city?.name},{" "}
+                                                {eventDetails?._embedded?.venues?.[0]?.state?.stateCode}
+                                            </Typography>                    
+                                        </Box>
+                                    </div>
+                                    {eventDetails?._embedded?.venues?.[0]?.images?.[0]?.url && (
+                                        <CardMedia
+                                            component="img"
+                                            image={eventDetails._embedded.venues[0].images[0].url}
+                                            alt={eventDetails._embedded.venues[0].name || "Event image"}
+                                            sx={{ height: 200, width: 200, objectFit: "cover" }}
+                                        />
+                                    )}
+                                </Box>
                             </Box>
                         </Grid>
                     </Grid>
@@ -432,14 +427,13 @@ const ExternalEventDetails = () => {
                     <Grid container>
                         <Grid item xs={12} md={7} sx={{ p: 3 }}>
                             <Typography variant="h6" gutterBottom>
-                                Venue Information
+                                Event Information
                             </Typography>
 
                             <Card
                                 sx={{
                                     height: 300,
                                     display: "flex",
-                                    alignItems: "center",
                                     justifyContent: "center",
                                     backgroundColor: "#f5f5f5",
                                     mb: 2,
@@ -447,21 +441,11 @@ const ExternalEventDetails = () => {
                                     overflow: "hidden",
                                 }}
                             >
-                                {eventDetails?._embedded?.venues?.[0]?.images?.[0]?.url ? (
-                                    <CardMedia
-                                        component="img"
-                                        image={eventDetails._embedded.venues[0].images[0].url}
-                                        alt={eventDetails._embedded.venues[0].name}
-                                        sx={{ height: "100%", width: "100%", objectFit: "cover" }}
-                                    />
-                                ) : (
-                                    <Box sx={{ textAlign: "center" }}>
-                                        <EventSeat sx={{ fontSize: 60, color: "#bdbdbd", mb: 2 }} />
-                                        <Typography variant="body1" color="textSecondary">
-                                            Venue Map Placeholder
-                                        </Typography>
-                                    </Box>
-                                )}
+                                <Box sx={{ padding: "10px", display: "flex", textAlign: "start"}}>
+                                    <Typography variant="body1">
+                                        {eventDetails.info}
+                                    </Typography>
+                                </Box>
                             </Card>
 
                             <Typography variant="body1" fontWeight="bold" gutterBottom>

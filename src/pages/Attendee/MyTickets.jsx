@@ -118,7 +118,7 @@ const MyTickets = () => {
                 };
 
             }))
-            
+            console.log(updatedOrders)
             setOrders(updatedOrders)
 
         } catch (error) {
@@ -1072,33 +1072,37 @@ const MyTickets = () => {
                                 <Typography variant="h6" gutterBottom>
                                     Ticket Information
                                 </Typography>
-
-                                <Box sx={{ mb: 2 }}>
-                                    <Typography variant="body2" color={darkMode ? "white" : "black"} fontWeight="bold">
-                                        Ticket Type
-                                    </Typography>
-                                    <Typography variant="body1" fontWeight="medium" color={darkMode ? "white" : "black"}>
-                                        {selectedTicket?.event.eventTicketType || "Standard Admission"}
-                                    </Typography>
+                                <Box>
+                                    {selectedTicket?.tickets.map((ticket, index) => (
+                                        <p key={index}>{`${ticket.name}: ${ticket.quantity} x $${ticket.price}`}</p>
+                                    ))}
                                 </Box>
+                                {/*<Box sx={{ mb: 2 }}>*/}
+                                {/*    <Typography variant="body2" color={darkMode ? "white" : "black"} fontWeight="bold">*/}
+                                {/*        Ticket Type*/}
+                                {/*    </Typography>*/}
+                                {/*    <Typography variant="body1" fontWeight="medium" color={darkMode ? "white" : "black"}>*/}
+                                {/*        {selectedTicket?.tickets[0].name || "Standard Admission"}*/}
+                                {/*    </Typography>*/}
+                                {/*</Box>*/}
 
-                                <Box sx={{ mb: 2 }}>
-                                    <Typography variant="body2" color={darkMode ? "white" : "black"} fontWeight="bold">
-                                        Quantity
-                                    </Typography>
-                                    <Typography variant="body1" fontWeight="medium" color={darkMode ? "white" : "black"}>
-                                        {selectedTicket?.quantity || 1}
-                                    </Typography>
-                                </Box>
+                                {/*<Box sx={{ mb: 2 }}>*/}
+                                {/*    <Typography variant="body2" color={darkMode ? "white" : "black"} fontWeight="bold">*/}
+                                {/*        Quantity*/}
+                                {/*    </Typography>*/}
+                                {/*    <Typography variant="body1" fontWeight="medium" color={darkMode ? "white" : "black"}>*/}
+                                {/*        {selectedTicket?.quantity || 1}*/}
+                                {/*    </Typography>*/}
+                                {/*</Box>*/}
 
-                                <Box sx={{ mb: 2 }}>
-                                    <Typography variant="body2" color={darkMode ? "white" : "black"} fontWeight="bold">
-                                        Order ID
-                                    </Typography>
-                                    <Typography variant="body1" fontWeight="medium" color={darkMode ? "white" : "black"}>
-                                        {selectedTicket?.orderId || "N/A"}
-                                    </Typography>
-                                </Box>
+                                {/*<Box sx={{ mb: 2 }}>*/}
+                                {/*    <Typography variant="body2" color={darkMode ? "white" : "black"} fontWeight="bold">*/}
+                                {/*        Order ID*/}
+                                {/*    </Typography>*/}
+                                {/*    <Typography variant="body1" fontWeight="medium" color={darkMode ? "white" : "black"}>*/}
+                                {/*        {selectedTicket?.orderId || "N/A"}*/}
+                                {/*    </Typography>*/}
+                                {/*</Box>*/}
 
                                 <Box>
                                     <Typography variant="body2" color={darkMode ? "white" : "black"} fontWeight="bold">
@@ -1350,9 +1354,6 @@ const MyTickets = () => {
 
                     <Typography variant="body2" color={darkMode ? "white" : "black"} gutterBottom>
                         Present this QR code at the event entrance
-                    </Typography>
-                    <Typography variant="body2" fontWeight="bold" sx={{ mt: 1 }}>
-                        Ticket ID: {selectedTicket?.orderId || "N/A"}
                     </Typography>
                 </DialogContent>
                 <DialogActions sx={{ p: 2, backgroundColor: darkMode ? "rgba(255,255,255,0.05)" : "#f9f9f9" }}>

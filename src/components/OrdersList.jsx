@@ -1,4 +1,22 @@
 import React, { useState } from 'react';
+import './OrdersList.css';
+
+import infoIcon from '../assets/info.svg';
+import downloadIcon from '../assets/download.svg';
+import googleWalletIcon from '../assets/wallet.svg';
+import appleWalletIcon from '../assets/appleWallet.svg';
+import calendarIcon from '../assets/calendar.svg';
+import googleCalendarIcon from '../assets/googleCalendar.svg';
+
+import {
+    Box,
+    Typography,
+} from '@mui/material';
+import {
+    CalendarToday,
+    AccessTime,
+    LocationOn,
+} from '@mui/icons-material';
 
 
 const OrdersList = ({ orders, formatDate, formatTime }) => {
@@ -85,32 +103,44 @@ const OrdersList = ({ orders, formatDate, formatTime }) => {
                 const isPast = isEventInThePast(order.startDate, order.startTime);
                 return (
                     <div key={order.orderId}>
-                        <div className="ticket-row">
-                            <div className="ticket-image">
-                                <img src={order.event.image} alt={order.event.title} />
+                        <div className="ticket-row" style={{display: 'flex', flexDirection:'column', alignItems: 'start'}}>
+                            <div className="ticket-image" >
+                                <img src={order.event.image} alt={order.event.title} style={{height: '100%', width: '100%'}}/>
                             </div>
                             <div className="ticket-details">
-                                <div className="ticket-name">{order.event.title}</div>
-                                <div className="ticket-date">{formatDate(order.event.startDate)}</div>
-                                <div className="ticket-time">
-                                    {formatTime(order.event.startTime)} - {formatTime(order.event.endTime)}
+                                <div className="ticket-name" style={{fontSize:"30px", textDecoration:"underline"}}>{order.event.title}</div>
+                                <div style={{display: 'flex', alignItems: 'start', flexDirection: "column", paddingTop: "10px"}}>
+                                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                                        <CalendarToday sx={{ mr: 1, color: '#FF5757' }} />
+                                        <Typography>{order.event.startDate}</Typography>
+                                    </Box>
+                                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                                        <AccessTime sx={{ mr: 1, color: '#FF5757' }} />
+                                        <Typography>{order.event.startTime} – {order.event.endTime}</Typography>
+                                    </Box>
+                                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                                        <LocationOn sx={{ mr: 1, color: '#FF5757' }} />
+                                        <Typography>{order.event.location}</Typography>
+                                    </Box>
                                 </div>
-                                <div className="ticket-location">{order.event.location}</div>
                             </div>
-                            <div className="ticket-actions">
-                                <button onClick={() => toggleExpand(order.orderId)}>
+                            <div style={{display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%'}}>
+                                <button style={{display: 'flex', alignItems: 'center', justifyContent: 'center', width: "300px"}} onClick={() => toggleExpand(order.orderId)}>
+                                    <img src={infoIcon} style={{height:"25px"}}></img>
                                     {expandedOrderId === order.orderId ? 'Hide Info' : 'Additional Info'}
                                 </button>
-                                {!isPast && (
-                                    <>
-                                        <button>Download Info</button>
-                                        <button>Add to Apple Wallet</button>
-                                        <button>Add to Google Wallet</button>
-                                        <button onClick={() => addToCalendar(order)}>Add to Calendar</button>
-                                        <button onClick={() => handleAddToGoogleCalendar(order)}>Add to Google Calendar</button>
-                                    </>
-                                )}
                             </div>
+                                {!isPast && (
+                                    <div className="ticket-actions" style={{display: 'flex', alignItems: 'center', justifyContent: 'center', padding: "10px", gap: '10px'}}>
+                                        <>
+                                            <button><img src={downloadIcon} alt="Info"style={{paddingRight: "5px"}}/>Download Info</button>
+                                            <button><img src={appleWalletIcon} alt="Contact"style={{}}/>Add to Apple Wallet</button>
+                                            <button><img src={googleWalletIcon} alt="Contact"tyle={{paddingRight: "5px"}}/>Add to Google Wallet</button>
+                                            <button onClick={() => addToCalendar(order)}><img src={calendarIcon} alt="Contact" className="icon" style={{paddingRight: "5px"}}/>Add to Calendar</button>
+                                            <button onClick={() => handleAddToGoogleCalendar(order)}><img src={googleCalendarIcon} alt="Contact" className="icon" style={{paddingRight: "5px"}}/>Add to Google Calendar</button>
+                                        </>
+                                    </div>
+                                )}
                         </div>
                         {expandedOrderId === order.orderId && (
                             <div className="ticket-expanded">

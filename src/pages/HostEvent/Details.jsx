@@ -32,11 +32,19 @@ const Details = ({ eventDetails, onFormChange}) => {
 
         setDetails({ ...details, [name]: value });
     };
-    
+
 
     return (
         <div className="host-event-details">
-            <h1>Create a New Event</h1>
+            <h1 style={{
+                textDecoration: 'underline',
+                textDecorationColor: '#FF5757',
+                textUnderlineOffset: '4px',
+                borderBottom: '2px solid #ccc',
+                paddingBottom: '0.75rem',
+                marginBottom: '1.5rem',
+                color: '#ff4d4f',
+            }}>Create a New Event</h1>
 
             <div className="events-grid">
 
@@ -83,47 +91,38 @@ const Details = ({ eventDetails, onFormChange}) => {
 
                     <h2 className="heading">Date & Time</h2>
 
-                    {/* First row with headings only */}
                     <div className="form-group">
                         <div className="input-container">
                             <label>Session</label>
-                            <div className="date-time-headings">
-                                <span>Start Date</span>
-                                <span>Start Time</span>
-                                <span>End Time</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Second row for the input fields without labels */}
-                    <div className="form-group">
-                        <div className="date-time-inputs">
-                            <div className="date-input">
-                                <input
-                                    type="date"
-                                    name="startDate"
-                                    value={details.startDate}
-                                    onChange={handleInputChange}
-                                    required
-                                />
-                            </div>
-                            <div className="time-input">
-                                <input
-                                    type="time"
-                                    name="startTime"
-                                    value={details.startTime}
-                                    onChange={handleInputChange}
-                                    required
-                                />
-                            </div>
-                            <div className="time-input2">
-                                <input
-                                    type="time"
-                                    name="endTime"
-                                    value={details.endTime}
-                                    onChange={handleInputChange}
-                                    required
-                                />
+                            <div className="date-time-wrapper">
+                                <div className="date-time-headings">
+                                    <span>Start Date</span>
+                                    <span>Start Time</span>
+                                    <span>End Time</span>
+                                </div>
+                                <div className="date-time-inputs">
+                                    <input
+                                        type="date"
+                                        name="startDate"
+                                        value={details.startDate}
+                                        onChange={handleInputChange}
+                                        required
+                                    />
+                                    <input
+                                        type="time"
+                                        name="startTime"
+                                        value={details.startTime}
+                                        onChange={handleInputChange}
+                                        required
+                                    />
+                                    <input
+                                        type="time"
+                                        name="endTime"
+                                        value={details.endTime}
+                                        onChange={handleInputChange}
+                                        required
+                                    />
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -164,3 +163,4 @@ const Details = ({ eventDetails, onFormChange}) => {
 };
 
 export default Details;
+
