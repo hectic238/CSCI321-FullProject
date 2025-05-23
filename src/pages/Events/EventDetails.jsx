@@ -239,18 +239,6 @@ const EventDetails = () => {
                                     <LocationOn sx={{ mr: 1, color: '#FF5757' }} />
                                     <Typography>{eventDetails.location}</Typography>
                                 </Box>
-
-                                {/* More Info */}
-                                <Button
-                                    onClick={() => setIsDrawerVisible(true)}
-                                    sx={{
-                                        px: 2, py: 0.5, bgcolor: '#FF5757', color: 'white',
-                                        border: '1px solid #FF5757', borderRadius: 1,
-                                        '&:hover': { bgcolor: 'white', color: '#FF5757', border: '1px solid #FF5757' },
-                                    }}
-                                >
-                                    More Info
-                                </Button>
                             </Box>
                         </Grid>
                     </Grid>
@@ -261,14 +249,14 @@ const EventDetails = () => {
                     <Grid container>
                         {/* Venue */}
                         <Grid item xs={12} md={7} sx={{ p: 3 }}>
-                            <Typography variant="h6" gutterBottom>Venue Information</Typography>
+                            <Typography variant="h6" gutterBottom>Event Information</Typography>
                             <Card
                                 sx={{
-                                    height: 300, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                    height: 300, display: 'flex', padding: '10px', justifyContent: 'start',
                                     bgcolor: '#f5f5f5', mb: 2,
                                 }}
                             >
-                                <Typography color="textSecondary">Venue Map Placeholder</Typography>
+                                <Typography>{eventDetails.additionalInfo}</Typography>
                             </Card>
                         </Grid>
 

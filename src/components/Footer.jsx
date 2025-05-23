@@ -11,12 +11,11 @@ export const Footer = () => {
             textAlign: "center",
             position: "relative",
             bottom: "0",
-            width: "100%",
             marginTop: "50px",
             borderTop: "1px solid #ccc"
         }}>
             <h2 style={{ marginBottom: "10px" }}>PlanIt</h2>
-            <div style={{ display: "flex", justifyContent: "center", gap: "20px", marginBottom: "10px" }}>
+            <div style={{ display: "flex", justifyContent: "center", gap: "20px", marginBottom: "10px", width:"100"}}>
                 <button
                     style={{
                         backgroundColor: "#444",

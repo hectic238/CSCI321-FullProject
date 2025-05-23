@@ -49,6 +49,8 @@ const MyEvents = () => {
     }, [userEvents]);
     
     return (
+        <div className="host-event-page-wrapper">
+            <div className="My-event-card">
         <div>
             <Navbar />
             
@@ -93,6 +95,8 @@ const MyEvents = () => {
                     <EventCardLarge key={event.eventId} event={event} isDraft={false} />
                 ))}
             </div>
+            </div>
+        </div>
             </div>
         </div>
     );
