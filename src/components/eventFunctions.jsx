@@ -1,5 +1,6 @@
 import {APIWithToken} from "@/components/API.js";
 
+// function to get all the users events
 export const getUsersEvents = async () => {
     try {
 
@@ -18,7 +19,7 @@ export const getUsersEvents = async () => {
         console.error("Error:", error);
     }
 }
-
+// function to get all the users draft events
 export const getUsersDraftEvents = async () => {
     try {
 
@@ -33,7 +34,7 @@ export const getUsersDraftEvents = async () => {
         console.error("Error:", error);
     }
 }
-
+// function to create an event
 export const createEvent = async (body) => {
     try {
 
@@ -48,7 +49,7 @@ export const createEvent = async (body) => {
         console.error("Error:", error);
     }
 }
-
+// function to get events based on a specific category
 export const getEventsByCategory = async (category, lastKey, limit = 5) => {
     try {
 
@@ -63,7 +64,7 @@ export const getEventsByCategory = async (category, lastKey, limit = 5) => {
         console.error("Error:", error);
     }
 }
-
+// function to get events based on a specific search term
 export const getEventsBySearchTerm = async (searchTerm, lastKey, limit = 5) => {
     try {
 
@@ -78,7 +79,7 @@ export const getEventsBySearchTerm = async (searchTerm, lastKey, limit = 5) => {
         console.error("Error:", error);
     }
 }
-
+// function to get an event based on a event Id
 export const getEvent = async (eventId) => {
     try {
 
@@ -93,7 +94,7 @@ export const getEvent = async (eventId) => {
         console.error("Error:", error);
     }
 }
-
+// function to update an event based on new details
 export const updateEvent = async (eventDetails) => {
     try {
 
@@ -108,7 +109,7 @@ export const updateEvent = async (eventDetails) => {
         console.error("Error:", error);
     }
 }
-
+// function to get ticketmaster events
 export const getTicketmasterEvents = async (body) => {
     try {
         const response = await APIWithToken(`event/fetchTicketmasterEvents`, "POST", body)
@@ -121,7 +122,7 @@ export const getTicketmasterEvents = async (body) => {
         console.error("Error:", error);
     }
 }
-
+// function to calculate total pages of a ticketmaster request
 export const calculateTotalPages = async (body) => {
     try {
         const response = await APIWithToken(`event/calculateTotalPages`, "POST", body)
@@ -134,7 +135,7 @@ export const calculateTotalPages = async (body) => {
         console.error("Error:", error);
     }
 }
-
+// function to get a single ticketmaster event
 export const fetchExternalEvent = async (body) => {
     try {
         const response = await APIWithToken(`event/fetchExternalEventDetails`, "POST", body)
@@ -142,6 +143,7 @@ export const fetchExternalEvent = async (body) => {
             throw new Error("Failed to fetch ticketmaster Event");
         }
         const data = await response.json();
+        
         return data;  // this will return a single event
     } catch (error) {
         console.error("Error:", error);

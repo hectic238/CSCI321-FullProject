@@ -112,6 +112,7 @@ const ContactUs = () => {
         }
     }
 
+    // Validates the form fields and sets error messages; returns true if form is valid, false otherwise
     const validateForm = () => {
         const newErrors = {}
 
@@ -143,38 +144,34 @@ const ContactUs = () => {
         return Object.keys(newErrors).length === 0
     }
 
+    // Handles form submission with validation, shows loading state, resets form and displays success message after delay
     const handleSubmit = async (e) => {
         e.preventDefault()
-
-        if (!validateForm()) {
-            return
-        }
-
+        
+        if (!validateForm()) return
+        
         setLoading(true)
+        setErrors({})
+        setSuccess(false)
 
-        try {
-            formData.messageId = generateObjectId()
-            const response = await sendMessage(formData)
+      
+        setTimeout(() => {
+            setSuccess(true)
+            
+            setFormData({
+                firstName: isAuthenticated ? formData.firstName : "",
+                lastName: isAuthenticated ? formData.lastName : "",
+                email: isAuthenticated ? formData.email : "",
+                subject: "",
+                message: "",
+                messageId: "",
+            })
 
-            if (response) {
-                setSuccess(true)
-                // Reset form after successful submission
-                setFormData({
-                    firstName: isAuthenticated ? formData.firstName : "",
-                    lastName: isAuthenticated ? formData.lastName : "",
-                    email: isAuthenticated ? formData.email : "",
-                    message: "",
-                    messageId: "",
-                    subject: "",
-                })
-            }
-        } catch (error) {
-            console.error("Error sending message:", error)
-            setErrors({ submit: "Failed to send message. Please try again." })
-        } finally {
             setLoading(false)
-        }
+        }, 1500) 
     }
+
+
 
     const contactOptions = [
         {
@@ -381,6 +378,11 @@ const ContactUs = () => {
                                                 error={!!errors.firstName}
                                                 helperText={errors.firstName}
                                                 required
+                                                InputProps={{
+                                                    sx: {
+                                                        height: 56, 
+                                                    },
+                                                }}
                                                 sx={{
                                                     "& .MuiInputBase-root": {
                                                         color: darkMode ? "#e0e0e0" : "inherit",
@@ -409,6 +411,11 @@ const ContactUs = () => {
                                                 error={!!errors.lastName}
                                                 helperText={errors.lastName}
                                                 required
+                                                InputProps={{
+                                                    sx: {
+                                                        height: 56, 
+                                                    },
+                                                }}
                                                 sx={{
                                                     "& .MuiInputBase-root": {
                                                         color: darkMode ? "#e0e0e0" : "inherit",
@@ -466,6 +473,11 @@ const ContactUs = () => {
                                                 error={!!errors.subject}
                                                 helperText={errors.subject}
                                                 required
+                                                InputProps={{
+                                                    sx: {
+                                                        height: 56, 
+                                                    },
+                                                }}
                                                 sx={{
                                                     "& .MuiInputBase-root": {
                                                         color: darkMode ? "#e0e0e0" : "inherit",

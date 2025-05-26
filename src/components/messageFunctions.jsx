@@ -1,5 +1,6 @@
 ﻿import {APIWithToken} from "@/components/API.js";
 
+// function to send a message to contact
 export const sendMessage = async (body) => {
     try {
 

@@ -9,6 +9,7 @@ const redirectUri =
         ? 'https://localhost:5173/redirect'
         : 'https://aws-production.deyr091sxurr5.amplifyapp.com/redirect'
 
+// Configuration object for AWS Cognito authentication setup
 const cognitoAuthConfig = {
     authority: 'https://cognito-idp.ap-southeast-2.amazonaws.com/ap-southeast-2_i8rut828H',
     client_id: '71jdc4b1eh18i8d6f4194f7b1p',

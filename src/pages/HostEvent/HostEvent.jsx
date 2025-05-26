@@ -48,6 +48,7 @@ const HostEvent = () => {
         };
     });
 
+    // Sets event details and free tickets state when a valid passed event is received.
     useEffect(() => {
         if (passedEvent && Object.keys(passedEvent).length > 0) {
             setEventDetails(passedEvent);
@@ -85,10 +86,11 @@ const HostEvent = () => {
 
     const handlePublishEvent = async () => {
         eventDetails.isDraft = false;
-        await handleUploadEvent()
+        await handleUploadEvent(false)
     }
 
-    const handleUploadEvent = async () => {
+    // Handles creating or updating an event, resetting ticket quantities for edits and navigating home after success.
+    const handleUploadEvent = async (isDraft) => {
 
         try {
 
@@ -116,8 +118,12 @@ const HostEvent = () => {
             }
             else {
                 const response = await createEvent(eventDetails)
-                if(response) {
-                    alert(response.message);
+                if (response) {
+                    let message = "Successfully created event"
+                    if (isDraft) {
+                        message = "Successfully created draft"
+                    }
+                    alert(message);
                     navigate('/home');
                 }
             }
@@ -132,10 +138,11 @@ const HostEvent = () => {
     const handleSaveDraft =  async () => {
 
         eventDetails.isDraft = true;
-        await handleUploadEvent()
+        await handleUploadEvent(true)
 
     };
 
+    // Steps array defining the sequence and content components for the multi-step event creation form
     const steps = [
         {
             title: 'Event Details',

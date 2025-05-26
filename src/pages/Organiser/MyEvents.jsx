@@ -16,8 +16,9 @@ const MyEvents = () => {
     const [userEvents, setUserEvents] = useState([]);
 
     const auth = useAuth();
-    
 
+
+    // Fetches and sets user's events and draft events upon component mount if authenticated
     useEffect(() => {
         
         if (auth.isAuthenticated) {
@@ -37,7 +38,8 @@ const MyEvents = () => {
              
         }
     }, []);
-    
+
+    // Splits user events into active and past events based on the current date
     useEffect(() => {
         const now = new Date();
         // Split user events into active and past based on their date

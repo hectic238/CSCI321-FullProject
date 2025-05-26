@@ -35,6 +35,7 @@ function Navbar() {
     
     const auth = useAuth();
 
+    // signout function using aws cognito
     const signOutRedirect = () => {
         const clientId = "71jdc4b1eh18i8d6f4194f7b1p";
         const logoutUri = import.meta.env.MODE === 'development'
@@ -49,6 +50,7 @@ function Navbar() {
 
 
     useEffect(() => {
+        // get userType if the user is authenticated
         const getUserType = async () => {
             if (auth.isAuthenticated) {
                 try {
@@ -72,22 +74,8 @@ function Navbar() {
             setUserType(getCookie("userType"));
         }
     }, [auth.isAuthenticated]);
-
     
-    const logoutWithRedirect = () => {
-        
-        deleteCookie("userType");
-        setUserType(null);
-        
-        auth.removeUser();
-        
-        return logout({
-            logoutParams: {
-                returnTo: window.location.origin,
-            }
-        });
-    }
-    
+    // get userType if the user isAuthenticated and if the user exists
     useEffect(() => {
         if (isAuthenticated && user) {
             setUserType(getCookie("userType"));
@@ -101,6 +89,7 @@ function Navbar() {
 
     const navigate = useNavigate();
 
+    // Searching function based on the input
     const onSearch = async (value, _e, info) => {
         console.log(value);
         const currentPath = window.location.pathname;
@@ -122,9 +111,9 @@ function Navbar() {
         else {
             navigate(newPath);
         }
-        //navigate(`/explore/search/${value}`);
+        
     };
-
+    // User dropdown toggle
     const toggleDropdown = () => {
         setDropdownOpen(prev => !prev);
     };

@@ -1,6 +1,7 @@
 import {APIWithToken} from "@/components/API.js";
 
 
+// function to get the userType from the users accessToken from the lambda function
 export const getUserTypeFromToken =  async () => {
 
     try {
