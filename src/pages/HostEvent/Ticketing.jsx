@@ -188,8 +188,11 @@ function Ticketing ({eventDetails, handleTicketFormChange, setEventDetails, setF
                                         >
                                             Delete
                                         </button>
+                                        
                                     </div>
+                                    
                                 </div>
+                                
                             ))}
 
                             <button
@@ -212,6 +215,7 @@ function Ticketing ({eventDetails, handleTicketFormChange, setEventDetails, setF
                             >
                                 <span style={{ marginRight: "5px" }}>+</span> Add Ticket
                             </button>
+                            <p>Please note: PLANIT charges a 2.5% fee on all ticket purchases. This fee helps us maintain and improve the platform for all users.</p>
                         </div>
                     )}
 
