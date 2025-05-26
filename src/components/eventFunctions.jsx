@@ -142,6 +142,7 @@ export const fetchExternalEvent = async (body) => {
             throw new Error("Failed to fetch ticketmaster Event");
         }
         const data = await response.json();
+        
         return data;  // this will return a single event
     } catch (error) {
         console.error("Error:", error);

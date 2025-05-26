@@ -42,6 +42,7 @@ const TailoredEvents = () => {
         setDarkMode(!darkMode)
     }
 
+    // fetch user details for categories
     const fetchUserDetails = async () => {
         try {
             const response = await APIWithToken(`user/fetch`, "GET")
@@ -61,6 +62,9 @@ const TailoredEvents = () => {
         }
     }
 
+    const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+    
+    // fetch all events based on the users selected interests
     const checkCategories = async () => {
         const categories = {
             Music: ["Concerts", "Music Festivals", "Music Workshops", "DJ Nights"],
@@ -91,34 +95,44 @@ const TailoredEvents = () => {
         const result = Array.from(matchedKeys)
         setCategories(result)
 
-        // Fetch events for each category
-        const fetchPromises = result.map(async (cat) => {
-            const data = await fetchEvent("category", cat)
-            return { category: cat, events: data }
-        })
-
-        const categoryResults = await Promise.all(fetchPromises)
-
         const eventsByCat = {}
-        categoryResults.forEach(({ category, events }) => {
-            eventsByCat[category] = events
-        })
+
+        // loop through categories to fetch events
+        for (let i = 0; i < result.length; i++) {
+            const cat = result[i]
+
+            // delay to prevent overwhelming the server
+            await sleep(250)
+
+            try {
+                const data = await fetchEvent("category", cat)
+                eventsByCat[cat] = data
+            } catch (error) {
+                console.error(`Error fetching events for category ${cat}:`, error)
+                eventsByCat[cat] = [] // fallback to empty array
+            }
+        }
 
         setEventsByCategory(eventsByCat)
         setLoading(false)
     }
 
+    // Fetching events based on category
     const fetchEvent = async (type, category, searchTerm) => {
+        
         let websiteEvents = []
         let newWebsiteEvents = []
 
         if (!noMoreWebsiteEvents) {
             let data
 
+            // Fetch events based on saerching term
             if (type === "popular") {
                 data = await getEventsBySearchTerm(" ", lastEvaluatedKey, PAGE_SIZE)
             } else if (type === "category") {
+                
                 data = await getEventsByCategory(category, lastEvaluatedKey, PAGE_SIZE)
+                    
             }
 
             if (data?.events?.length) {
@@ -151,6 +165,7 @@ const TailoredEvents = () => {
         const numberWebsiteEvents = newWebsiteEvents.length
         let newTicketMasterEvents = []
 
+        // Fetching ticketmaster events
         if (numberWebsiteEvents !== 5) {
             const body = {
                 size: 5 - numberWebsiteEvents,
@@ -170,11 +185,12 @@ const TailoredEvents = () => {
                         source: "ticketmaster",
                     }))
 
+                    // return website events and the new ticketmaster events
                     return [...newWebsiteEvents, ...newTicketMasterEvents]
                 }
             }
         }
-
+        // return combined events with new events
         return [...events, ...newWebsiteEvents]
     }
 
