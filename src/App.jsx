@@ -30,6 +30,7 @@ const App = () => {
     const location = useLocation();
 
 
+    // Manage body scroll classes based on current pathname and cleanup on unmount or path change
     useEffect(() => {
     
 

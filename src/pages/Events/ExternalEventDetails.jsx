@@ -127,6 +127,7 @@ const ExternalEventDetails = () => {
         }
     }
 
+    // Fetches external event details on event ID change, updates state and page title, and manages loading and errors.
     useEffect(() => {
         const getEventDetails = async () => {
             try {

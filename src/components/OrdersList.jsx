@@ -56,6 +56,7 @@ const OrdersList = ({ orders, formatDate, formatTime }) => {
     };
 
 
+    // handle adding to calender top generate an ics file
     const addToCalendar = async (order) => {
         console.log(order);
         const { title, startDate, endDate, location, startTime, endTime } = order;

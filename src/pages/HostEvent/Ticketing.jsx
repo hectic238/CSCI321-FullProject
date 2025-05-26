@@ -32,9 +32,9 @@ function Ticketing ({eventDetails, handleTicketFormChange, setEventDetails, setF
         setFreeTicket([{ name: "Free Admission", price: 0, count: value, soldOut: false, bought: 0 }])
 
     }
-    
-    
 
+
+// Updates a specific ticket's field and syncs the changes to the parent form state
     const handleTicketChange = (index, field, value) => {
         const updatedTickets = tickets.map((ticket, i) =>
             i === index ? { ...ticket, [field]: value } : ticket
@@ -43,6 +43,7 @@ function Ticketing ({eventDetails, handleTicketFormChange, setEventDetails, setF
         handleTicketFormChange('tickets', updatedTickets); // Update the tickets in eventDetails
     };
 
+    // Removes a ticket at the specified index and updates the event details and form state accordingly
     const handleDeleteTicket = (index) => {
         const updatedTickets = tickets.filter((_, i) => i !== index);
         setEventDetails((prevDetails) => ({

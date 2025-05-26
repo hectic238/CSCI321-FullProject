@@ -29,6 +29,7 @@ const Checkout = () => {
 
     const [clientSecret, setClientSecret] = useState(null);
 
+    // fetching checkout if the user and the event exist and are authenticated
     useEffect(() => {
         // ❗ SAFETY CHECK for `auth.user` and `event`
         if (!auth.isAuthenticated || !auth.user || !event) return;

@@ -1,5 +1,6 @@
 import { getToken } from "@/components/getToken.jsx";
 
+// API function for all APIs
 export const APIWithToken = async (url, method, body = null) => {
     try {
         const accessToken = getToken();

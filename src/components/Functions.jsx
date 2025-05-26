@@ -1,4 +1,5 @@
 ﻿
+// generate an objectID for functions
 export const generateObjectId = () =>  {
     const timestamp = (Math.floor(new Date().getTime() / 1000)).toString(16);
     const randomHex = 'xxxxxxxxxxxxxxxx'.replace(/[x]/g, function() {

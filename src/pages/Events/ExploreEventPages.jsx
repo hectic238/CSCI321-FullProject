@@ -176,6 +176,7 @@ const ExploreEventPages = () => {
         })
     }
 
+    // Fetches local and Ticketmaster events based on search type, category, page, and search query, handling pagination, duplicates, and merging results.
     const fetchEvent = async (type, categoryName, page, searchQuery) => {
         console.log("Fetching events with search query:", searchQuery, "page:", page)
         setSearchError(null)
@@ -354,6 +355,7 @@ const ExploreEventPages = () => {
         [setEvents, setLoading],
     )
 
+    // Loads more events on "View More" click, handles pagination, updates event lists and loading states, and manages errors gracefully.
     const handleViewMore = async () => {
         if (loadingMore) return
         setLoadingMore(true) // Use the separate loading state for "View More"

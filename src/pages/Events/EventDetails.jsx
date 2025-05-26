@@ -50,6 +50,7 @@ const EventDetails = () => {
 
     const auth = useAuth();
 
+    // Updates the attendee count for free events, ensuring it doesn't go below zero and stays synced with total tickets.
     const handleAttendeeCountChange = (change) => {
         const newCount = attendeeCount + change;
         if (newCount >= 0) {
@@ -58,6 +59,7 @@ const EventDetails = () => {
         }
     };
 
+    // Adds a ticket to the selection if it's not sold out, updates quantity, total tickets, and total price accordingly.
     const handleAddTicket = (ticket) => {
         if (ticket.soldOut) {
             console.log(`${ticket.name} is sold out.`);
@@ -75,6 +77,7 @@ const EventDetails = () => {
         setTotalPrice(prev => prev + Number(ticket.price));
     };
 
+    // Removes a ticket from the selection, updating quantity, total tickets, and total price, and deletes it if quantity reaches zero.
     const handleRemoveTicket = (ticket) => {
         const newSelectedTickets = [...selectedTickets];
         const ticketIndex = newSelectedTickets.findIndex(t => t.name === ticket.name);
@@ -91,6 +94,7 @@ const EventDetails = () => {
 
     const navigate = useNavigate();
 
+    // Handles the checkout process by validating login, user type, and ticket selection before navigating to the checkout page.
     const handleCheckout =  async () => {
 
         // If user isnt logged in, force them to the login page
@@ -109,6 +113,7 @@ const EventDetails = () => {
         navigate(`/checkout/${eventId}`, { state: { selectedTickets, eventDetails } });
     };
 
+    // Handles attendance for free events by updating attendee and ticket counts, creating a zero-price order, and redirecting to the homepage.
     const handleAttendClick = async () => {
         if (!isEventInPast) {
             eventDetails.numberAttendees += totalTickets;
@@ -140,6 +145,7 @@ const EventDetails = () => {
         setSnackbarOpen(true);
     };
 
+    // Shares the event via the Web Share API if available, or copies the URL to clipboard with a confirmation message.
     const handleShareEvent = () => {
         const url = window.location.href;
         if (navigator.share) {
@@ -152,6 +158,7 @@ const EventDetails = () => {
         }
     };
 
+    // Fetches event details on load, parses ticket data, checks if the event is in the past, and updates the page title.
     useEffect(() => {
 
         getEvent(eventId).then(event => {

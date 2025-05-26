@@ -1,5 +1,6 @@
 import {APIWithToken} from "@/components/API.js";
 
+// API call for lambda to generate checkout
 export const generateCheckout = async (body) => {
     try {
         const response = await APIWithToken(`checkout`, "POST", body)
@@ -14,7 +15,7 @@ export const generateCheckout = async (body) => {
         console.error("Error fetching checkout session:", error);
     }
 }
-
+// API call for lambda to fetch the session status
 export const fetchSessionStatus = async (sessionId) => {
     try {
         const response = await APIWithToken(`sessionStatus?session_id=${sessionId}`, "GET")

@@ -38,6 +38,8 @@ const CheckoutReturn = () => {
         localStorage.setItem("darkMode", darkMode.toString())
     }, [darkMode])
 
+    
+    // get the session status of checkout from the lambda call, and display an order confirmation
     useEffect(() => {
         const getSessionStatus = async () => {
             const sessionId = new URLSearchParams(location.search).get("session_id")

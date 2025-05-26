@@ -112,6 +112,7 @@ const ContactUs = () => {
         }
     }
 
+    // Validates the form fields and sets error messages; returns true if form is valid, false otherwise
     const validateForm = () => {
         const newErrors = {}
 
@@ -143,6 +144,7 @@ const ContactUs = () => {
         return Object.keys(newErrors).length === 0
     }
 
+    // Handles form submission with validation, shows loading state, resets form and displays success message after delay
     const handleSubmit = async (e) => {
         e.preventDefault()
         

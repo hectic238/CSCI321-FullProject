@@ -8,7 +8,7 @@ const Banner = ({ eventDetails, onImageChange, editing}) => {
 
     }
 
-
+    // Validates selected image file for type, size, and dimensions before passing it to the parent component.
     const handleImageChange = (e) => {
         const file = e.target.files[0];
         if (!file) return;

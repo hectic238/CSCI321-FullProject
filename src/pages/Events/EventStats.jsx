@@ -6,6 +6,7 @@ function EventStats() {
     const { eventId } = useParams()
     const [eventDetails, setEventDetails] = useState(null)
 
+    // Loads and parses event data when the component mounts or the event ID changes, then updates the event state.
     useEffect(() => {
         getEvent(eventId).then((event) => {
             if (event) {

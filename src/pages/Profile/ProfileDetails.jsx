@@ -72,8 +72,8 @@ const ProfileDetails = () => {
             setError("Failed to fetch user details")
         }
     }
-    
-    
+
+    // Fetches user orders, enriches each order with corresponding event details and parsed tickets, and updates state
     const fetchOrders = async () => {
         try {
             setLoading(true)

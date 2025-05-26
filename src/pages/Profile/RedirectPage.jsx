@@ -57,6 +57,7 @@ const RedirectPage = () => {
         createdDate: ""
     })
 
+    // Handles input changes for the form, updating state for regular fields, dateOfBirth (as dayjs object), and toggling interests in an array
     const handleInputChange = (field, value) => {
         if (field === "dateOfBirth") {
             value = value ? dayjs(value) : null
@@ -77,6 +78,7 @@ const RedirectPage = () => {
         }
     }
 
+    // Waits until an access token is available in session storage, checking every 500ms before resolving
     const checkSessionStorage = () => {
         return new Promise((resolve) => {
             const checkInterval = setInterval(() => {
@@ -89,6 +91,7 @@ const RedirectPage = () => {
         });
     };
 
+    // Checks if user already exists on component mount; redirects if so and manages loading state for UX
     useEffect(() => {
         
         const init = async () => {
@@ -111,6 +114,7 @@ const RedirectPage = () => {
         }, 800)
     }, [])
 
+    // Handles form submission for user sign-up, sends form data to API, manages loading state, and redirects on success
     const handleSubmit = async (e) => {
         e.preventDefault()
         setSubmitting(true)
