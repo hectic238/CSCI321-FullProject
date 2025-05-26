@@ -12,10 +12,10 @@ import { DarkMode, LightMode } from "@mui/icons-material"
 // Configuration for the 5 categories
 const categoriesConfig = [
     { key: "popular", title: "Popular Events", type: "popular", category: "popular", path: "/explore/category/popular" },
-    { key: "concerts", title: "Concerts", type: "category", category: "music", path: "/explore/category/music" },
-    { key: "theatre", title: "Theatre", type: "category", category: "theatre", path: "/explore/category/theatre" },
-    { key: "family", title: "Family", type: "category", category: "family", path: "/explore/category/family" },
-    { key: "comedy", title: "Comedy", type: "category", category: "comedy", path: "/explore/category/comedy" },
+    { key: "concerts", title: "Music", type: "category", category: "Music", path: "/explore/category/Music" },
+    { key: "theatre", title: "Arts", type: "category", category: "Art", path: "/explore/category/Art" },
+    { key: "family", title: "Family", type: "category", category: "Family", path: "/explore/category/Family" },
+    { key: "comedy", title: "Comedy", type: "category", category: "Comedy", path: "/explore/category/Comedy" },
 ]
 const PAGE_SIZE = 5
 
@@ -55,6 +55,8 @@ export default function ExploreEvents({ category, searchTerm }) {
         let websiteEvents = []
         let newWebsiteEvents = []
         if (!noMoreWebsiteEvents) {
+            
+            console.log("Category: ", category)
             const data = type === "popular"
                 ? await getEventsBySearchTerm(" ", lastEvaluatedKey, PAGE_SIZE)
                 : await getEventsByCategory(category, lastEvaluatedKey, PAGE_SIZE)
@@ -84,10 +86,10 @@ export default function ExploreEvents({ category, searchTerm }) {
     const loadEvents = async () => {
         try {
             setPopularEvents(await fetchEvent("popular", "popular", ""))
-            setConcerts(await fetchEvent("category", "music", ""))
-            setTheatreEvents(await fetchEvent("category", "theatre", ""))
-            setFamilyEvents(await fetchEvent("category", "family", ""))
-            setComedyEvents(await fetchEvent("category", "comedy", ""))
+            setConcerts(await fetchEvent("category", "Music", ""))
+            setTheatreEvents(await fetchEvent("category", "Art", ""))
+            setFamilyEvents(await fetchEvent("category", "Family", ""))
+            setComedyEvents(await fetchEvent("category", "Comedy", ""))
         } catch (e) {
             console.error(e)
         } finally {

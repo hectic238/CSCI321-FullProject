@@ -355,7 +355,7 @@ const ExploreEventPages = () => {
         [setEvents, setLoading],
     )
 
-    // Loads more events on "View More" click, handles pagination, updates event lists and loading states, and manages errors gracefully.
+    // Loads more events on "View More" click, handles pagination, updates event lists and loading states, and manages errors.
     const handleViewMore = async () => {
         if (loadingMore) return
         setLoadingMore(true) // Use the separate loading state for "View More"
