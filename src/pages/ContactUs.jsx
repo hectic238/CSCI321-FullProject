@@ -665,8 +665,8 @@ const ContactUs = () => {
                                     answer: "We aim to respond to all inquiries within 24-48 hours during business days.",
                                 },
                                 {
-                                    question: "Can I track the status of my inquiry?",
-                                    answer: "Yes, you'll receive a confirmation email with a reference number to track your inquiry.",
+                                    question: "How can I cancel or refund my ticket purchase?",
+                                    answer: "You can use this contact form and add 'Refund Inquiry' as the subject, and our support team will be in touch.",
                                 },
                                 {
                                     question: "Do you offer phone support?",
