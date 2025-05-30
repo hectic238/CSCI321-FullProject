@@ -16,6 +16,26 @@ const EventCard = ({ event, darkMode = false }) => {
         [event]
     )
 
+    // Format date and time
+    const formatDate = (dateString) => {
+        if (!dateString) return ""
+        const date = new Date(dateString)
+        return date.toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+        })
+    }
+
+    const formatTime = (timeString) => {
+        if (!timeString) return ""
+        const [hours, minutes] = timeString.split(":")
+        const hour = Number.parseInt(hours)
+        const ampm = hour >= 12 ? "PM" : "AM"
+        const formattedHour = hour % 12 || 12
+        return `${formattedHour}:${minutes} ${ampm}`
+    }
+
     const handleCardClick = () => {
         if (event.source === "ticketmaster") navigate(`/event/${event.id}`)
         else navigate(`/event/${event.title}/${event.eventId || event.id}`)
@@ -43,12 +63,12 @@ const EventCard = ({ event, darkMode = false }) => {
     // Time
     const startTime =
         event.source === "ticketmaster"
-            ? event.dates?.start?.localTime || "Time TBA"
-            : event.startTime || "Time TBA"
+            ? formatTime(event.dates?.start?.localTime) || "Time TBA"
+            : formatTime(event.startTime) || "Time TBA"
     const endTime =
         event.source === "ticketmaster"
-            ? event.dates?.end?.localTime || null
-            : event.endTime || null
+            ? formatTime(event.dates?.end?.localTime) || null
+            : formatTime(event.endTime) || null
     const timeDisplay = endTime ? `${startTime} - ${endTime}` : startTime
 
     // Determine free
