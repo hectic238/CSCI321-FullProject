@@ -1,131 +1,213 @@
-import React from "react";
-import { Link } from 'react-router-dom';
-import './EventPageCard.css';
+"use client"
 
-const formatDate = (dateString) => {
-    const date = new Date(dateString);
+import React from "react"
+import { Card, CardContent, CardMedia, Typography, Box, Chip } from "@mui/material"
+import { CalendarToday, AccessTime, LocationOn } from "@mui/icons-material"
+import { useNavigate } from "react-router-dom"
+import { useAuth } from "react-oidc-context"
 
-    // Options for formatting
-    const options = { day: 'numeric', month: 'long', year: 'numeric' };
+const EventCard = ({ event, darkMode = false }) => {
+    const navigate = useNavigate()
+    const auth = useAuth()
 
-    // Get formatted date
-    return date.toLocaleDateString('en-GB', options);
-};
+    // Generate unique ID
+    const eventUniqueId = React.useMemo(
+        () => event.id || event.eventId || `${event.title}-${event.startDate}-${event.location}`.replace(/\s+/g, "-"),
+        [event]
+    )
 
-const formatTime = (timeString) => {
-    if(timeString === undefined){
-        return '';
-    }
-    const [hours, minutes] = timeString.split(':');
-    const formattedHours = hours % 12 || 12; // Convert to 12-hour format
-    const ampm = hours >= 12 ? 'PM' : 'AM'; // Determine AM/PM
-    return `${formattedHours}:${minutes} ${ampm}`; // Return formatted time
-};
-
-function EventCard({ event }) {
-    let isSoldOut;
-    let totalTicketsLeft;
-    let isLimitedSpace;
-    let isFreeEvent;
-    if(event.source === 'local') {
-        isFreeEvent = event.eventTicketType === 'free'; 
-    }
-    
-    if (event.tickets && event.eventTicketType !== 'free') {
-        totalTicketsLeft = event.tickets.reduce((total, ticket) => {
-            return total + ticket.count;
-        }, 0);
-        isLimitedSpace = totalTicketsLeft > 0 && totalTicketsLeft < 50;
-        isSoldOut = totalTicketsLeft <= 0;
+    // Format date and time
+    const formatDate = (dateString) => {
+        if (!dateString) return ""
+        const date = new Date(dateString)
+        return date.toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+        })
     }
 
-    const venue = event._embedded?.venues?.[0] || {};
-    const address = venue.address?.line1 || "";
-    const city = venue.city?.name || "";
-    const state = venue.state?.stateCode || "";
-    
-    return (
-        <div key={event.id} style={{"position":"relative","padding":"20px","borderRadius":"10px","boxShadow":"0 4px 8px rgba(0, 0, 0, 0.1)","width":"300px","margin":"10px"}}>
+    const formatTime = (timeString) => {
+        if (!timeString) return ""
+        const [hours, minutes] = timeString.split(":")
+        const hour = Number.parseInt(hours)
+        const ampm = hour >= 12 ? "PM" : "AM"
+        const formattedHour = hour % 12 || 12
+        return `${formattedHour}:${minutes} ${ampm}`
+    }
 
-            {event.source === 'local' ? (
-                <div>
+    const handleCardClick = () => {
+        if (event.source === "ticketmaster") navigate(`/event/${event.id}`)
+        else navigate(`/event/${event.title}/${event.eventId || event.id}`)
+    }
 
-                    <div style={{
-                        position: "absolute",
-                        top: "10px",
-                        right: "10px",
-                        display: "flex",
-                        flexDirection: "column",
-                        gap: "5px"
-                    }}>
-                        {isFreeEvent &&
-                            <div style={{ backgroundColor: "green", color: "white", fontSize: "0.8rem", fontWeight: "bold", padding: "5px 10px", borderRadius: "5px" }}>
-                                Free Attendance
-                            </div>
-                        }
+    // Format date
+    const formattedDate = event.startDate
+        ? new Date(event.startDate).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
+        : event.dates?.start?.localDate
+            ? new Date(event.dates.start.localDate).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
+            : "Date TBA"
 
-                        {isLimitedSpace &&
-                            <div style={{ backgroundColor: "orange", color: "white", fontSize: "0.8rem", fontWeight: "bold", padding: "5px 10px", borderRadius: "5px" }}>
-                                Limited Spaces Left
-                            </div>
-                        }
+    // Image URL
+    const imageUrl =
+        event.source === "ticketmaster"
+            ? event.images?.[0]?.url || "/placeholder.jpg"
+            : event.image || "/placeholder.jpg"
 
-                        {isSoldOut &&
-                            <div style={{ backgroundColor: "red", color: "white", fontSize: "0.8rem", fontWeight: "bold", padding: "5px 10px", borderRadius: "5px" }}>
-                                Sold Out
-                            </div>
-                        }
-                        
-                    </div>
-                        
+    // Location
+    const location =
+        event.source === "ticketmaster"
+            ? event._embedded?.venues?.[0]?.name || "Location TBA"
+            : event.location || "Location TBA"
 
-                        <img src={event.image} alt={event.title} style={{"width": "250px", "height": "141px"}}/>
-                        <Link to={`/event/${event.title.replace(/\s+/g, '-')}/${event.eventId}`}><h3>{event.title}</h3>
-                        </Link>
-                        <p><strong>Date:</strong> {formatDate(event.startDate)}</p>
-                        <p>
-                            <strong>Time:</strong> 
-                            {formatTime(event.startTime)}
-                            {
-                                event.endTime !== "" ? (
-                                    " - " + formatTime(event.endTime)
-                                ) : (
-                                    ""
-                                )
-                            }
-                        </p>
-                        <p><strong>Location:</strong> {event.location}</p>
-                    
-                    </div>
-                    ) : (
-                    <div>
-                        <div style={{
-                            "position": "absolute",
-                            "top": "10px",
-                            "right": "10px",
-                            "backgroundColor": "blue",
-                            "color": "white",
-                            "fontSize": "0.8rem",
-                            "fontWeight": "bold",
-                            "padding": "5px 10px",
-                            "borderRadius": "5px"
-                        }}>
-                            Hosted By Ticketmaster
-                        </div>
-                        <div>
-                            <img src={event.images[0].url} alt={event.name} style={{"width": "250px", "height": "141px"}}/>
-                            <Link to={`/event/${event.id}`}><h3>{event.name}</h3></Link>
-                            <p><strong>Date:</strong> {formatDate(event.dates.start.localDate)}</p>
-                            <p><strong>Time:</strong> {formatTime(event.dates.start.localTime)}</p>
-                            <p>
-                                <strong>Location:</strong> {`${address}, ${city}, ${state}`}
-                            </p>
-                        </div>
-                    </div>
-                    )}
+    // Time
+    const startTime =
+        event.source === "ticketmaster"
+            ? formatTime(event.dates?.start?.localTime) || "Time TBA"
+            : formatTime(event.startTime) || "Time TBA"
+    const endTime =
+        event.source === "ticketmaster"
+            ? formatTime(event.dates?.end?.localTime) || null
+            : formatTime(event.endTime) || null
+    const timeDisplay = endTime ? `${startTime} - ${endTime}` : startTime
 
-                </div>
-            );
+    // Determine free
+    const isFree =
+        event.isFree === true ||
+        (event.tickets?.some((t) => t?.price === 0))
+
+    // Determine price range
+    const priceRange = React.useMemo(() => {
+        if (isFree) return null
+        if (event.priceRanges?.length) {
+            const pr = event.priceRanges[0]
+            return `$${pr.min}${pr.max > pr.min ? ` - $${pr.max}` : ""}`
+        }
+        if (event.tickets?.length) {
+            const prices = event.tickets.filter(t => t?.price != null).map(t => Number(t.price))
+            if (prices.length) {
+                const min = Math.min(...prices)
+                const max = Math.max(...prices)
+                return min === max ? `$${min}` : `$${min} - $${max}`
             }
+        }
+        return null
+    }, [event, isFree])
 
-            export default EventCard;
+    const isSoldOut = event.isSoldOut === true
+    const hasLimitedSpace = event.hasLimitedSpace === true
+
+    return (
+        <Card
+            onClick={handleCardClick}
+            sx={{
+                width: "210px",
+                height: "290px",
+                display: "flex",
+                flexDirection: "column",
+                cursor: "pointer",
+                transition: "transform 0.2s, box-shadow 0.2s",
+                "&:hover": { transform: "translateY(-4px)", boxShadow: "0 8px 16px rgba(0,0,0,0.2)" },
+                backgroundColor: darkMode ? "#2a2a2a" : "white",
+                color: darkMode ? "#e0e0e0" : "inherit",
+                border: darkMode ? "1px solid #333" : "1px solid #e0e0e0",
+                position: "relative",
+                margin: "0 auto",
+            }}
+        >
+            <Box sx={{ position: "relative" }}>
+                <CardMedia component="img" height="140" image={imageUrl} alt={event.title || event.name} sx={{ objectFit: "cover" }} />
+
+                {/* Free event or price tag at top-left */}
+                {isFree ? (
+                    <Chip
+                        label="Free Event"
+                        size="small"
+                        sx={{
+                            position: "absolute",
+                            top: 8,
+                            left: 8,
+                            backgroundColor: "green",
+                            color: "white",
+                            fontSize: "0.75rem",
+                            fontWeight: "bold",
+                            height: "22px",
+                        }}
+                    />
+                ) : (
+                    priceRange && (
+                        <Chip
+                            label={priceRange}
+                            size="small"
+                            sx={{
+                                position: "absolute",
+                                top: 8,
+                                left: 8,
+                                backgroundColor: "#6b21a8",
+                                color: "white",
+                                fontSize: "0.75rem",
+                                fontWeight: "bold",
+                                height: "22px",
+                            }}
+                        />
+                    )
+                )}
+            </Box>
+
+            <Box sx={{ position: "relative", flexGrow: 1, display: "flex", flexDirection: "column", height: "120px" }}>
+                <CardContent sx={{ p: 1.2, pb: 0, "&:last-child": { pb: 0 }, overflow: "hidden" }}>
+                    <Typography
+                        variant="h6"
+                        sx={{
+                            fontWeight: "bold",
+                            fontSize: "0.85rem",
+                            color: darkMode ? "white" : "#333",
+                            display: "-webkit-box",
+                            WebkitLineClamp: 2,
+                            WebkitBoxOrient: "vertical",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            lineHeight: 1.2,
+                            minHeight: "32px",
+                        }}
+                    >
+                        {event.title || event.name}
+                    </Typography>
+
+                    <Box sx={{ display: "flex", alignItems: "center", mb: 0.2 }}>
+                        <CalendarToday sx={{ fontSize: "0.9rem", mr: 0.6, color: "#FF5757" }} />
+                        <Typography variant="body2" sx={{ fontSize: "0.75rem", color: darkMode ? "#fff" : "#333", fontWeight: 500 }}>
+                            {formattedDate}
+                        </Typography>
+                    </Box>
+
+                    <Box sx={{ display: "flex", alignItems: "center", mb: 0.2 }}>
+                        <AccessTime sx={{ fontSize: "0.9rem", mr: 0.6, color: "#FF5757" }} />
+                        <Typography variant="body2" sx={{ fontSize: "0.75rem", color: darkMode ? "#fff" : "#333", fontWeight: 500 }}>
+                            {timeDisplay}
+                        </Typography>
+                    </Box>
+
+                    <Box sx={{ display: "flex", alignItems: "flex-start", mb: 0.3 }}>
+                        <LocationOn sx={{ fontSize: "0.9rem", mr: 0.6, mt: "2px", color: "#FF5757" }} />
+                        <Typography sx={{ fontSize: "0.75rem", color: darkMode ? "#fff" : "#333", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden", textOverflow: "ellipsis", fontWeight: 500 }}>
+                            {location}
+                        </Typography>
+                    </Box>
+                </CardContent>
+
+                <Box sx={{ position: "absolute", bottom: "6px", left: 0, right: 0, display: "flex", justifyContent: "space-between", px: 1.2, py: 0.5 }}>
+                    {event.source === "ticketmaster" && (
+                        <Chip label="Ticketmaster" size="small" sx={{ backgroundColor: "#026CDF", color: "white", fontSize: "0.7rem", height: "22px", fontWeight: 500 }} />
+                    )}
+                    <Box sx={{ display: "flex", gap: 0.8 }}>
+                        {isSoldOut && <Chip label="Sold Out" size="small" sx={{ backgroundColor: "red", color: "white", fontSize: "0.7rem", height: "22px", fontWeight: "bold" }} />}
+                        {!isSoldOut && hasLimitedSpace && <Chip label="Almost Sold Out" size="small" sx={{ backgroundColor: "orange", color: "black", fontSize: "0.7rem", fontWeight: "bold", height: "22px" }} />}
+                    </Box>
+                </Box>
+            </Box>
+        </Card>
+    )
+}
+
+export default EventCard

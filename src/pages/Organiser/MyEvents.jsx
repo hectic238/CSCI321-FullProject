@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import './MyEvents.css';
+import Navbar from "../../components/Navbar.jsx"; // Add necessary styles here
 import EventCardLarge from "../../components/EventCardLarge.jsx";
 import {getUsersDraftEvents, getUsersEvents} from "@/components/eventFunctions.jsx";
 import {useAuth} from "react-oidc-context";
+import EventCard from "@/components/EventCard.jsx";
 
 
 
@@ -14,8 +16,9 @@ const MyEvents = () => {
     const [userEvents, setUserEvents] = useState([]);
 
     const auth = useAuth();
-    
 
+
+    // Fetches and sets user's events and draft events upon component mount if authenticated
     useEffect(() => {
         
         if (auth.isAuthenticated) {
@@ -35,7 +38,8 @@ const MyEvents = () => {
              
         }
     }, []);
-    
+
+    // Splits user events into active and past events based on the current date
     useEffect(() => {
         const now = new Date();
         // Split user events into active and past based on their date
@@ -47,7 +51,10 @@ const MyEvents = () => {
     }, [userEvents]);
     
     return (
+        <div className="host-event-page-wrapper">
+            <div className="My-event-card">
         <div>
+            <Navbar />
             
             <div className='events-grid'>
 
@@ -90,6 +97,8 @@ const MyEvents = () => {
                     <EventCardLarge key={event.eventId} event={event} isDraft={false} />
                 ))}
             </div>
+            </div>
+        </div>
             </div>
         </div>
     );

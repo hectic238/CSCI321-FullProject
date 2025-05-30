@@ -67,6 +67,7 @@ const MyTickets = () => {
     
     const auth = useAuth();
 
+    // function to format the date for events
     const formatDate = (dateString) => {
         if (!dateString) return ""
         const date = new Date(dateString)
@@ -76,6 +77,8 @@ const MyTickets = () => {
             year: "numeric",
         })
     }
+    
+    // function to format the time for events from 24hr to 12hr
 
     const formatTime = (timeString) => {
         if (!timeString) return ""
@@ -84,6 +87,8 @@ const MyTickets = () => {
         const ampm = hours >= 12 ? "PM" : "AM"
         return `${formattedHours}:${minutes} ${ampm}`
     }
+    
+    // fetch all the users orders, and based on these orders fetched, fetch event summaries based on those.
 
     const fetchOrders = async () => {
         try {
@@ -118,7 +123,7 @@ const MyTickets = () => {
                 };
 
             }))
-            
+            console.log(updatedOrders)
             setOrders(updatedOrders)
 
         } catch (error) {
@@ -128,36 +133,15 @@ const MyTickets = () => {
         }
 
     }
+    // fetch orders if user is authenticated
 
     useEffect(() => {
         if (auth.isAuthenticated) {
             fetchOrders();
         }
     }, [auth.isAuthenticated])
-
-    /*
-    useEffect(() => {
-        if (isAuthenticated) {
-            const fetchOrders = async () => {
-                setLoading(true)
-                try {
-                    const enrichedOrders = await enrichOrdersWithEventDetails(false, await getAccessTokenSilently(), user.sub)
-                    console.log("Enriched orders:", enrichedOrders) // For debugging
-                    setOrders(enrichedOrders || [])
-
-                    // Simulate fetching weather data for each event
-                    const weatherPromises = enrichedOrders.map((order) => fetchWeatherData(order))
-                    await Promise.all(weatherPromises)
-                } catch (error) {
-                    console.error("Failed to fetch orders:", error)
-                } finally {
-                    setLoading(false)
-                }
-            }
-            fetchOrders()
-        }
-    }, [user, isAuthenticated])
-*/
+    
+    
     useEffect(() => {
         document.title = "My Tickets | PLANIT"
 
@@ -180,32 +164,9 @@ const MyTickets = () => {
         localStorage.setItem("darkMode", darkMode)
     }, [darkMode])
 
-    const fetchWeatherData = async (order) => {
-        // This would be a real API call in production
-        // For demo purposes, we'll simulate weather data
+    
 
-        if (!order.startDate || !order.location) return
-
-        // Simulate API delay
-        await new Promise((resolve) => setTimeout(resolve, 500))
-
-        const weatherConditions = ["Sunny", "Partly Cloudy", "Cloudy", "Rainy", "Stormy"]
-        const temperatures = [18, 20, 22, 24, 26, 28, 30]
-
-        const randomWeather = weatherConditions[Math.floor(Math.random() * weatherConditions.length)]
-        const randomTemp = temperatures[Math.floor(Math.random() * temperatures.length)]
-
-        setWeatherData((prev) => ({
-            ...prev,
-            [order.id]: {
-                condition: randomWeather,
-                temperature: randomTemp,
-                humidity: Math.floor(Math.random() * 30) + 40, // 40-70%
-                chanceOfRain: Math.floor(Math.random() * 100),
-            },
-        }))
-    }
-
+    // progress bar for the time until the event
     const getTimeUntilEvent = (startDate, startTime) => {
         if (!startDate) return null
 
@@ -241,6 +202,7 @@ const MyTickets = () => {
         return { text, percentage, isUpcoming: diffTime < 7 * 24 * 60 * 60 * 1000 } // Mark as upcoming if less than 7 days
     }
 
+    // function to set favourites, not connected yet to backend
     const toggleFavorite = (orderId) => {
         let newFavorites
         if (favorites.includes(orderId)) {
@@ -267,6 +229,8 @@ const MyTickets = () => {
     const handleMenuClose = () => {
         setAnchorEl(null)
     }
+    
+    // function to add an event to the google calendar
 
     const handleAddToGoogleCalendar = (order) => {
         if (!order) return
@@ -325,6 +289,7 @@ const MyTickets = () => {
         }, 1500)
     }
 
+    // function to generate ics file
     const handleAddToCalendar = (order) => {
         // Generic calendar file download (.ics file)
         showSnackbar("Downloading calendar file...")
@@ -380,6 +345,8 @@ const MyTickets = () => {
 
         showSnackbar("Calendar file downloaded")
     }
+    
+    // function to download the event info
 
     const handleDownloadInfo = (order) => {
         showSnackbar("Downloading ticket information...")
@@ -1072,33 +1039,37 @@ const MyTickets = () => {
                                 <Typography variant="h6" gutterBottom>
                                     Ticket Information
                                 </Typography>
-
-                                <Box sx={{ mb: 2 }}>
-                                    <Typography variant="body2" color={darkMode ? "white" : "black"} fontWeight="bold">
-                                        Ticket Type
-                                    </Typography>
-                                    <Typography variant="body1" fontWeight="medium" color={darkMode ? "white" : "black"}>
-                                        {selectedTicket?.event.eventTicketType || "Standard Admission"}
-                                    </Typography>
+                                <Box>
+                                    {selectedTicket?.tickets.map((ticket, index) => (
+                                        <p key={index}>{`${ticket.name}: ${ticket.quantity} x $${ticket.price}`}</p>
+                                    ))}
                                 </Box>
+                                {/*<Box sx={{ mb: 2 }}>*/}
+                                {/*    <Typography variant="body2" color={darkMode ? "white" : "black"} fontWeight="bold">*/}
+                                {/*        Ticket Type*/}
+                                {/*    </Typography>*/}
+                                {/*    <Typography variant="body1" fontWeight="medium" color={darkMode ? "white" : "black"}>*/}
+                                {/*        {selectedTicket?.tickets[0].name || "Standard Admission"}*/}
+                                {/*    </Typography>*/}
+                                {/*</Box>*/}
 
-                                <Box sx={{ mb: 2 }}>
-                                    <Typography variant="body2" color={darkMode ? "white" : "black"} fontWeight="bold">
-                                        Quantity
-                                    </Typography>
-                                    <Typography variant="body1" fontWeight="medium" color={darkMode ? "white" : "black"}>
-                                        {selectedTicket?.quantity || 1}
-                                    </Typography>
-                                </Box>
+                                {/*<Box sx={{ mb: 2 }}>*/}
+                                {/*    <Typography variant="body2" color={darkMode ? "white" : "black"} fontWeight="bold">*/}
+                                {/*        Quantity*/}
+                                {/*    </Typography>*/}
+                                {/*    <Typography variant="body1" fontWeight="medium" color={darkMode ? "white" : "black"}>*/}
+                                {/*        {selectedTicket?.quantity || 1}*/}
+                                {/*    </Typography>*/}
+                                {/*</Box>*/}
 
-                                <Box sx={{ mb: 2 }}>
-                                    <Typography variant="body2" color={darkMode ? "white" : "black"} fontWeight="bold">
-                                        Order ID
-                                    </Typography>
-                                    <Typography variant="body1" fontWeight="medium" color={darkMode ? "white" : "black"}>
-                                        {selectedTicket?.orderId || "N/A"}
-                                    </Typography>
-                                </Box>
+                                {/*<Box sx={{ mb: 2 }}>*/}
+                                {/*    <Typography variant="body2" color={darkMode ? "white" : "black"} fontWeight="bold">*/}
+                                {/*        Order ID*/}
+                                {/*    </Typography>*/}
+                                {/*    <Typography variant="body1" fontWeight="medium" color={darkMode ? "white" : "black"}>*/}
+                                {/*        {selectedTicket?.orderId || "N/A"}*/}
+                                {/*    </Typography>*/}
+                                {/*</Box>*/}
 
                                 <Box>
                                     <Typography variant="body2" color={darkMode ? "white" : "black"} fontWeight="bold">
@@ -1350,9 +1321,6 @@ const MyTickets = () => {
 
                     <Typography variant="body2" color={darkMode ? "white" : "black"} gutterBottom>
                         Present this QR code at the event entrance
-                    </Typography>
-                    <Typography variant="body2" fontWeight="bold" sx={{ mt: 1 }}>
-                        Ticket ID: {selectedTicket?.orderId || "N/A"}
                     </Typography>
                 </DialogContent>
                 <DialogActions sx={{ p: 2, backgroundColor: darkMode ? "rgba(255,255,255,0.05)" : "#f9f9f9" }}>

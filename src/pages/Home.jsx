@@ -8,24 +8,40 @@ const Home = () => {
     useEffect(() => {
         document.title = "Local Event Planner | PLANIT";
     });
+
+    useEffect(() => {
+        if (location.hash) {
+            // small timeout to ensure the DOM is ready
+            setTimeout(() => {
+                const element = document.getElementById(location.hash.replace("#", ""));
+                if (element) {
+                    element.scrollIntoView({ behavior: "smooth" });
+                }
+            }, 50);
+        } else {
+            // If no hash, scroll to top on mount or navigation
+            window.scrollTo({ top: 0, behavior: "smooth" });
+        }
+    }, [location]);
     
     return (
         <>
 
             <div className="landing-page">
                 <div className="circle-container">
-                    <img src={logoSmall} alt="Logo" className="homelogo"/>
-                    <nav>
-                        <h1 className="slogan">WHERE EVERY EVENT FALLS INTO PLACE</h1>
-
-                        <a href="#exploreEvents" className="cta-button">Find Events</a>
-                    </nav>
+                    <img src={logoSmall || "/placeholder.svg"} alt="Logo" className="homelogo" />
+                    <h1 className="planit-title">PLANIT</h1>
+                    <p className="planit-tagline">
+                        WHERE EVERY EVENT FALLS INTO
+                        <br />
+                        PLACE
+                    </p>
+                    <a href="#exploreEvents" className="find-events-button">Find events</a>
                 </div>
-
             </div>
 
             <section id="exploreEvents">
-                <ExploreEvents/>
+                <ExploreEvents />
             </section>
         </>
     )

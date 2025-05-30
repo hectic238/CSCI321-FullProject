@@ -36,6 +36,7 @@ import InterestedPage from "../../components/InterestedPage"
 import OrdersList from "../../components/OrdersList.jsx"
 import { APIWithToken } from "../../components/API"
 import {useAuth} from "react-oidc-context";
+import {Check} from "@mui/icons-material";
 
 // Extend dayjs with plugins
 dayjs.extend(utc)
@@ -71,8 +72,8 @@ const ProfileDetails = () => {
             setError("Failed to fetch user details")
         }
     }
-    
-    
+
+    // Fetches user orders, enriches each order with corresponding event details and parsed tickets, and updates state
     const fetchOrders = async () => {
         try {
             setLoading(true)
@@ -103,7 +104,6 @@ const ProfileDetails = () => {
                 }
             }))
             
-            console.log(updatedOrders)
             setOrders(updatedOrders)
             
         } catch (error) {
@@ -163,6 +163,9 @@ const ProfileDetails = () => {
             fetchOrders();
         }
     }, [auth.isAuthenticated])
+    
+    
+   
     
     if (!userDetails) {
         return (

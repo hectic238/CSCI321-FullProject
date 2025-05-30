@@ -3,6 +3,7 @@ export function setCookie(name, value) {
     document.cookie = `${name}=${value};path=/`; 
 }
 
+// Function to get a session cookie
 export function getCookie(name) {
     const nameEq = `${name}=`;
     const cookies = document.cookie.split(';');
@@ -15,7 +16,7 @@ export function getCookie(name) {
     }
     return null; 
 }
-
+// Function to delete a session cookie
 export function deleteCookie(name) {
     document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/`; 
 }

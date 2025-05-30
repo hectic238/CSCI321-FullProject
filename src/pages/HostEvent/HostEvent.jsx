@@ -23,7 +23,7 @@ const HostEvent = () => {
     const navigate = useNavigate();
     const { token } = theme.useToken();
     const [current, setCurrent] = useState(0);
-    const [formErrors, setFormErrors] = useState({});  
+    const [formErrors, setFormErrors] = useState({});
     const [freeTicket, setFreeTicket] = useState([{ name: "Free Admission", price: 0, count: 0, soldOut: false, bought: 0 }]);
     const [eventDetails, setEventDetails] = useState(() => {
         const safeEvent = passedEvent || {};
@@ -47,7 +47,8 @@ const HostEvent = () => {
             isDraft: safeEvent.isDraft || false,
         };
     });
-    
+
+    // Sets event details and free tickets state when a valid passed event is received.
     useEffect(() => {
         if (passedEvent && Object.keys(passedEvent).length > 0) {
             setEventDetails(passedEvent);
@@ -57,43 +58,44 @@ const HostEvent = () => {
             }
         }
     }, [passedEvent]);
-    
+
     useEffect(() => {
         console.log(freeTicket)
     }, [freeTicket])
-    
+
     const handleFormChange = (newDetails) => {
         setEventDetails((prevDetails) => ({
             ...prevDetails,
-            ...newDetails, 
+            ...newDetails,
         }));
     };
 
     const handleImageChange = (image) => {
         setEventDetails((prevDetails) => ({
             ...prevDetails,
-            image: image, 
+            image: image,
         }));
     };
 
     const handleTicketFormChange = (field, value) => {
         setEventDetails((prevDetails) => ({
             ...prevDetails,
-            [field]: value, 
+            [field]: value,
         }));
     };
-    
+
     const handlePublishEvent = async () => {
         eventDetails.isDraft = false;
-        await handleUploadEvent()
+        await handleUploadEvent(false)
     }
 
-    const handleUploadEvent = async () => {
-        
+    // Handles creating or updating an event, resetting ticket quantities for edits and navigating home after success.
+    const handleUploadEvent = async (isDraft) => {
+
         try {
 
-            
-            
+
+
             if(editing) {
 
                 const updatedTickets = eventDetails.tickets.map(ticket => ({
@@ -106,9 +108,9 @@ const HostEvent = () => {
                     ...eventDetails,
                     tickets: updatedTickets
                 };
-                
+
                 const response = await updateEvent(updatePayload);
-                
+
                 if(response) {
                     alert(response.message);
                     navigate('/home');
@@ -116,13 +118,17 @@ const HostEvent = () => {
             }
             else {
                 const response = await createEvent(eventDetails)
-                if(response) {
-                    alert(response.message);
+                if (response) {
+                    let message = "Successfully created event"
+                    if (isDraft) {
+                        message = "Successfully created draft"
+                    }
+                    alert(message);
                     navigate('/home');
                 }
             }
-            
-            
+
+
         } catch (error) {
             console.error('Error adding event:', error);
             alert(`Error: ${error.message}`);
@@ -130,12 +136,13 @@ const HostEvent = () => {
     };
 
     const handleSaveDraft =  async () => {
-        
+
         eventDetails.isDraft = true;
-        await handleUploadEvent()
-        
+        await handleUploadEvent(true)
+
     };
-    
+
+    // Steps array defining the sequence and content components for the multi-step event creation form
     const steps = [
         {
             title: 'Event Details',
@@ -251,11 +258,11 @@ const HostEvent = () => {
         if (eventDetails.eventTicketType === 'ticketed' && (eventDetails.tickets.length === 0 || eventDetails.tickets.some(ticket => !ticket.name || !ticket.price || !ticket.count))) {
             errors.tickets = "Tickets";
         }
-        
+
         if(eventDetails.eventTicketType === 'free' && freeTicket[0].count === 0 ) {
             errors.tickets = "Free Ticket Count";
         }
-        
+
         setFormErrors(errors);
         if (Object.keys(errors).length > 0) {
             const errorMessages = Object.values(errors).join(', ');
@@ -263,8 +270,8 @@ const HostEvent = () => {
         }
 
         if(eventDetails.eventTicketType === 'free') {
-            
-            
+
+
             setEventDetails((prevDetails) => ({
                     ...prevDetails,
                     tickets: freeTicket,
@@ -272,8 +279,8 @@ const HostEvent = () => {
 
             ));
         }
-        
-        
+
+
         return Object.keys(errors).length === 0;
     };
 
@@ -290,54 +297,50 @@ const HostEvent = () => {
     };
 
     return (
-        <>
-            <img src={banner} alt="Banner" className="banner-image"/>
-            <Steps style={{
-                width: '90%',
-                margin: 'auto',
-            }} current={current} items={items}/>
-            <div style={contentStyle}>{steps[current].content}</div>
-            <div
-                style={{
-                    marginBottom: 24,
-                }}
-            >
-                {current < steps.length - 1 && (
-                    <Button type="primary" onClick={() => next()}>
-                        Save and Continue
-                    </Button>
-                )}
-                {current === steps.length - 1 && (
-                    <Button
-                        type="primary"
-                        onClick={() => handlePublishEvent()}
-                    >
-                        Publish Event
-                    </Button>
-                    
-                )}
-                {current === steps.length - 1 && (
-                    <Button
-                        type="primary"
-                        onClick={() => handleSaveDraft()}
-                    >
-                        Save as Draft
-                    </Button>
+        <div className="host-event-page-wrapper">
+            <div className="host-event-card">
+                <h1 className="host-event-title">Host Your Event</h1>
 
-                )}
-                {current > 0 && (
-                    <Button
-                        style={{
-                            margin: '0 8px',
-                        }}
-                        onClick={() => prev()}
-                    >
-                        Back
-                    </Button>
-                )}
+                <img src={banner} alt="Banner" className="banner-image" />
+
+                <Steps
+                    current={current}
+                    items={items}
+                    style={{ width: '90%', margin: '20px auto' }}
+                />
+
+                <div className="host-event-step-content">{steps[current].content}</div>
+
+                <div className="host-event-buttons">
+                    {current < steps.length - 1 && (
+                        <Button className="host-event-button" onClick={next}>
+                            Save and Continue
+                        </Button>
+                    )}
+                    {current === steps.length - 1 && (
+                        <>
+                            <Button className="host-event-button" onClick={handlePublishEvent}>
+                                Publish Event
+                            </Button>
+                            <Button
+                                className="host-event-button-outlined"
+                                onClick={handleSaveDraft}
+                            >
+                                Save as Draft
+                            </Button>
+                        </>
+                    )}
+                    {current > 0 && (
+                        <Button className="host-event-button-outlined" onClick={prev}>
+                            Back
+                        </Button>
+                    )}
+                </div>
             </div>
-        </>
+        </div>
     );
 };
 
 export default HostEvent;
+
+

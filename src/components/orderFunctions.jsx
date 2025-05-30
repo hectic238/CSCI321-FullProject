@@ -1,5 +1,6 @@
 import {APIWithToken} from "@/components/API.js";
 
+// function to create a order after checkout
 export const createOrder = async (body) => {
     try {
 
