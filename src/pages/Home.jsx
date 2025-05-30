@@ -8,6 +8,21 @@ const Home = () => {
     useEffect(() => {
         document.title = "Local Event Planner | PLANIT";
     });
+
+    useEffect(() => {
+        if (location.hash) {
+            // small timeout to ensure the DOM is ready
+            setTimeout(() => {
+                const element = document.getElementById(location.hash.replace("#", ""));
+                if (element) {
+                    element.scrollIntoView({ behavior: "smooth" });
+                }
+            }, 50);
+        } else {
+            // If no hash, scroll to top on mount or navigation
+            window.scrollTo({ top: 0, behavior: "smooth" });
+        }
+    }, [location]);
     
     return (
         <>

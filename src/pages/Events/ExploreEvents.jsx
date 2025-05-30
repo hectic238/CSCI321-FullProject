@@ -56,7 +56,6 @@ export default function ExploreEvents({ category, searchTerm }) {
         let newWebsiteEvents = []
         if (!noMoreWebsiteEvents) {
             
-            console.log("Category: ", category)
             const data = type === "popular"
                 ? await getEventsBySearchTerm(" ", lastEvaluatedKey, PAGE_SIZE)
                 : await getEventsByCategory(category, lastEvaluatedKey, PAGE_SIZE)
@@ -84,12 +83,22 @@ export default function ExploreEvents({ category, searchTerm }) {
 
     // Sequential load
     const loadEvents = async () => {
+        setLoading(true)
         try {
-            setPopularEvents(await fetchEvent("popular", "popular", ""))
-            setConcerts(await fetchEvent("category", "Music", ""))
-            setTheatreEvents(await fetchEvent("category", "Art", ""))
-            setFamilyEvents(await fetchEvent("category", "Family", ""))
-            setComedyEvents(await fetchEvent("category", "Comedy", ""))
+            const popular = await fetchEvent("popular", "popular", "")
+            setPopularEvents(popular)
+
+            const concerts = await fetchEvent("category", "Music", "")
+            setConcerts(concerts)
+
+            const theatre = await fetchEvent("category", "Art", "")
+            setTheatreEvents(theatre)
+
+            const family = await fetchEvent("category", "Family", "")
+            setFamilyEvents(family)
+
+            const comedy = await fetchEvent("category", "Comedy", "")
+            setComedyEvents(comedy)
         } catch (e) {
             console.error(e)
         } finally {

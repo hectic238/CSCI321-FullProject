@@ -65,6 +65,8 @@ const TailoredEvents = () => {
     const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
     
     // fetch all events based on the users selected interests
+    
+    /*
     const checkCategories = async () => {
         const categories = {
             Music: ["Concerts", "Music Festivals", "Music Workshops", "DJ Nights"],
@@ -116,6 +118,90 @@ const TailoredEvents = () => {
         setEventsByCategory(eventsByCat)
         setLoading(false)
     }
+    */
+    const checkCategories = async () => {
+        const categoriesMap = {
+            Music: ["Concerts", "Music Festivals", "Music Workshops", "DJ Nights"],
+            Art: ["Art Exhibitions", "Cultural Festivals", "Theater Plays", "Dance Performances"],
+            Food: ["Food Festivals", "Wine Tastings", "Cooking Classes", "Beer Festivals"],
+            Sports: ["Marathons", "Yoga Sessions", "Fitness Workshops", "Sporting Events"],
+            Business: ["Conferences", "Seminars", "Workshops", "Networking Events"],
+            Family: ["Family-Friendly Events", "Children's Workshops", "Kid-Friendly Shows", "Educational Activities"],
+            Technology: ["Tech Conferences", "Hackathons", "Startup Events", "Gadget Expos"],
+            Comedy: ["Stand-up Comedy", "Improv Nights", "Comedy Festivals", "Magic Shows"],
+            Charity: ["Fundraising Events", "Charity Galas", "Benefit Concerts", "Auctions & Fundraisers"],
+            Education: ["Lectures & Talks", "Education Workshops", "Educational Seminars", "Skill-Building Sessions"],
+            Travel: ["City Tours", "Adventure Travel", "Cultural Experiences", "Cruise Vacations"],
+        }
+
+        const selectedCategories = userDetails.interests
+        const matchedKeys = new Set()
+
+        selectedCategories.forEach((category) => {
+            for (const [key, values] of Object.entries(categoriesMap)) {
+                if (values.includes(category)) {
+                    matchedKeys.add(key)
+                    break
+                }
+            }
+        })
+
+        const result = Array.from(matchedKeys)
+        setCategories(result)
+
+        setEventsByCategory({}) // Clear existing state
+        setLoading(true)
+
+        // Fetch each category asynchronously without waiting
+        /*
+        result.forEach(async (cat, index) => {
+            // Optional: stagger requests slightly to avoid hammering backend
+            await sleep(250 * index)
+
+            try {
+                const data = await fetchEvent("category", cat)
+                setEventsByCategory(prev => ({
+                    ...prev,
+                    [cat]: data
+                }))
+            } catch (error) {
+                console.error(`Error fetching events for category ${cat}:`, error)
+                setEventsByCategory(prev => ({
+                    ...prev,
+                    [cat]: [] // fallback
+                }))
+            }
+
+            // Optional: turn off loading once all are fetched
+            if (index === result.length - 1) {
+                setLoading(false)
+            }
+        })
+        
+         */
+
+        for (const category of result) {
+            
+            if (eventsByCategory[category]) continue
+
+            try {
+                const events = await fetchEvent("category", category)
+                setEventsByCategory(prev => ({
+                    ...prev,
+                    [category]: events
+                }))
+            } catch (error) {
+                setEventsByCategory(prev => ({
+                    ...prev,
+                    [category]: [] 
+                }))
+            }
+        }
+
+        setLoading(false)
+    
+    }
+
 
     // Fetching events based on category
     const fetchEvent = async (type, category, searchTerm) => {
@@ -417,7 +503,7 @@ const TailoredEvents = () => {
                                             </button>
                                         </Box>
 
-                                        {/* Grid layout for events */}
+                                        {/* Grid layout for events 
                                         <Box sx={eventsContainerStyle(hasEvents, eventCount)}>
                                             {hasEvents ? (
                                                 eventsByCategory[category].map((event, idx) => (
@@ -432,7 +518,27 @@ const TailoredEvents = () => {
                                                     Check back later!</Box>
                                             )}
                                         </Box>
-
+*/}
+                                        <Box sx={eventsContainerStyle(eventsByCategory[category]?.length > 0, eventCount)}>
+                                            {eventsByCategory[category] === undefined ? (
+                                                // Still loading this category
+                                                <Box sx={{ ...noEventsStyle, gridColumn: '1 / -1' }}>
+                                                    Loading events for {category}...
+                                                </Box>
+                                            ) : eventsByCategory[category].length > 0 ? (
+                                                eventsByCategory[category].map((event, idx) => (
+                                                    <Box key={event.eventId || event.id || idx} sx={cardWrapperStyle}>
+                                                        <Box sx={innerCardStyle}>
+                                                            <EventCard event={event} darkMode={darkMode} />
+                                                        </Box>
+                                                    </Box>
+                                                ))
+                                            ) : (
+                                                <Box sx={{ ...noEventsStyle, gridColumn: '1 / -1' }}>
+                                                    No events found in this category. Check back later!
+                                                </Box>
+                                            )}
+                                        </Box>
                                         {index < categories.length - 1 && (
                                             <Divider
                                                 sx={{

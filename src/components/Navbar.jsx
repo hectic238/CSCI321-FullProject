@@ -158,13 +158,30 @@ function Navbar() {
             {/* Buttons */}
             <div className="nav-links">
                 <div className="attendee-actions">
-                    <Link to="/home#exploreEvents" className={location.pathname === "/home" && location.hash === "#exploreEvents" ? "navbar-cta-button active" : "navbar-cta-button"} id="full-button">
-                        <img src={exploreIcon} alt="Explore" className="icon" style={{paddingRight: "5px"}}/>
-                        Explore Events
-                    </Link>
-                    <Link to="/home#exploreEvents" className={location.pathname === "/home" && location.hash === "#exploreEvents" ? "navbar-cta-button active" : "navbar-cta-button"} id="mobile-button" style={{display: "none"}}>
-                        <img src={exploreIcon} alt="Explore" className="icon"/>
-                    </Link>
+                    {location.pathname === '/home' ? (
+                        <>
+                            <a
+                                href="/home#exploreEvents"
+                                className={location.pathname === "/home" && location.hash === "#exploreEvents" ? "navbar-cta-button active" : "navbar-cta-button"}
+                                id="full-button"
+                                
+                            >
+                                <img src={exploreIcon} alt="Explore" className="icon" style={{ paddingRight: "5px" }} />
+                                Explore Events
+                            </a>
+                        </>
+                    ) : (
+                        <>
+                            <Link to="/home#exploreEvents" className={location.pathname === "/home" && location.hash === "#exploreEvents" ? "navbar-cta-button active" : "navbar-cta-button"} id="full-button">
+                                <img src={exploreIcon} alt="Explore" className="icon" style={{paddingRight: "5px"}}/>
+                                Explore Events
+                            </Link>
+                            <Link to="/home#exploreEvents" className={location.pathname === "/home" && location.hash === "#exploreEvents" ? "navbar-cta-button active" : "navbar-cta-button"} id="mobile-button" style={{display: "none"}}>
+                                <img src={exploreIcon} alt="Explore" className="icon"/>
+                            </Link>
+                        </>
+                    )}
+                    
 
                     <Link to="/contactUs" className={location.pathname === "/contactUs" ? "navbar-cta-button active" : "navbar-cta-button"} id="full-button">
                         <img src={contactIcon} alt="Contact" className="icon" style={{paddingRight: "5px"}}/>

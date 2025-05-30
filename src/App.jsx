@@ -24,6 +24,7 @@ import ExploreEventPages from "@/pages/Events/ExploreEventPages.jsx";
 import CheckoutReturn from "@/pages/Checkout/CheckoutReturn.jsx";
 import RedirectPage from "@/pages/Profile/RedirectPage.jsx";
 import TailoredEvents from "@/pages/Events/TailoredEvents.jsx";
+import ScrollToTop from "@/components/ScrollToTop.jsx";
 
 const App = () => {
     const [isLoggedOut, setIsLoggedOut] = useState(false);
@@ -129,6 +130,7 @@ const App = () => {
 // Wrap App with BrowserRouter in the main index file
 const Main = () => (
     <BrowserRouter>
+        <ScrollToTop />
         <App />
     </BrowserRouter>
 );

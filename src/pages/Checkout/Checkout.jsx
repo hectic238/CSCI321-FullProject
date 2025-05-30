@@ -62,6 +62,26 @@ const Checkout = () => {
         );
     }
 
+    // Format date and time
+    const formatDate = (dateString) => {
+        if (!dateString) return ""
+        const date = new Date(dateString)
+        return date.toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+        })
+    }
+
+    const formatTime = (timeString) => {
+        if (!timeString) return ""
+        const [hours, minutes] = timeString.split(":")
+        const hour = Number.parseInt(hours)
+        const ampm = hour >= 12 ? "PM" : "AM"
+        const formattedHour = hour % 12 || 12
+        return `${formattedHour}:${minutes} ${ampm}`
+    }
+
     return (
         <Box sx={{ minHeight: '100vh', backgroundColor: '#f5f5f5' }}>
 
@@ -128,12 +148,12 @@ const Checkout = () => {
                         </Typography>
                         <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                             <CalendarToday sx={{ mr: 1, color: '#FF5757' }} />
-                            <Typography variant="body1">{event.startDate}</Typography>
+                            <Typography variant="body1">{formatDate(event.startDate)}</Typography>
                         </Box>
                         <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                             <AccessTime sx={{ mr: 1, color: '#FF5757' }} />
                             <Typography variant="body1">
-                                {event.startTime} – {event.endTime}
+                                {formatTime(event.startTime)} – {formatTime(event.endTime)}
                             </Typography>
                         </Box>
                         <Box sx={{ display: 'flex', alignItems: 'center' }}>

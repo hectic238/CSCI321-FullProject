@@ -50,6 +50,26 @@ const EventDetails = () => {
 
     const auth = useAuth();
 
+    // Format date and time
+    const formatDate = (dateString) => {
+        if (!dateString) return ""
+        const date = new Date(dateString)
+        return date.toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+        })
+    }
+
+    const formatTime = (timeString) => {
+        if (!timeString) return ""
+        const [hours, minutes] = timeString.split(":")
+        const hour = Number.parseInt(hours)
+        const ampm = hour >= 12 ? "PM" : "AM"
+        const formattedHour = hour % 12 || 12
+        return `${formattedHour}:${minutes} ${ampm}`
+    }
+
     // Updates the attendee count for free events, ensuring it doesn't go below zero and stays synced with total tickets.
     const handleAttendeeCountChange = (change) => {
         const newCount = attendeeCount + change;
@@ -236,11 +256,11 @@ const EventDetails = () => {
                                 {/* Date/Time/Location */}
                                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                                     <CalendarToday sx={{ mr: 1, color: '#FF5757' }} />
-                                    <Typography>{eventDetails.startDate}</Typography>
+                                    <Typography>{formatDate(eventDetails.startDate)}</Typography>
                                 </Box>
                                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                                     <AccessTime sx={{ mr: 1, color: '#FF5757' }} />
-                                    <Typography>{eventDetails.startTime} – {eventDetails.endTime}</Typography>
+                                    <Typography>{formatTime(eventDetails.startTime)} – {formatTime(eventDetails.endTime)}</Typography>
                                 </Box>
                                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                                     <LocationOn sx={{ mr: 1, color: '#FF5757' }} />
@@ -263,7 +283,9 @@ const EventDetails = () => {
                                     bgcolor: '#f5f5f5', mb: 2,
                                 }}
                             >
-                                <Typography>{eventDetails.additionalInfo}</Typography>
+                                <Typography sx={{ whiteSpace: 'pre-line' }}>
+                                    {eventDetails.additionalInfo}
+                                </Typography>
                             </Card>
                         </Grid>
 

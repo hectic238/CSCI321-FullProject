@@ -32,6 +32,26 @@ const CheckoutReturn = () => {
         localStorage.getItem("darkMode") === "true"
     )
 
+    // Format date and time
+    const formatDate = (dateString) => {
+        if (!dateString) return ""
+        const date = new Date(dateString)
+        return date.toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+        })
+    }
+
+    const formatTime = (timeString) => {
+        if (!timeString) return ""
+        const [hours, minutes] = timeString.split(":")
+        const hour = Number.parseInt(hours)
+        const ampm = hour >= 12 ? "PM" : "AM"
+        const formattedHour = hour % 12 || 12
+        return `${formattedHour}:${minutes} ${ampm}`
+    }
+
     useEffect(() => {
         document.title = "Checkout | PLANIT"
         document.body.classList.toggle("dark", darkMode)
@@ -178,14 +198,14 @@ const CheckoutReturn = () => {
                                     <Grid item xs={12} sm={4}>
                                         <Box display="flex" alignItems="center" justifyContent="center">
                                             <CalendarToday sx={{ mr: 1, color: "#FF5757" }} />
-                                            <Typography>{event.startDate}</Typography>
+                                            <Typography>{formatDate(event.startDate)}</Typography>
                                         </Box>
                                     </Grid>
                                     <Grid item xs={12} sm={4}>
                                         <Box display="flex" alignItems="center" justifyContent="center">
                                             <AccessTime sx={{ mr: 1, color: "#FF5757" }} />
                                             <Typography>
-                                                {event.startTime} &ndash; {event.endTime || ""}
+                                                {formatTime(event.startTime)} &ndash; {formatTime(event.endTime) || ""}
                                             </Typography>
                                         </Box>
                                     </Grid>
